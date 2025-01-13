@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-import { filterSchema } from "@/app/(dashboard)/schemas";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { filterSchema } from "@/lib/schemas";
 
 type FilterValues = z.infer<typeof filterSchema>;
 
