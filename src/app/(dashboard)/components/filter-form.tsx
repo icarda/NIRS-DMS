@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { filterSchema } from "@/lib/schemas";
+import { dashboardFilterSchema } from "@/lib/schemas";
 
-type FilterValues = z.infer<typeof filterSchema>;
+type FilterValues = z.infer<typeof dashboardFilterSchema>;
 
 // Mock data - replace with actual data
 const CROPS = ["Barley", "Maize", "Chickpea"];
@@ -33,7 +33,7 @@ const NIR_MODELS = ["Antharis II", "FOSS DS2500"];
 
 export function FilterForm() {
   const form = useForm<FilterValues>({
-    resolver: zodResolver(filterSchema),
+    resolver: zodResolver(dashboardFilterSchema),
     defaultValues: {
       crop: "",
       qualityLab: "",
@@ -45,7 +45,6 @@ export function FilterForm() {
 
   function onSubmit(data: FilterValues) {
     console.log(data);
-    // Handle form submission
   }
 
   return (
