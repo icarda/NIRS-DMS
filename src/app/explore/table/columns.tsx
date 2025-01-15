@@ -90,10 +90,7 @@ export const columns: ColumnDef<ColumnSchema>[] = [
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
-      if (typeof value === "string") return value === String(rowValue);
-      if (typeof value === "boolean") return value === rowValue;
-      if (Array.isArray(value)) return value.includes(rowValue);
-      return false;
+      return value.includes(rowValue);
     },
   },
   {
@@ -111,17 +108,16 @@ export const columns: ColumnDef<ColumnSchema>[] = [
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
-      if (value instanceof Date && rowValue instanceof Date) {
-        return isSameDay(value, rowValue);
-      }
-      if (Array.isArray(value)) {
-        if (isArrayOfDates(value) && rowValue instanceof Date) {
-          const sorted = value.sort((a, b) => a.getTime() - b.getTime());
-          return (
-            sorted[0]?.getTime() <= rowValue.getTime() &&
-            rowValue.getTime() <= sorted[1]?.getTime()
-          );
+      console.log(rowValue, value);
+      if (isArrayOfDates(value) && rowValue instanceof Date) {
+        if (value.length === 1) {
+          return isSameDay(value[0], rowValue);
         }
+        const sorted = value.sort((a, b) => a.getTime() - b.getTime());
+        return (
+          sorted[0]?.getTime() <= rowValue.getTime() &&
+          rowValue.getTime() <= sorted[1]?.getTime()
+        );
       }
       return false;
     },

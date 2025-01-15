@@ -72,11 +72,7 @@ export function DataTable<TData, TValue>({
         )}
       >
         <div className="-m-1 h-full p-1">
-          <DataTableFilterControls
-            table={table}
-            columns={columns}
-            filterFields={filterFields}
-          />
+          <DataTableFilterControls table={table} filterFields={filterFields} />
         </div>
       </div>
       <div className="flex max-w-full flex-1 flex-col overflow-hidden">

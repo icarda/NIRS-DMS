@@ -20,13 +20,11 @@ import type { DataTableFilterField } from "./types";
 
 interface DataTableFilterControlsProps<TData, TValue> {
   table: Table<TData>;
-  columns: ColumnDef<TData, TValue>[];
   filterFields?: DataTableFilterField<TData>[];
 }
 
 export function DataTableFilterControls<TData, TValue>({
   table,
-  columns,
   filterFields,
 }: DataTableFilterControlsProps<TData, TValue>) {
   const filters = table.getState().columnFilters;

@@ -20,7 +20,6 @@ export function DataTableFilterCheckbox<TData>({
   table,
   value: _value,
   options,
-  component,
 }: DataTableFilterCheckboxProps<TData>) {
   const value = _value as string;
   const [inputValue, setInputValue] = useState("");
@@ -29,8 +28,6 @@ export function DataTableFilterCheckbox<TData>({
   const filterValue = column?.getFilterValue();
 
   if (!options?.length) return null;
-
-  const Component = component;
 
   // filter out the options based on the input value
   const filterOptions = options.filter(
@@ -85,16 +82,9 @@ export function DataTableFilterCheckbox<TData>({
                 />
                 <Label
                   htmlFor={`${value}-${option.value}`}
-                  className="flex w-full items-center justify-center gap-1 truncate text-muted-foreground group-hover:text-accent-foreground"
+                  className="flex w-full items-center truncate text-muted-foreground group-hover:text-accent-foreground"
                 >
-                  {Component ? (
-                    <Component {...option} />
-                  ) : (
-                    <span className="truncate font-normal">{option.label}</span>
-                  )}
-                  <span className="ml-auto flex items-center justify-center font-mono text-xs">
-                    {facetedValue?.get(option.value)}
-                  </span>
+                  <span className="truncate font-normal">{option.label}</span>
                 </Label>
               </div>
             );
