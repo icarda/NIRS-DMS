@@ -45,7 +45,7 @@ export const data = [
     starch: 35.33,
     protein: 12.27,
     hrd: 2.68,
-    irrigation: Math.random() > 0.5,
+    irrigation: undefined,
     date: new Date("2024-06-15T16:01:35+01:00"),
   },
   {

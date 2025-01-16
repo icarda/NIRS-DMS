@@ -40,10 +40,12 @@ export function DataTableToolBar<TData>({
             </>
           )}
         </Button>
-        <p className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} of{" "}
-          {table.getCoreRowModel().rows.length} row(s) filtered
-        </p>
+        {controlsOpen && (
+          <p className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length} of{" "}
+            {table.getCoreRowModel().rows.length} row(s) filtered
+          </p>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {filters.length ? (

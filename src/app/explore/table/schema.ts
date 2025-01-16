@@ -10,7 +10,7 @@ export const columnSchema = z.object({
   starch: z.number(),
   protein: z.number(),
   hrd: z.number(),
-  irrigation: z.boolean(),
+  irrigation: z.boolean().optional(),
   date: z.date(),
 });
 

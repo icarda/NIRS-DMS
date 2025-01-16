@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { format, isSameDay } from "date-fns";
-import { Check, Minus } from "lucide-react";
+import { Check, Minus, X } from "lucide-react";
 
 import { isArrayOfDates } from "@/lib/utils";
 import { DataTableColumnHeader } from "./data-table-column-header";
@@ -85,8 +85,11 @@ export const columns: ColumnDef<ColumnSchema>[] = [
     header: "Irrigation",
     cell: ({ row }) => {
       const value = row.getValue("irrigation");
+      if (typeof value === "undefined") {
+        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+      }
       if (value) return <Check className="h-4 w-4" />;
-      return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+      return <X className="h-4 w-4 text-muted-foreground/50" />;
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
