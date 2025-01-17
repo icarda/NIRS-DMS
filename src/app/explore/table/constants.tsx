@@ -1157,7 +1157,6 @@ export const filterFields = [
     min: 0,
     max: 100,
     options: data.map(({ starch }) => ({ label: `${starch}`, value: starch })),
-    defaultOpen: true,
     unit: "%",
   },
 ] satisfies DataTableFilterField<ColumnSchema>[];

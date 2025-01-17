@@ -28,7 +28,7 @@ const links = [
   },
   {
     title: "Crop Quality Ontology",
-    url: "/crop-quality-ontology",
+    url: "/crop-ontology",
     icon: Leaf,
   },
   {

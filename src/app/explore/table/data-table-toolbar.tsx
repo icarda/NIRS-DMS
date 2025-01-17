@@ -31,12 +31,12 @@ export function DataTableToolBar<TData>({
           {controlsOpen ? (
             <>
               <PanelLeftClose className="h-4 w-4" />
-              <span className="hidden sm:block">Hide Controls</span>
+              <span className="hidden sm:block">Hide Filters</span>
             </>
           ) : (
             <>
               <PanelLeftOpen className="h-4 w-4" />
-              <span className="hidden sm:block">Show Controls</span>
+              <span className="hidden sm:block">Show Filters</span>
             </>
           )}
         </Button>
