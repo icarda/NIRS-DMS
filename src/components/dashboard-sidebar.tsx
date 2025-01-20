@@ -1,5 +1,7 @@
 "use client";
 
+import { log } from "console";
+
 import { Database, FileUp, Home, Leaf, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -45,6 +47,8 @@ const links = [
 
 export function AppSidebar() {
   const path = usePathname();
+
+  console.log(path);
   return (
     <Sidebar>
       <SidebarHeader className="p-4 text-center font-bold">
@@ -56,7 +60,14 @@ export function AppSidebar() {
             <SidebarMenu>
               {links.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={path == item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      item.url === "/"
+                        ? path === "/"
+                        : path.startsWith(item.url)
+                    }
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

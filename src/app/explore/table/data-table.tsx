@@ -23,10 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTablePagination } from "@/components/ui/table-pagination";
 import { cn } from "@/lib/utils";
 import { DataTableFilterControls } from "./data-table-filter-controls";
 import { DataTableToolBar } from "./data-table-toolbar";
-import { DataTablePagination } from "./table-pagination";
 import { DataTableFilterField } from "./types";
 
 interface DataTableProps<TData, TValue> {
