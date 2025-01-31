@@ -58,6 +58,9 @@ export default function CropPage({
   const { id } = use(params);
   const crop = crops.find((c) => c.id === id);
 
+  if (!crop) {
+    notFound();
+  }
   const form = useForm<z.infer<typeof traitSchema>>({
     resolver: zodResolver(traitSchema),
     defaultValues: {
@@ -72,10 +75,6 @@ export default function CropPage({
   function onSubmit(values: z.infer<typeof traitSchema>) {
     console.log(values);
     // Handle form submission here
-  }
-
-  if (!crop) {
-    notFound();
   }
 
   return (
@@ -110,7 +109,7 @@ export default function CropPage({
                     <Wheat className="h-4 w-4" />
                     <span>
                       {
-                        crop.traits.filter((trait) => (trait.entity = "Grain"))
+                        crop.traits.filter((trait) => trait.entity === "Grain")
                           .length
                       }{" "}
                       Grain Properties
@@ -124,7 +123,7 @@ export default function CropPage({
                     <FlaskConical className="h-4 w-4" />
                     <span>
                       {
-                        crop.traits.filter((trait) => (trait.entity = "Wort"))
+                        crop.traits.filter((trait) => trait.entity === "Wort")
                           .length
                       }{" "}
                       Wort Properties
