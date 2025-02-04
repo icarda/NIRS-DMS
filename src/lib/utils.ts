@@ -24,3 +24,12 @@ export function isArrayOfBooleans(arr: unknown): arr is boolean[] {
   if (!Array.isArray(arr)) return false;
   return arr.every((item) => typeof item === "boolean");
 }
+
+export function fileSize(size: number) {
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  return (
+    (size / Math.pow(1024, i)).toFixed(2) +
+    " " +
+    ["B", "kB", "MB", "GB", "TB"][i]
+  );
+}

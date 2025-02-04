@@ -14,18 +14,14 @@ import {
   UploadFormData,
   uploadFormSchema,
 } from "@/lib/schemas";
+import MetadataStep from "./steps/metadata-step";
 import TrialStep from "./steps/trial-step";
-// import TrialStep from "./steps/trial-step";
-// import MetadataStep from "./steps/metadata-step";
 import UploadStep from "./steps/upload-step";
-
-// import { useToast } from "@/hooks/use-toast";
 
 type FormData = TrialFormData & MetadataFormData & UploadFormData;
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
-  // const { toast } = useToast();
 
   const form = useForm<FormData>({
     mode: "onTouched",
@@ -46,20 +42,17 @@ const MultiStepForm = () => {
       coordinates: "",
       irrigation: false,
       fertilizers: [{ type: "", amount: 0 }],
+      productType: "",
+      qualityLab: "",
+      nirModel: "",
+      physiologicalStage: "",
+      program: "",
+      requesterName: "",
+      requesterEmail: "",
     },
   });
 
-  const onSubmit = async (data: FormData) => {
-    // Generate study code
-    const date = new Date(data.trialPlantingDate);
-    const formattedDate = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
-    const studyCode = `${data.trial}-${data.crop}-${formattedDate}`;
-
-    // toast({
-    //   title: "Success!",
-    //   description: `Your study has been created with code: ${studyCode}`,
-    // });
-  };
+  const onSubmit = async (data: FormData) => {};
 
   const nextStep = async () => {
     // Trigger validation for current step
@@ -107,7 +100,7 @@ const MultiStepForm = () => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {step === 1 && <TrialStep form={form} />}
-        {/* {step === 2 && <MetadataStep form={form} />} */}
+        {step === 2 && <MetadataStep form={form} />}
         {step === 3 && <UploadStep form={form} />}
 
         <div className="mt-8 flex justify-between">
