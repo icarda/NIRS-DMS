@@ -70,9 +70,7 @@ const MultiStepForm = () => {
   return (
     <div className="mx-auto max-w-3xl p-6">
       <div className="mb-8 flex items-center justify-center">
-        <div
-          className={`flex items-center ${step >= 1 ? "text-primary" : "text-muted"}`}
-        >
+        <div className="flex items-center text-primary">
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
             1
           </div>
@@ -80,7 +78,7 @@ const MultiStepForm = () => {
         </div>
         <div className="mx-4 h-px w-16 bg-border" />
         <div
-          className={`flex items-center ${step >= 2 ? "text-primary" : "text-muted"}`}
+          className={`flex items-center ${step >= 2 ? "text-primary" : "text-primary/30"}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
             2
@@ -89,7 +87,7 @@ const MultiStepForm = () => {
         </div>
         <div className="mx-4 h-px w-16 bg-border" />
         <div
-          className={`flex items-center ${step === 3 ? "text-primary" : "text-muted"}`}
+          className={`flex items-center ${step === 3 ? "text-primary" : "text-primary/30"}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
             3
