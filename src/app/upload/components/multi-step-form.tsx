@@ -28,7 +28,7 @@ const MultiStepForm = () => {
   // const { toast } = useToast();
 
   const form = useForm<FormData>({
-    mode: "all",
+    mode: "onTouched",
     resolver: zodResolver(
       step === 1
         ? trialFormSchema
@@ -65,14 +65,7 @@ const MultiStepForm = () => {
     // Trigger validation for current step
     const isValid = await form.trigger();
 
-    // if (!isValid) {
-    //   toast({
-    //     title: "Validation Error",
-    //     description: "Please fill in all required fields correctly",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
+    if (!isValid) return;
 
     setStep((prev) => prev + 1);
   };

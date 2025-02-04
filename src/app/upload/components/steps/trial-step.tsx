@@ -59,9 +59,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
       form.setValue("irrigation", true);
       form.setValue("fertilizers", [{ type: "nitrogen", amount: 23 }]);
     } else {
-      // Reset fields for new trial
       form.setValue("trial", "");
-      form.setValue("trialPlantingDate", null);
       form.setValue("crop", "");
       form.setValue("soilType", "");
       form.setValue("location", "");
@@ -69,6 +67,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
       form.setValue("irrigation", false);
       form.setValue("fertilizers", [{ type: "", amount: 0 }]);
     }
+    form.clearErrors();
   }, [useExistingTrial, form]);
 
   return (
