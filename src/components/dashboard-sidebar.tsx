@@ -48,7 +48,6 @@ const links = [
 export function AppSidebar() {
   const path = usePathname();
 
-  console.log(path);
   return (
     <Sidebar>
       <SidebarHeader className="p-4 text-center font-bold">
