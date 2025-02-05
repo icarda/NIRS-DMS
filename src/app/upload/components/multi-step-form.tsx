@@ -68,7 +68,7 @@ const MultiStepForm = () => {
   };
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
+    <div className="mx-auto max-w-4xl p-6">
       <div className="mb-8 flex items-center justify-center">
         <div className="flex items-center text-primary">
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">

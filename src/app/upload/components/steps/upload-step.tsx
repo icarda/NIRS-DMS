@@ -52,7 +52,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
             form.getValues("trial"),
             form.getValues("crop"),
             new Date(form.getValues("trialPlantingDate")).toLocaleDateString(
-              "en-US"
+              "fr-FR"
             ),
           ].join("+")}
         </h1>
@@ -85,7 +85,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
                             or drag and drop
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            CSV or XLSX files only
+                            CSV or XLSX files only - 5MB max
                           </p>
                         </div>
                         <Input

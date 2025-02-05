@@ -20,8 +20,8 @@ export const trialFormSchema = z.object({
   coordinates: z
     .string()
     .regex(
-      /^-?\d+\.?\d*,\s*-?\d+\.?\d*$/,
-      "Invalid coordinates format. Use lat,lon (e.g., 33.2315,-8.1515)"
+      /^-?\d+\.?\d*,\s-?\d+\.?\d*$/,
+      "Invalid coordinates format. Use lat,lon (e.g., 33.2315, -8.1515)"
     ),
   irrigation: z.boolean(),
   fertilizers: z
@@ -72,6 +72,36 @@ export const uploadFormSchema = z.object({
     .nullable(),
 });
 
+export const traitUploadSchema = z.object({
+  crop: z.string().min(1, "Please select a crop"),
+  year: z.string().min(1, "Please select a year"),
+  study: z.string().min(1, "Please select a study"),
+  traits: z.array(z.string()).min(1, "Please select at least one trait"),
+  file: z
+    .instanceof(File, { message: "File is required" })
+    .refine(
+      (file) => {
+        const validTypes = [
+          "text/csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ];
+        return validTypes.includes(file.type);
+      },
+      {
+        message: "File must be CSV or XLSX format",
+      }
+    )
+    .refine(
+      (file) => {
+        const MAX_SIZE_5MB = 5 * 1024 * 1024;
+        return file.size <= MAX_SIZE_5MB;
+      },
+      { message: "File size must be less than 5MB" }
+    )
+    .nullable(),
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type MetadataFormData = z.infer<typeof metadataFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;
+export type TraitUploadFormData = z.infer<typeof traitUploadSchema>;

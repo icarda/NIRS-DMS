@@ -54,7 +54,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
       form.setValue("crop", "wheat");
       form.setValue("soilType", "clay");
       form.setValue("location", "Sample Location");
-      form.setValue("coordinates", "33.2315,-8.1515");
+      form.setValue("coordinates", "33.2315, -8.1515");
       form.setValue("irrigation", true);
       form.setValue("fertilizers", [{ type: "nitrogen", amount: 23 }]);
     } else {
@@ -294,10 +294,10 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
               name="coordinates"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Coordinates (lat,lon)</FormLabel>
+                  <FormLabel>Coordinates (lat ,lon)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter coordinates (e.g., 33.2315,-8.1515)"
+                      placeholder="Enter coordinates (e.g., 33.2315, -8.1515)"
                       {...field}
                       disabled={useExistingTrial}
                     />

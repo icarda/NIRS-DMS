@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MultiStepForm from "./components/multi-step-form";
+import TraitUpload from "./components/trait-upload";
 
 export default function UploadData() {
   return (
@@ -26,7 +27,9 @@ export default function UploadData() {
             <TabsContent value="spectral_data">
               <MultiStepForm />
             </TabsContent>
-            <TabsContent value="traits">traits</TabsContent>
+            <TabsContent value="traits">
+              <TraitUpload />
+            </TabsContent>
           </div>
         </Tabs>
       </div>
