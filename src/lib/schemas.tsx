@@ -102,6 +102,16 @@ export const traitUploadSchema = z.object({
     .nullable(),
 });
 
+export const trialMetadataDialog = z.object({
+  id: z.number(),
+  name: z.string().min(2, "Metadata name must be at least 2 characters"),
+  type: z.enum(["String", "Number", "Boolean", "Date", "Array"]),
+  defaultValue: z.string(),
+  required: z.boolean(),
+  minValue: z.string(),
+  maxValue: z.string(),
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type MetadataFormData = z.infer<typeof metadataFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;

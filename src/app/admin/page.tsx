@@ -1,4 +1,21 @@
+import { DataTable } from "@/components/ui/data-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { nirModels } from "@/data/nir_models";
+import { physiologicalStages } from "@/data/physiological-stages";
+import { productTypes } from "@/data/product-types";
+import { trialMetadatas } from "@/data/trials-metadata";
+import { users } from "@/data/users";
+import {
+  NIRModelColumns,
+  physiologicalStageColumns,
+  productTypeColumns,
+  trialMetadataColumns,
+  userColumns,
+} from "./columns";
+import { NirModelAddDialog } from "./components/nir-model-add-dialog";
+import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
+import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
+import { TrialMetadataAddDialog } from "./components/trial-metadata-add-dialog";
 
 export default function Admin() {
   return (
@@ -40,11 +57,51 @@ export default function Admin() {
             </TabsList>
           </div>
           <div>
-            <TabsContent value="users"></TabsContent>
-            <TabsContent value="product_types"></TabsContent>
-            <TabsContent value="physiological_stages"></TabsContent>
-            <TabsContent value="nir_models"></TabsContent>
-            <TabsContent value="trials_metadata"></TabsContent>
+            <TabsContent value="users">
+              <DataTable
+                columns={userColumns}
+                data={users}
+                filterColumn="fullName"
+              />
+            </TabsContent>
+            <TabsContent value="product_types">
+              <DataTable
+                columns={productTypeColumns}
+                data={productTypes}
+                filterColumn="type"
+                selectCrop
+              >
+                <ProductTypeAddDialog />
+              </DataTable>
+            </TabsContent>
+            <TabsContent value="physiological_stages">
+              <DataTable
+                columns={physiologicalStageColumns}
+                data={physiologicalStages}
+                filterColumn="stage"
+                selectCrop
+              >
+                <PhysiologicalStageAddDialog />
+              </DataTable>
+            </TabsContent>
+            <TabsContent value="nir_models">
+              <DataTable
+                columns={NIRModelColumns}
+                data={nirModels}
+                filterColumn="name"
+              >
+                <NirModelAddDialog />
+              </DataTable>
+            </TabsContent>
+            <TabsContent value="trials_metadata">
+              <DataTable
+                columns={trialMetadataColumns}
+                data={trialMetadatas}
+                filterColumn="name"
+              >
+                <TrialMetadataAddDialog />
+              </DataTable>
+            </TabsContent>
           </div>
         </Tabs>
       </div>

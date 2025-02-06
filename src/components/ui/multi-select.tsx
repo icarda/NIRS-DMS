@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Command as CommandPrimitive } from "cmdk";
 import { X } from "lucide-react";
 
@@ -20,9 +21,15 @@ interface MultiSelectProps {
   data: Selectable[];
   value: string[];
   onChange(value: string[]): void;
+  placeholder?: string;
 }
 
-export function MultiSelect({ data, value, onChange }: MultiSelectProps) {
+export function MultiSelect({
+  data,
+  value,
+  onChange,
+  placeholder,
+}: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
@@ -95,7 +102,7 @@ export function MultiSelect({ data, value, onChange }: MultiSelectProps) {
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
-            placeholder="Select traits..."
+            placeholder={placeholder || "Select traits..."}
             className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -104,26 +111,28 @@ export function MultiSelect({ data, value, onChange }: MultiSelectProps) {
         <CommandList>
           {open && selectables.length > 0 ? (
             <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-              <CommandGroup className="h-full overflow-auto">
-                {selectables.map((selectable) => {
-                  return (
-                    <CommandItem
-                      key={selectable.value}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      onSelect={() => {
-                        setInputValue("");
-                        onChange([...value, selectable.value]);
-                      }}
-                      className={"cursor-pointer"}
-                    >
-                      {selectable.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
+              <ScrollArea className="h-48">
+                <CommandGroup className="h-full overflow-auto">
+                  {selectables.map((selectable) => {
+                    return (
+                      <CommandItem
+                        key={selectable.value}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onSelect={() => {
+                          setInputValue("");
+                          onChange([...value, selectable.value]);
+                        }}
+                        className={"cursor-pointer"}
+                      >
+                        {selectable.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </ScrollArea>
             </div>
           ) : null}
         </CommandList>
