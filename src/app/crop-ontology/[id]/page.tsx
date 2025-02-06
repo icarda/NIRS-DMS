@@ -141,12 +141,12 @@ export default function CropPage({
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <PlusIcon className="h-4 w-4" />
-                Add Crop
+                Add Trait
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Crop</DialogTitle>
+                <DialogTitle>Add Trait</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form
