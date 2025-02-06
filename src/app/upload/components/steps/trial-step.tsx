@@ -34,6 +34,32 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
+const TRIALS = [
+  {
+    trial: "trial1",
+    trialPlantingDate: new Date(),
+    crop: "wheat",
+    soilType: "clay",
+    location: "Sample Location",
+    coordinates: "33.2315, -8.1515",
+    irrigation: true,
+    fertilizers: [
+      { type: "nitrogen", amount: 23 },
+      { type: "phosphorus", amount: 12 },
+    ],
+  },
+  {
+    trial: "trial2",
+    trialPlantingDate: new Date(Date.now() - 3600 * 24 * 1000),
+    crop: "corn",
+    soilType: "loam",
+    location: "Sample Location 2",
+    coordinates: "33.2315, -8.1515",
+    irrigation: false,
+    fertilizers: [{ type: "nitrogen", amount: 23 }],
+  },
+];
+
 const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
   const {
     fields: fertilizers,
@@ -47,19 +73,10 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
 
   // Reset form fields when switching between existing and new trial
   useEffect(() => {
-    if (useExistingTrial) {
-      // Simulate populating data from an existing trial
-      form.setValue("trial", "trial1");
-      form.setValue("trialPlantingDate", new Date());
-      form.setValue("crop", "wheat");
-      form.setValue("soilType", "clay");
-      form.setValue("location", "Sample Location");
-      form.setValue("coordinates", "33.2315, -8.1515");
-      form.setValue("irrigation", true);
-      form.setValue("fertilizers", [{ type: "nitrogen", amount: 23 }]);
-    } else {
+    if (!useExistingTrial) {
       form.setValue("trial", "");
       form.setValue("crop", "");
+      form.setValue("trialPlantingDate", null);
       form.setValue("soilType", "");
       form.setValue("location", "");
       form.setValue("coordinates", "");
@@ -125,7 +142,23 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Trial</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const trial = TRIALS.find((t) => t.trial === value)!;
+                        form.setValue(
+                          "trialPlantingDate",
+                          trial.trialPlantingDate
+                        );
+                        form.setValue("crop", trial.crop);
+                        form.setValue("soilType", trial.soilType);
+                        form.setValue("location", trial.location);
+                        form.setValue("coordinates", trial.coordinates);
+                        form.setValue("irrigation", trial.irrigation);
+                        form.setValue("fertilizers", trial.fertilizers);
+                      }}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select trial" />
