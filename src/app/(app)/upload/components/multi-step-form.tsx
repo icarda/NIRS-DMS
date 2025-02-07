@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ type FormData = TrialFormData & MetadataFormData & UploadFormData;
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
+  const router = useRouter();
 
   const form = useForm<FormData>({
     mode: "onTouched",
@@ -52,7 +54,10 @@ const MultiStepForm = () => {
     },
   });
 
-  const onSubmit = async (data: FormData) => {};
+  const onSubmit = async (data: FormData) => {
+    setStep(1);
+    form.reset();
+  };
 
   const nextStep = async () => {
     // Trigger validation for current step

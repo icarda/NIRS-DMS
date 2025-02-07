@@ -20,7 +20,7 @@ export const crops: Crop[] = [
     title: "Barley",
     description:
       "A versatile cereal grain primarily used in brewing and animal feed, known for its high nutritional value and brewing qualities.",
-    image: "/placeholder.svg",
+    image: "/barley.png",
     traits: [
       {
         variable: "BetaGlucan",

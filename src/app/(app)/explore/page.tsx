@@ -1,4 +1,4 @@
-import { columns } from "@/app/explore/table/columns";
+import { columns } from "@/app/(app)/explore/table/columns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { data, filterFields } from "./table/constants";
 import { DataTable } from "./table/data-table";

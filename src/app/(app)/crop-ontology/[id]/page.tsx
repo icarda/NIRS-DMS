@@ -210,7 +210,7 @@ export default function CropPage({
                       name="unit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Entity</FormLabel>
+                          <FormLabel>Unit</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
@@ -285,7 +285,11 @@ export default function CropPage({
             </DialogContent>
           </Dialog>
         </div>
-        <DataTable columns={traitColumns} data={crop.traits} />
+        <DataTable
+          columns={traitColumns}
+          data={crop.traits}
+          filterColumn="name"
+        />
       </div>
     </div>
   );

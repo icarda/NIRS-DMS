@@ -5,8 +5,8 @@ import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash2 } from "lucide-react";
 
-import { QUALITY_LABS } from "@/app/explore/table/constants";
-import { DataTableColumnHeader } from "@/app/explore/table/data-table-column-header";
+import { QUALITY_LABS } from "@/app/(app)/explore/table/constants";
+import { DataTableColumnHeader } from "@/app/(app)/explore/table/data-table-column-header";
 import {
   AlertDialog,
   AlertDialogAction,
