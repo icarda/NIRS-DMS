@@ -1,6 +1,10 @@
 import { AppSidebar } from "@/components/dashboard-sidebar";
 import { Header } from "@/components/header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default function AuthLayout({
   children,

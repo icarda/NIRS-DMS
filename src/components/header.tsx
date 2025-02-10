@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "./ui/sidebar";
 
 interface HeaderProps {
   title: string;
@@ -10,7 +11,10 @@ interface HeaderProps {
 export function Header({ title }: HeaderProps) {
   return (
     <header className="flex h-16 items-center justify-between px-6">
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <div className="flex items-center gap-4">
+        <SidebarTrigger />
+        <h1 className="text-2xl font-bold">{title}</h1>
+      </div>
       <div className="flex items-center gap-4">
         <Button variant="ghost" asChild>
           <Link href="/auth/signin" className="py-3">
