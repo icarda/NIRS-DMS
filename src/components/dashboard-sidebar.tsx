@@ -24,14 +24,14 @@ const links = [
     icon: Home,
   },
   {
-    title: "Explore Data",
-    url: "/explore",
-    icon: Database,
-  },
-  {
     title: "Crop Quality Ontology",
     url: "/crop-ontology",
     icon: Leaf,
+  },
+  {
+    title: "Explore Data",
+    url: "/explore",
+    icon: Database,
   },
   {
     title: "Upload Data",
