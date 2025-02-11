@@ -17,14 +17,10 @@ export function Header({ title }: HeaderProps) {
       </div>
       <div className="flex items-center gap-4">
         <Button variant="ghost" asChild>
-          <Link href="/auth/signin" className="py-3">
-            Sign In
-          </Link>
+          <Link href="/auth/signin">Sign In</Link>
         </Button>
         <Button asChild>
-          <Link href="/auth/register" className="py-3">
-            Register
-          </Link>
+          <Link href="/auth/register">Register</Link>
         </Button>
       </div>
     </header>
