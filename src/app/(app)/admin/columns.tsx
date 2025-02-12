@@ -36,6 +36,7 @@ export type User = {
 export type ProductType = {
   id: number;
   type: string;
+  crop: string;
 };
 
 export type PhysiologicalStage = {
@@ -186,6 +187,12 @@ export const productTypeColumns: ColumnDef<ProductType>[] = [
     cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
   },
   {
+    accessorKey: "crop",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Crop" />
+    ),
+  },
+  {
     accessorKey: "type",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
@@ -245,6 +252,12 @@ export const physiologicalStageColumns: ColumnDef<PhysiologicalStage>[] = [
     accessorKey: "id",
     header: "#",
     cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
+  },
+  {
+    accessorKey: "crop",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Crop" />
+    ),
   },
   {
     accessorKey: "stage",

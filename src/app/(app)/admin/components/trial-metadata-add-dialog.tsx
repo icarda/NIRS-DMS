@@ -57,8 +57,8 @@ export function TrialMetadataAddDialog({}: TrialMetadataAddDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm">
+          <Plus className="h-4 w-4" />
           Add Trial Metadata
         </Button>
       </DialogTrigger>

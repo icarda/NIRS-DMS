@@ -23,9 +23,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { crops } from "@/data/crops";
 
 const formSchema = z.object({
-  type: z.string().min(2, "Product type must be at least 2 characters"),
+  type: z
+    .string()
+    .nonempty("Product type is required")
+    .min(2, "Product type must be at least 2 characters"),
+  crop: z
+    .string()
+    .nonempty("Crop is required")
+    .min(2, "Crop must be at least 2 characters"),
 });
 
 interface ProductTypeDialogProps {
@@ -37,6 +53,7 @@ export function ProductTypeAddDialog({}: ProductTypeDialogProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "",
+      crop: "",
     },
   });
 
@@ -48,8 +65,8 @@ export function ProductTypeAddDialog({}: ProductTypeDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm">
+          <Plus className="h-4 w-4" />
           Add Product Type
         </Button>
       </DialogTrigger>
@@ -70,6 +87,35 @@ export function ProductTypeAddDialog({}: ProductTypeDialogProps) {
                   <FormLabel>Product Type</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter product type" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="crop"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Crop</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a crop" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {crops.map((crop) => (
+                            <SelectItem key={crop.id} value={crop.id}>
+                              {crop.title}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

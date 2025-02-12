@@ -23,9 +23,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { crops } from "@/data/crops";
 
 const formSchema = z.object({
-  stage: z.string().min(2, "Physiological stage must be at least 2 characters"),
+  stage: z
+    .string()
+    .nonempty("Stage is required")
+    .min(2, "Physiological stage must be at least 2 characters"),
+  crop: z.string().nonempty("Crop is required"),
 });
 
 interface PhysiologicalStageDialogProps {
@@ -37,6 +50,7 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       stage: "",
+      crop: "",
     },
   });
 
@@ -48,8 +62,8 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm">
+          <Plus className="h-4 w-4" />
           Add Physiological Stage
         </Button>
       </DialogTrigger>
@@ -70,6 +84,35 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
                   <FormLabel>Physiological Stage</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter physiological Stage" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="crop"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Crop</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a crop" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {crops.map((crop) => (
+                            <SelectItem key={crop.id} value={crop.id}>
+                              {crop.title}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

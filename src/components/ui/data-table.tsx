@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   ColumnDef,
@@ -12,7 +12,6 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -23,14 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crops } from "@/data/crops";
-import { Button } from "./button";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./select";
@@ -69,19 +65,29 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const crops = useMemo(
+    () => Array.from(new Set(data.map((el) => (el as { crop: string }).crop))),
+    []
+  );
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between py-2">
         {selectCrop && (
-          <Select>
+          <Select
+            value={(table.getColumn("crop")?.getFilterValue() as string) ?? ""}
+            onValueChange={(value) =>
+              table.getColumn("crop")?.setFilterValue(value)
+            }
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select a crop" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 {crops.map((crop) => (
-                  <SelectItem key={crop.id} value={crop.id}>
-                    {crop.title}
+                  <SelectItem key={crop} value={crop}>
+                    {crop}
                   </SelectItem>
                 ))}
               </SelectGroup>
