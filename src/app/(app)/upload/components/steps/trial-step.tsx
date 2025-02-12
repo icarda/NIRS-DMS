@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format, isExists } from "date-fns";
-import { is } from "drizzle-orm";
+import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 
@@ -36,7 +34,7 @@ import { cn } from "@/lib/utils";
 
 const TRIALS = [
   {
-    trial: "trial1",
+    trial: "BW",
     trialPlantingDate: new Date(),
     crop: "wheat",
     soilType: "clay",
@@ -49,7 +47,7 @@ const TRIALS = [
     ],
   },
   {
-    trial: "trial2",
+    trial: "FF-23",
     trialPlantingDate: new Date(Date.now() - 3600 * 24 * 1000),
     crop: "corn",
     soilType: "loam",
@@ -165,8 +163,11 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="trial1">Trial 1</SelectItem>
-                        <SelectItem value="trial2">Trial 2</SelectItem>
+                        {TRIALS.map((trial) => (
+                          <SelectItem key={trial.trial} value={trial.trial}>
+                            {trial.trial}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

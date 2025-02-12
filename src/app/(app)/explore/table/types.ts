@@ -1,5 +1,3 @@
-import type { JSX } from "react";
-
 export type SearchParams = {
   [key: string]: string | string[] | undefined;
 };

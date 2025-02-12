@@ -3,27 +3,25 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
-  MetadataFormData,
-  metadataFormSchema,
+  StudyFormData,
+  studyFormSchema,
   TrialFormData,
   trialFormSchema,
   UploadFormData,
   uploadFormSchema,
 } from "@/lib/schemas";
-import MetadataStep from "./steps/metadata-step";
+import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
 
-type FormData = TrialFormData & MetadataFormData & UploadFormData;
+type FormData = TrialFormData & StudyFormData & UploadFormData;
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
-  const router = useRouter();
 
   const form = useForm<FormData>({
     mode: "onTouched",
@@ -31,7 +29,7 @@ const MultiStepForm = () => {
       step === 1
         ? trialFormSchema
         : step === 2
-          ? metadataFormSchema
+          ? studyFormSchema
           : uploadFormSchema
     ),
     defaultValues: {
@@ -88,7 +86,7 @@ const MultiStepForm = () => {
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
             2
           </div>
-          <span className="ml-2">Metadata</span>
+          <span className="ml-2">Study</span>
         </div>
         <div className="mx-4 h-px w-16 bg-border" />
         <div
@@ -103,7 +101,7 @@ const MultiStepForm = () => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {step === 1 && <TrialStep form={form} />}
-        {step === 2 && <MetadataStep form={form} />}
+        {step === 2 && <StudyStep form={form} />}
         {step === 3 && <UploadStep form={form} />}
 
         <div className="mt-8 flex justify-between">

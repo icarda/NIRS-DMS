@@ -24,7 +24,6 @@ export function DataTableFilterCheckbox<TData>({
   const value = _value as string;
   const [inputValue, setInputValue] = useState("");
   const column = table.getColumn(value);
-  const facetedValue = column?.getFacetedUniqueValues();
   const filterValue = column?.getFilterValue();
 
   if (!options?.length) return null;

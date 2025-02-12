@@ -20,7 +20,6 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -29,9 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { studyAccesses } from "@/data/studies";
 import { trialMetadataDialog } from "@/lib/schemas";
-import { MetadataSchema, User } from "../columns";
+import { MetadataSchema } from "../columns";
 
 interface TrialMetadataEditDialogProps {
   metadata: MetadataSchema;

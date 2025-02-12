@@ -35,7 +35,7 @@ export const trialFormSchema = z.object({
     .min(1, "At least one fertilizer entry is required"),
 });
 
-export const metadataFormSchema = z.object({
+export const studyFormSchema = z.object({
   productType: z.string().min(1, "Product type is required"),
   qualityLab: z.string().min(1, "Quality lab is required"),
   nirModel: z.string().min(1, "NIR model is required"),
@@ -113,6 +113,6 @@ export const trialMetadataDialog = z.object({
 });
 
 export type TrialFormData = z.infer<typeof trialFormSchema>;
-export type MetadataFormData = z.infer<typeof metadataFormSchema>;
+export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;
 export type TraitUploadFormData = z.infer<typeof traitUploadSchema>;

@@ -24,7 +24,7 @@ import { dashboardFilterSchema } from "@/lib/schemas";
 
 type FilterValues = z.infer<typeof dashboardFilterSchema>;
 
-// Mock data - replace with actual data
+// Mock data
 const CROPS = ["Barley", "Maize", "Chickpea"];
 const QUALITY_LABS = ["ICARDA-MAR", "ICARDA-LEB", "CIMMY"];
 const YEARS = ["2024", "2023", "2022", "2021"];

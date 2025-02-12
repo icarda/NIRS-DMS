@@ -92,7 +92,6 @@ export default function CropOntology() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    // Handle form submission here
   }
 
   return (

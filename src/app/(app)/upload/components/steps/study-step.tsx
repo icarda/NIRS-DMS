@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const MetadataStep = ({ form }: { form: UseFormReturn<any> }) => {
+const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -236,4 +236,4 @@ const MetadataStep = ({ form }: { form: UseFormReturn<any> }) => {
   );
 };
 
-export default MetadataStep;
+export default StudyStep;

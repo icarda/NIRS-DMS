@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import type { ColumnDef, Table } from "@tanstack/react-table";
+import type { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 
 import {
