@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/dashboard-sidebar";
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import {
   SidebarInset,
@@ -19,6 +20,7 @@ export default function AuthLayout({
         <div className="flex flex-1 flex-col overflow-y-auto px-4 py-2 font-[family-name:var(--font-inter)]">
           {children}
         </div>
+        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );
