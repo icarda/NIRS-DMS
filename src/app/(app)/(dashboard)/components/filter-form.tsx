@@ -20,16 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { crops } from "@/data/crops";
+import { nirModels } from "@/data/nir_models";
+import { qualityLabs } from "@/data/quality-labs";
 import { dashboardFilterSchema } from "@/lib/schemas";
 
 type FilterValues = z.infer<typeof dashboardFilterSchema>;
 
 // Mock data
-const CROPS = ["Barley", "Maize", "Chickpea"];
-const QUALITY_LABS = ["ICARDA-MAR", "ICARDA-LEB", "CIMMY"];
 const YEARS = ["2024", "2023", "2022", "2021"];
 const COUNTRIES = ["Morocco", "Lebanon", "Mexico"];
-const NIR_MODELS = ["Antharis II", "FOSS DS2500"];
 
 export function FilterForm() {
   const form = useForm<FilterValues>({
@@ -66,9 +66,9 @@ export function FilterForm() {
                       <SelectValue placeholder="Select crop" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CROPS.map((crop) => (
-                        <SelectItem key={crop} value={crop}>
-                          {crop}
+                      {crops.map((crop) => (
+                        <SelectItem key={crop.id} value={crop.id}>
+                          {crop.title}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -94,7 +94,7 @@ export function FilterForm() {
                       <SelectValue placeholder="Select quality lab" />
                     </SelectTrigger>
                     <SelectContent>
-                      {QUALITY_LABS.map((lab) => (
+                      {qualityLabs.map((lab) => (
                         <SelectItem key={lab} value={lab}>
                           {lab}
                         </SelectItem>
@@ -150,9 +150,9 @@ export function FilterForm() {
                       <SelectValue placeholder="Select NIR model" />
                     </SelectTrigger>
                     <SelectContent>
-                      {NIR_MODELS.map((model) => (
-                        <SelectItem key={model} value={model}>
-                          {model}
+                      {nirModels.map((model) => (
+                        <SelectItem key={model.id} value={model.name}>
+                          {model.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

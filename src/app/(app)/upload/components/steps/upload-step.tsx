@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { type UploadFormData } from "@/lib/schemas";
 import { fileSize } from "@/lib/utils";
 
 const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
@@ -50,10 +49,8 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
           Upload data file for study:{" "}
           {[
             form.getValues("trial"),
-            form.getValues("crop"),
-            new Date(form.getValues("trialPlantingDate")).toLocaleDateString(
-              "fr-FR"
-            ),
+            form.getValues("productType"),
+            new Date(form.getValues("sampleDate")).toLocaleDateString("fr-FR"),
           ].join("+")}
         </h1>
         <p className="text-base text-muted-foreground">

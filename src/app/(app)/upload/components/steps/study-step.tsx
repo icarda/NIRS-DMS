@@ -27,6 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { nirModels } from "@/data/nir_models";
+import { physiologicalStages } from "@/data/physiological-stages";
+import { productTypes } from "@/data/product-types";
+import { qualityLabs } from "@/data/quality-labs";
 import { cn } from "@/lib/utils";
 
 const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
@@ -58,8 +62,13 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="type1">Type 1</SelectItem>
-                      <SelectItem value="type2">Type 2</SelectItem>
+                      {Array.from(
+                        new Set(productTypes.map((type) => type.type))
+                      ).map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -83,8 +92,11 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="lab1">Lab 1</SelectItem>
-                      <SelectItem value="lab2">Lab 2</SelectItem>
+                      {qualityLabs.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -108,8 +120,11 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="model1">Model 1</SelectItem>
-                      <SelectItem value="model2">Model 2</SelectItem>
+                      {nirModels.map((model) => (
+                        <SelectItem key={model.id} value={model.name}>
+                          {model.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -135,8 +150,13 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="stage1">Stage 1</SelectItem>
-                      <SelectItem value="stage2">Stage 2</SelectItem>
+                      {Array.from(
+                        new Set(physiologicalStages.map((stage) => stage.stage))
+                      ).map((stage) => (
+                        <SelectItem key={stage} value={stage}>
+                          {stage}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
