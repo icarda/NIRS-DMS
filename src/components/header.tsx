@@ -1,8 +1,7 @@
-"use client";
-
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 
 interface HeaderProps {
@@ -13,6 +12,7 @@ export function Header({ title }: HeaderProps) {
     <header className="flex h-16 items-center justify-between px-6">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
+        <Separator orientation="vertical" className="h-4" />
         <h1 className="text-2xl font-bold">{title}</h1>
       </div>
       <div className="flex items-center gap-4">
