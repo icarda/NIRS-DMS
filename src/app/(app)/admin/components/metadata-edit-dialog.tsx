@@ -28,24 +28,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { trialMetadataDialog } from "@/lib/schemas";
+import { metadataDialog } from "@/lib/schemas";
 import { MetadataSchema } from "../columns";
 
-interface TrialMetadataEditDialogProps {
+interface MetadataEditDialogProps {
   metadata: MetadataSchema;
   open: boolean;
   onOpenChange(open: boolean): void;
-  onSave(data: z.infer<typeof trialMetadataDialog>): void;
+  onSave(data: z.infer<typeof metadataDialog>): void;
+  type: "study" | "trial";
 }
 
-export function TrialMetadataEditDialog({
+export function MetadataEditDialog({
   metadata,
   open,
   onOpenChange,
   onSave,
-}: TrialMetadataEditDialogProps) {
-  const form = useForm<z.infer<typeof trialMetadataDialog>>({
-    resolver: zodResolver(trialMetadataDialog),
+  type,
+}: MetadataEditDialogProps) {
+  const form = useForm<z.infer<typeof metadataDialog>>({
+    resolver: zodResolver(metadataDialog),
     defaultValues: {
       name: metadata.name,
       type: metadata.type,
@@ -60,7 +62,9 @@ export function TrialMetadataEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Trial Metadata</DialogTitle>
+          <DialogTitle>
+            Edit <span className="capitalize">{type}</span> Metadata
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)} className="space-y-2">

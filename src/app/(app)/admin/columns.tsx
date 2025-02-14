@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrialMetadataEditDialog } from "./components/trial-metadata-edit-dialog";
+import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
 
@@ -410,7 +410,7 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Full Name" />
+      <DataTableColumnHeader column={column} title="Name" />
     ),
   },
   {
@@ -488,11 +488,12 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
             </Button>
           </div>
 
-          <TrialMetadataEditDialog
+          <MetadataEditDialog
             metadata={metadata}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             onSave={handleEdit}
+            type="trial"
           />
 
           <AlertDialog
@@ -504,6 +505,128 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently delete the trial metadata{" "}
+                  <span className="font-medium">{metadata.name}</span>. This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      );
+    },
+  },
+];
+
+export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
+  {
+    accessorKey: "id",
+    header: "#",
+    cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
+  },
+  {
+    accessorKey: "defaultValue",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Default Value" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("defaultValue");
+      return !value ? "NULL" : value;
+    },
+  },
+  {
+    accessorKey: "required",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Required" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("required");
+      return value ? "YES" : "NO";
+    },
+  },
+  {
+    accessorKey: "min_value",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Minimum Value" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("min_value");
+      return !value ? "NULL" : value;
+    },
+  },
+  {
+    accessorKey: "max_value",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Maxmimum Value" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("max_value");
+      return !value ? "NULL" : value;
+    },
+  },
+
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const metadata = row.original;
+      const [editDialogOpen, setEditDialogOpen] = useState(false);
+      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+      const handleEdit = (data: any) => {
+        setEditDialogOpen(false);
+      };
+
+      const handleDelete = () => {
+        setDeleteDialogOpen(false);
+      };
+
+      return (
+        <>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditDialogOpen(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <MetadataEditDialog
+            metadata={metadata}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            onSave={handleEdit}
+            type="study"
+          />
+
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the study metadata{" "}
                   <span className="font-medium">{metadata.name}</span>. This
                   action cannot be undone.
                 </AlertDialogDescription>

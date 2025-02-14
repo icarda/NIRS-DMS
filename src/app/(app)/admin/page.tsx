@@ -3,19 +3,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nirModels } from "@/data/nir_models";
 import { physiologicalStages } from "@/data/physiological-stages";
 import { productTypes } from "@/data/product-types";
+import { studyMetadatas } from "@/data/study-metadata";
 import { trialMetadatas } from "@/data/trials-metadata";
 import { users } from "@/data/users";
 import {
   NIRModelColumns,
   physiologicalStageColumns,
   productTypeColumns,
+  studyMetadataColumns,
   trialMetadataColumns,
   userColumns,
 } from "./columns";
+import { MetadataAddDialog } from "./components/metadata-add-dialog";
 import { NirModelAddDialog } from "./components/nir-model-add-dialog";
 import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
-import { TrialMetadataAddDialog } from "./components/trial-metadata-add-dialog";
 
 export default function Admin() {
   return (
@@ -53,6 +55,12 @@ export default function Admin() {
                 className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
               >
                 Trials Metadata
+              </TabsTrigger>
+              <TabsTrigger
+                value="study_metadata"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Study Metadata
               </TabsTrigger>
             </TabsList>
           </div>
@@ -99,7 +107,16 @@ export default function Admin() {
                 data={trialMetadatas}
                 filterColumn="name"
               >
-                <TrialMetadataAddDialog />
+                <MetadataAddDialog type="trial" />
+              </DataTable>
+            </TabsContent>
+            <TabsContent value="study_metadata">
+              <DataTable
+                columns={studyMetadataColumns}
+                data={studyMetadatas}
+                filterColumn="name"
+              >
+                <MetadataAddDialog type="study" />
               </DataTable>
             </TabsContent>
           </div>

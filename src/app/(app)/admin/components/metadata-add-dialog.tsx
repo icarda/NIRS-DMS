@@ -31,15 +31,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { trialMetadataDialog } from "@/lib/schemas";
+import { metadataDialog } from "@/lib/schemas";
 
-interface TrialMetadataAddDialogProps {
-  // onSave: (data: z.infer<typeof trialMetadataDialog>) => void;
+interface MetadataAddDialogProps {
+  type: "study" | "trial";
+  // onSave: (data: z.infer<typeof metadataDialog>) => void;
 }
 
-export function TrialMetadataAddDialog({}: TrialMetadataAddDialogProps) {
-  const form = useForm<z.infer<typeof trialMetadataDialog>>({
-    resolver: zodResolver(trialMetadataDialog),
+export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
+  const form = useForm<z.infer<typeof metadataDialog>>({
+    resolver: zodResolver(metadataDialog),
     defaultValues: {
       name: "",
       type: "String",
@@ -50,7 +51,7 @@ export function TrialMetadataAddDialog({}: TrialMetadataAddDialogProps) {
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof trialMetadataDialog>) => {
+  const handleSubmit = (data: z.infer<typeof metadataDialog>) => {
     form.reset();
   };
 
@@ -59,12 +60,14 @@ export function TrialMetadataAddDialog({}: TrialMetadataAddDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
-          Add Trial Metadata
+          <span>
+            Add <span className="capitalize">{type}</span> Metadata
+          </span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add new trial metadata</DialogTitle>
+          <DialogTitle>Add new {type} metadata</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

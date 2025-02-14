@@ -1,4 +1,4 @@
-import { MetadataSchema } from "@/app/admin/columns";
+import { MetadataSchema } from "@/app/(app)/admin/columns";
 
 export const trialMetadatas: MetadataSchema[] = [
   {
