@@ -1,4 +1,5 @@
 import { DataTable } from "@/components/ui/data-table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nirModels } from "@/data/nir_models";
 import { physiologicalStages } from "@/data/physiological-stages";
@@ -22,106 +23,107 @@ import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 export default function Admin() {
   return (
     <div>
-      <div className="flex items-center">
-        <Tabs defaultValue="users" className="flex-1">
-          <div className="border-b">
-            <TabsList className="h-12 bg-transparent">
-              <TabsTrigger
-                value="users"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                Users
-              </TabsTrigger>
-              <TabsTrigger
-                value="product_types"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                Product Types
-              </TabsTrigger>
-              <TabsTrigger
-                value="physiological_stages"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                Physiological Stages
-              </TabsTrigger>
-              <TabsTrigger
-                value="nir_models"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                NIR Models
-              </TabsTrigger>
-              <TabsTrigger
-                value="trials_metadata"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                Trials Metadata
-              </TabsTrigger>
-              <TabsTrigger
-                value="study_metadata"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-              >
-                Study Metadata
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          <div>
-            <TabsContent value="users">
-              <DataTable
-                columns={userColumns}
-                data={users}
-                filterColumn="fullName"
-              />
-            </TabsContent>
-            <TabsContent value="product_types">
-              <DataTable
-                columns={productTypeColumns}
-                data={productTypes}
-                filterColumn="type"
-                selectCrop
-              >
-                <ProductTypeAddDialog />
-              </DataTable>
-            </TabsContent>
-            <TabsContent value="physiological_stages">
-              <DataTable
-                columns={physiologicalStageColumns}
-                data={physiologicalStages}
-                filterColumn="stage"
-                selectCrop
-              >
-                <PhysiologicalStageAddDialog />
-              </DataTable>
-            </TabsContent>
-            <TabsContent value="nir_models">
-              <DataTable
-                columns={NIRModelColumns}
-                data={nirModels}
-                filterColumn="name"
-              >
-                <NirModelAddDialog />
-              </DataTable>
-            </TabsContent>
-            <TabsContent value="trials_metadata">
-              <DataTable
-                columns={trialMetadataColumns}
-                data={trialMetadatas}
-                filterColumn="name"
-              >
-                <MetadataAddDialog type="trial" />
-              </DataTable>
-            </TabsContent>
-            <TabsContent value="study_metadata">
-              <DataTable
-                columns={studyMetadataColumns}
-                data={studyMetadatas}
-                filterColumn="name"
-              >
-                <MetadataAddDialog type="study" />
-              </DataTable>
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
+      <Tabs defaultValue="users" className="w-full">
+        <div className="border-b">
+          {/* <ScrollArea className="w-full"> */}
+          <TabsList className="flex h-12 justify-start">
+            <TabsTrigger
+              value="users"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              Users
+            </TabsTrigger>
+            <TabsTrigger
+              value="product_types"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              Product Types
+            </TabsTrigger>
+            <TabsTrigger
+              value="physiological_stages"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              Physiological Stages
+            </TabsTrigger>
+            <TabsTrigger
+              value="nir_models"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              NIR Models
+            </TabsTrigger>
+            <TabsTrigger
+              value="trials_metadata"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              Trials Metadata
+            </TabsTrigger>
+            <TabsTrigger
+              value="study_metadata"
+              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            >
+              Study Metadata
+            </TabsTrigger>
+          </TabsList>
+          {/* <ScrollBar orientation="horizontal" />
+          </ScrollArea> */}
+        </div>
+        <div>
+          <TabsContent value="users">
+            <DataTable
+              columns={userColumns}
+              data={users}
+              filterColumn="fullName"
+            />
+          </TabsContent>
+          <TabsContent value="product_types">
+            <DataTable
+              columns={productTypeColumns}
+              data={productTypes}
+              filterColumn="type"
+              selectCrop
+            >
+              <ProductTypeAddDialog />
+            </DataTable>
+          </TabsContent>
+          <TabsContent value="physiological_stages">
+            <DataTable
+              columns={physiologicalStageColumns}
+              data={physiologicalStages}
+              filterColumn="stage"
+              selectCrop
+            >
+              <PhysiologicalStageAddDialog />
+            </DataTable>
+          </TabsContent>
+          <TabsContent value="nir_models">
+            <DataTable
+              columns={NIRModelColumns}
+              data={nirModels}
+              filterColumn="name"
+            >
+              <NirModelAddDialog />
+            </DataTable>
+          </TabsContent>
+          <TabsContent value="trials_metadata">
+            <DataTable
+              columns={trialMetadataColumns}
+              data={trialMetadatas}
+              filterColumn="name"
+            >
+              <MetadataAddDialog type="trial" />
+            </DataTable>
+          </TabsContent>
+          <TabsContent value="study_metadata">
+            <DataTable
+              columns={studyMetadataColumns}
+              data={studyMetadatas}
+              filterColumn="name"
+            >
+              <MetadataAddDialog type="study" />
+            </DataTable>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

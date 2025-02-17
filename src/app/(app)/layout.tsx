@@ -17,10 +17,10 @@ export default function AuthLayout({
       <AppSidebar />
       <SidebarInset>
         <Header title="Dashboard" />
-        <div className="flex flex-1 flex-col overflow-y-auto px-4 py-2 font-[family-name:var(--font-inter)]">
+        <div className="px-0 py-2 font-[family-name:var(--font-inter)] md:px-4">
           {children}
+          <Footer />
         </div>
-        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );

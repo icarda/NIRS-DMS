@@ -62,7 +62,9 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Trial Metadata</h1>
+        <h1 className="text-xl font-bold tracking-tight md:text-3xl">
+          Trial Metadata
+        </h1>
         <p className="text-base text-muted-foreground">
           Choose the trial associated with the data you are uploading to ensure
           accurate organization.
@@ -107,7 +109,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
             )}
           />
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
             {useExistingTrial ? (
               <FormField
                 control={form.control}
@@ -171,7 +173,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
               name="trialPlantingDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Trial planting date</FormLabel>
+                  <FormLabel>Planting date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -231,9 +233,7 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                 </FormItem>
               )}
             />
-          </div>
 
-          <div className="grid grid-cols-3 gap-6">
             <FormField
               control={form.control}
               name="species"

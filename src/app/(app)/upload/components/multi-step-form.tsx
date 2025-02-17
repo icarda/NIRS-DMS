@@ -71,31 +71,31 @@ const MultiStepForm = () => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl p-4 md:p-6">
       <div className="mb-8 flex items-center justify-center">
         <div className="flex items-center text-primary">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-current md:h-8 md:w-8">
             1
           </div>
-          <span className="ml-2">Trial</span>
+          <span className="ml-2 text-sm md:text-base">Trial</span>
         </div>
-        <div className="mx-4 h-px w-16 bg-border" />
+        <div className="mx-4 h-px w-10 bg-border md:w-16" />
         <div
           className={`flex items-center ${step >= 2 ? "text-primary" : "text-primary/30"}`}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-current md:h-8 md:w-8">
             2
           </div>
-          <span className="ml-2">Study</span>
+          <span className="ml-2 text-sm md:text-base">Study</span>
         </div>
-        <div className="mx-4 h-px w-16 bg-border" />
+        <div className="mx-4 h-px w-10 bg-border md:w-16" />
         <div
           className={`flex items-center ${step === 3 ? "text-primary" : "text-primary/30"}`}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-current">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-current md:h-8 md:w-8">
             3
           </div>
-          <span className="ml-2">Upload</span>
+          <span className="ml-2 text-sm md:text-base">Upload</span>
         </div>
       </div>
 
