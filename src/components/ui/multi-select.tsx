@@ -73,7 +73,7 @@ export function MultiSelect({
       className="overflow-visible bg-transparent"
     >
       <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-        <div className="flex flex-wrap gap-x-1 gap-y-2">
+        <div className="flex flex-wrap gap-x-1 gap-y-2 overflow-hidden">
           {selected.map((selectable) => {
             return (
               <Badge key={selectable.value} variant="default">
@@ -103,7 +103,7 @@ export function MultiSelect({
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
             placeholder={placeholder || "Select traits..."}
-            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>

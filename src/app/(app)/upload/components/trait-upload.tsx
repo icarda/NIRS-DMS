@@ -80,9 +80,11 @@ const TraitUpload = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 p-6">
+    <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Upload Trait Data</h1>
+        <h1 className="text-xl font-bold tracking-tight md:text-3xl">
+          Upload Trait Data
+        </h1>
         <p className="text-base text-muted-foreground">
           Select the crop, trial, and trait, then upload the file containing
           measured values for the selected trait.
@@ -90,7 +92,7 @@ const TraitUpload = () => {
       </div>
       <Form {...form}>
         <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
             <FormField
               control={form.control}
               name="crop"
