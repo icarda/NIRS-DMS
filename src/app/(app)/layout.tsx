@@ -1,11 +1,7 @@
 import { AppSidebar } from "@/components/dashboard-sidebar";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function AuthLayout({
   children,
@@ -19,8 +15,8 @@ export default function AuthLayout({
         <Header title="Dashboard" />
         <div className="px-0 py-2 font-[family-name:var(--font-inter)] md:px-4">
           {children}
-          <Footer />
         </div>
+        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );
