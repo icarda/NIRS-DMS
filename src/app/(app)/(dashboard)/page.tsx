@@ -53,7 +53,7 @@ export default function Dashboard() {
           </Dialog>
         </div>
       </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Samples</CardTitle>
@@ -107,19 +107,19 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>Graph 1</CardTitle>
           </CardHeader>
           <CardContent>Graph 1</CardContent>
         </Card>
-        <Card className="col-span-2">
+        <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>Graph 2</CardTitle>
           </CardHeader>
           <CardContent>Graph 2</CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="col-span-1 md:col-span-3">
           <CardHeader>
             <CardTitle>Graph 3</CardTitle>
           </CardHeader>

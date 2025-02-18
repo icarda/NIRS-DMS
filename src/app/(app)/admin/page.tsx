@@ -25,49 +25,49 @@ export default function Admin() {
     <div>
       <Tabs defaultValue="users" className="w-full">
         <div className="border-b">
-          {/* <ScrollArea className="w-full"> */}
-          <TabsList className="flex h-12 justify-start">
-            <TabsTrigger
-              value="users"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              Users
-            </TabsTrigger>
-            <TabsTrigger
-              value="product_types"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              Product Types
-            </TabsTrigger>
-            <TabsTrigger
-              value="physiological_stages"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              Physiological Stages
-            </TabsTrigger>
-            <TabsTrigger
-              value="nir_models"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              NIR Models
-            </TabsTrigger>
-            <TabsTrigger
-              value="trials_metadata"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              Trials Metadata
-            </TabsTrigger>
-            <TabsTrigger
-              value="study_metadata"
-              className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
-            >
-              Study Metadata
-            </TabsTrigger>
-          </TabsList>
-          {/* <ScrollBar orientation="horizontal" />
-          </ScrollArea> */}
+          <ScrollArea className="w-full">
+            <TabsList className="inline-flex h-12 w-full items-center justify-start">
+              <TabsTrigger
+                value="users"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Users
+              </TabsTrigger>
+              <TabsTrigger
+                value="product_types"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Product Types
+              </TabsTrigger>
+              <TabsTrigger
+                value="physiological_stages"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Physiological Stages
+              </TabsTrigger>
+              <TabsTrigger
+                value="nir_models"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                NIR Models
+              </TabsTrigger>
+              <TabsTrigger
+                value="trials_metadata"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Trials Metadata
+              </TabsTrigger>
+              <TabsTrigger
+                value="study_metadata"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Study Metadata
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
-        <div>
+        <div className="px-2 md:px-0">
           <TabsContent value="users">
             <DataTable
               columns={userColumns}

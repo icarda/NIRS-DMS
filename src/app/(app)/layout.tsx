@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function AuthLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,9 +11,9 @@ export default function AuthLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="max-w-full">
         <Header title="Dashboard" />
-        <div className="px-0 py-2 font-[family-name:var(--font-inter)] md:px-4">
+        <div className="py-2 font-[family-name:var(--font-inter)] md:px-4">
           {children}
         </div>
         <Footer />

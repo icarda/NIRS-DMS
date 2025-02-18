@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { metadataDialog } from "@/lib/schemas";
 
 interface MetadataAddDialogProps {
@@ -39,6 +40,7 @@ interface MetadataAddDialogProps {
 }
 
 export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
+  const isMobile = useIsMobile();
   const form = useForm<z.infer<typeof metadataDialog>>({
     resolver: zodResolver(metadataDialog),
     defaultValues: {
@@ -60,9 +62,11 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
-          <span>
-            Add <span className="capitalize">{type}</span> Metadata
-          </span>
+          {!isMobile && (
+            <span>
+              Add <span className="capitalize">{type}</span> Metadata
+            </span>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

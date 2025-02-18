@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { crops } from "@/data/crops";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   stage: z
@@ -46,6 +47,7 @@ interface PhysiologicalStageDialogProps {
 }
 
 export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
+  const isMobile = useIsMobile();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,7 +66,7 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
-          Add Physiological Stage
+          {!isMobile && "Add Physiological Stage"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

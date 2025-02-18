@@ -1,7 +1,5 @@
 "use client";
 
-import { log } from "console";
-
 import { Database, FileUp, Home, Leaf, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

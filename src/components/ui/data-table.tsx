@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between py-2">
+      <div className="flex flex-col-reverse justify-between gap-2 py-2 sm:flex-row sm:items-center">
         {selectCrop && (
           <Select
             value={(table.getColumn("crop")?.getFilterValue() as string) ?? ""}

@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   name: z.string().min(2, "Model name must be at least 2 characters"),
@@ -44,6 +45,7 @@ interface NirModelAddDialogProps {
 }
 
 export function NirModelAddDialog({}: NirModelAddDialogProps) {
+  const isMobile = useIsMobile();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,7 +66,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
-          Add NIR Model
+          {!isMobile && "Add NIR Model"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

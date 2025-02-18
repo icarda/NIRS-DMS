@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { crops } from "@/data/crops";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   type: z
@@ -49,6 +50,8 @@ interface ProductTypeDialogProps {
 }
 
 export function ProductTypeAddDialog({}: ProductTypeDialogProps) {
+  const isMobile = useIsMobile();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,7 +70,7 @@ export function ProductTypeAddDialog({}: ProductTypeDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
-          Add Product Type
+          {!isMobile && "Add Product Type"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
