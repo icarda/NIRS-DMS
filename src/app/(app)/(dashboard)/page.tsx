@@ -21,7 +21,7 @@ import { FilterForm } from "./components/filter-form";
 
 export default function Dashboard() {
   return (
-    <div>
+    <div className="px-2 md:px-0">
       <div className="border-b">
         <div className="flex items-center justify-between">
           <Tabs defaultValue="overview">
