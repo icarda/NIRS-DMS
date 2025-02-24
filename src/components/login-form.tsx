@@ -110,7 +110,7 @@ export function LoginForm({
               />
               <FormSuccess message={success} />
               <FormError message={error} />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isPending}>
                 Login
               </Button>
               <div className="text-center text-sm">

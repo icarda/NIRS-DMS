@@ -1,3 +1,5 @@
+import { count } from "console";
+
 import {
   boolean,
   date,
@@ -5,41 +7,45 @@ import {
   foreignKey,
   integer,
   jsonb,
+  pgEnum,
   pgTable,
+  primaryKey,
   serial,
   text,
+  timestamp,
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
+import type { AdapterAccountType } from "next-auth/adapters";
 
-export const center = pgTable("center", {
+export const centers = pgTable("center", {
   centerId: serial("center_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   acronym: varchar("acronym", { length: 50 }).notNull().unique(),
 });
 
-export const qualityLab = pgTable("quality_lab", {
+export const qualityLabs = pgTable("quality_lab", {
   qualityLabId: serial("quality_lab_id").primaryKey(),
   centerId: integer("center_id")
     .notNull()
-    .references(() => center.centerId, { onDelete: "cascade" }),
+    .references(() => centers.centerId, { onDelete: "cascade" }),
   name: varchar("name", { length: 100 }).notNull().unique(),
   location: varchar("location", { length: 255 }),
   country: varchar("country", { length: 100 }),
 });
 
-export const crop = pgTable("crop", {
+export const crops = pgTable("crop", {
   cropId: serial("crop_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   cropImageUrl: varchar("crop_image_url", { length: 255 }),
   description: text("description"),
 });
 
-export const cropCommonName = pgTable("crop_common_name", {
+export const cropCommonNames = pgTable("crop_common_name", {
   commonNameId: serial("common_name_id").primaryKey(),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
   commonName: varchar("common_name", { length: 100 }).notNull().unique(),
 });
 
@@ -47,27 +53,27 @@ export const species = pgTable("species", {
   speciesId: serial("species_id").primaryKey(),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
   name: varchar("name", { length: 100 }).notNull().unique(),
 });
 
-export const productType = pgTable("product_type", {
+export const productTypes = pgTable("product_type", {
   productTypeId: serial("product_type_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
 });
 
-export const physiologicalStage = pgTable("physiological_stage", {
+export const physiologicalStages = pgTable("physiological_stage", {
   stageId: serial("stage_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
 });
 
-export const nirModel = pgTable("nir_model", {
+export const nirModels = pgTable("nir_model", {
   nirModelId: serial("nir_model_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   type: varchar("type", { length: 50 }),
@@ -76,7 +82,7 @@ export const nirModel = pgTable("nir_model", {
   manufacturer: varchar("manufacturer", { length: 100 }),
 });
 
-export const trial = pgTable("trial", {
+export const trials = pgTable("trial", {
   trialId: serial("trial_id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   plantingDate: date("planting_date"),
@@ -91,42 +97,42 @@ export const trial = pgTable("trial", {
     .references(() => species.speciesId, { onDelete: "cascade" }),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
 });
 
-export const trialFertilizer = pgTable("trial_fertilizer", {
+export const trialFertilizers = pgTable("trial_fertilizer", {
   trialFertilizerId: serial("trial_fertilizer_id").primaryKey(),
   trialId: integer("trial_id")
     .notNull()
-    .references(() => trial.trialId, { onDelete: "cascade" }),
+    .references(() => trials.trialId, { onDelete: "cascade" }),
   fertilizerType: varchar("fertilizer_type", { length: 100 }).notNull(),
   fertilizerAmount: doublePrecision("fertilizer_amount"),
 });
 
-export const study = pgTable(
+export const studies = pgTable(
   "study",
   {
     studyId: serial("study_id").primaryKey(),
     trialId: integer("trial_id")
       .notNull()
-      .references(() => trial.trialId, { onDelete: "cascade" }),
+      .references(() => trials.trialId, { onDelete: "cascade" }),
     studyCode: varchar("study_code", { length: 100 }).notNull(),
     productTypeId: integer("product_type_id")
       .notNull()
-      .references(() => productType.productTypeId, { onDelete: "cascade" }),
+      .references(() => productTypes.productTypeId, { onDelete: "cascade" }),
     nirModelId: integer("nir_model_id")
       .notNull()
-      .references(() => nirModel.nirModelId, { onDelete: "cascade" }),
+      .references(() => nirModels.nirModelId, { onDelete: "cascade" }),
     requesterName: varchar("requester_name", { length: 100 }),
     requesterEmail: varchar("requester_email", { length: 100 }),
     sampleDate: date("sample_date"),
     physiologicalStageId: integer("physiological_stage_id")
       .notNull()
-      .references(() => physiologicalStage.stageId, { onDelete: "cascade" }),
+      .references(() => physiologicalStages.stageId, { onDelete: "cascade" }),
     additionalMetadata: jsonb("additional_metadata").default({}),
     qualityLabId: integer("quality_lab_id")
       .notNull()
-      .references(() => qualityLab.qualityLabId, { onDelete: "cascade" }),
+      .references(() => qualityLabs.qualityLabId, { onDelete: "cascade" }),
   },
   (table) => [
     {
@@ -139,11 +145,11 @@ export const study = pgTable(
   ]
 );
 
-export const cropTrait = pgTable("crop_trait", {
+export const cropTraits = pgTable("crop_trait", {
   cropTraitId: serial("crop_trait_id").primaryKey(),
   cropId: integer("crop_id")
     .notNull()
-    .references(() => crop.cropId, { onDelete: "cascade" }),
+    .references(() => crops.cropId, { onDelete: "cascade" }),
   traitName: varchar("trait_name", { length: 100 }).notNull(),
   entity: varchar("entity", { length: 100 }),
   methodDescription: text("method_description"),
@@ -162,10 +168,10 @@ export const trait = pgTable(
     unit: varchar("unit", { length: 20 }),
     studyId: integer("study_id")
       .notNull()
-      .references(() => study.studyId, { onDelete: "cascade" }),
+      .references(() => studies.studyId, { onDelete: "cascade" }),
     cropTraitId: integer("crop_trait_id")
       .notNull()
-      .references(() => cropTrait.cropTraitId, { onDelete: "cascade" }),
+      .references(() => cropTraits.cropTraitId, { onDelete: "cascade" }),
     sampleId: integer("sample_id").notNull(),
   },
   (table) => [
@@ -184,7 +190,7 @@ export const nirsData = pgTable(
     nirsDataId: serial("nirs_data_id").primaryKey(),
     studyId: integer("study_id")
       .notNull()
-      .references(() => study.studyId, { onDelete: "cascade" }),
+      .references(() => studies.studyId, { onDelete: "cascade" }),
     sampleId: integer("sample_id").notNull(),
     gid: integer("gid").notNull(),
     plotId: integer("plot_id").notNull(),
@@ -196,6 +202,50 @@ export const nirsData = pgTable(
       sampleStudyFk: foreignKey({
         columns: [table.sampleId, table.studyId],
         foreignColumns: [trait.sampleId, trait.studyId],
+      }),
+    },
+  ]
+);
+
+export const roles = pgEnum("role", ["USER", "ADMIN", "SUPERADMIN"]);
+
+export const users = pgTable("user", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 100 }).notNull().unique(),
+  password: varchar("password", { length: 100 }).notNull(),
+  role: roles().notNull().default("USER"),
+  location: varchar("location", { length: 100 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  country: varchar("country", { length: 100 }).notNull(),
+  centerId: integer("center_id")
+    .notNull()
+    .references(() => centers.centerId),
+  position: varchar("position", { length: 100 }).notNull(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
+});
+
+export const accounts = pgTable(
+  "account",
+  {
+    userId: integer("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").$type<AdapterAccountType>().notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => [
+    {
+      compoundKey: primaryKey({
+        columns: [account.provider, account.providerAccountId],
       }),
     },
   ]

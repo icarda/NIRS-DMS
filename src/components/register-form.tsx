@@ -91,7 +91,11 @@ export function RegisterForm({
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Max" {...field} />
+                        <Input
+                          disabled={isPending}
+                          placeholder="Max"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -104,7 +108,11 @@ export function RegisterForm({
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Robinson" {...field} />
+                        <Input
+                          disabled={isPending}
+                          placeholder="Robinson"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -119,6 +127,7 @@ export function RegisterForm({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -144,7 +153,11 @@ export function RegisterForm({
                     <FormItem>
                       <FormLabel>Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="Location" {...field} />
+                        <Input
+                          disabled={isPending}
+                          placeholder="Location"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -160,6 +173,7 @@ export function RegisterForm({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isPending}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -187,6 +201,7 @@ export function RegisterForm({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isPending}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -213,6 +228,7 @@ export function RegisterForm({
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
+                        disabled={isPending}
                         type="email"
                         placeholder="m@example.com"
                         {...field}
@@ -229,7 +245,7 @@ export function RegisterForm({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input disabled={isPending} type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -237,7 +253,7 @@ export function RegisterForm({
               />
               <FormSuccess message={success} />
               <FormError message={error} />
-              <Button type="submit" className="w-full">
+              <Button disabled={isPending} type="submit" className="w-full">
                 Register
               </Button>
               <div className="mt-4 text-center text-sm">

@@ -5,7 +5,7 @@ import { env } from "@/data/env/server";
 import * as schema from "./schema";
 
 const globalForDrizzle = global as unknown as {
-  drizzle: ReturnType<typeof drizzle>;
+  drizzle: ReturnType<typeof drizzle<typeof schema>>;
 };
 
 const sql = postgres(env.DATABASE_URL);
