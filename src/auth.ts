@@ -4,7 +4,6 @@ import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import { db } from "@/drizzle/db";
 import { getUserByEmail } from "@/features/users/db/users";
-import { UserRole } from "./drizzle/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db),
@@ -17,7 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub;
       }
       if (token.role && session.user) {
-        session.user.role = token.role as UserRole;
+        session.user.role = token.role;
       }
       return session;
     },
