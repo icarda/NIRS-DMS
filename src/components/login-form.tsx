@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { login } from "@/actions/login";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,17 +24,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { login } from "@/features/auth/actions/login";
 import { loginSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -48,11 +46,9 @@ export function LoginForm({
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setError("");
-    setSuccess("");
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        setError(data?.error);
       });
     });
   }
@@ -108,7 +104,6 @@ export function LoginForm({
                   </FormItem>
                 )}
               />
-              <FormSuccess message={success} />
               <FormError message={error} />
               <Button type="submit" className="w-full" disabled={isPending}>
                 Login
@@ -127,7 +122,7 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4">
-        By clicking continue, you agree to our{" "}
+        By clicking Login, you agree to our{" "}
         <Link href="#" className="hover:text-primary">
           Terms of Service
         </Link>{" "}

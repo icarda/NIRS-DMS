@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { register } from "@/actions/register";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { FormError } from "./form-error";
@@ -269,6 +269,17 @@ export function RegisterForm({
           </Form>
         </CardContent>
       </Card>
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4">
+        By registering, you agree to our{" "}
+        <Link href="#" className="hover:text-primary">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="#" className="hover:text-primary">
+          Privacy Policy
+        </Link>
+        .
+      </div>
     </div>
   );
 }
