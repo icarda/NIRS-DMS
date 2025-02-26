@@ -1,44 +1,33 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
 
+import authConfig from "@/auth.config";
 import { db } from "@/drizzle/db";
 import { getUserByEmail } from "@/features/users/db/users";
-import { loginSchema } from "@/lib/schemas";
+import { UserRole } from "./drizzle/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db),
   session: {
     strategy: "jwt",
   },
-  providers: [
-    Credentials({
-      credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-        },
-      },
-      async authorize(credentials): Promise<any> {
-        const validatedFields = loginSchema.safeParse(credentials);
-        if (validatedFields.success) {
-          const { email, password } = validatedFields.data;
-          const user = await getUserByEmail(email);
-          if (!user) {
-            return null;
-          }
-          const passwordMatch = await bcrypt.compare(password, user.password);
-          if (passwordMatch) {
-            return user;
-          }
-        }
-        return null;
-      },
-    }),
-  ],
+  callbacks: {
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+      if (token.role && session.user) {
+        session.user.role = token.role as UserRole;
+      }
+      return session;
+    },
+    async jwt({ token }) {
+      if (!token.email) return token;
+      const user = await getUserByEmail(token.email);
+      if (!user) return token;
+      token.role = user.role;
+      return token;
+    },
+  },
+  ...authConfig,
 });

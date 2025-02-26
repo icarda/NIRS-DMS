@@ -1,4 +1,6 @@
-import { auth } from "./auth";
+import NextAuth from "next-auth";
+
+import authConfig from "./auth.config";
 import {
   apiAuthPrefix,
   authRoutes,
@@ -6,7 +8,10 @@ import {
   publicRoutes,
 } from "./features/auth/routes";
 
+const { auth } = NextAuth(authConfig);
+
 export default auth((req) => {
+  console.log(req.auth);
   const isLoggedin = !!req.auth;
   console.log("isLoggedin: ", isLoggedin);
   console.log("ROUTE: ", req.nextUrl.pathname);

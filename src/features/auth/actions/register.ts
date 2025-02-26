@@ -50,7 +50,7 @@ export async function register(values: z.infer<typeof registerSchema>) {
   }
 
   await db.insert(users).values({
-    centerId: userCenter.centerId!,
+    centerId: userCenter.centerId,
     country,
     email,
     firstName,

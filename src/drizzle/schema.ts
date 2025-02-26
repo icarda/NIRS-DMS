@@ -207,13 +207,15 @@ export const nirsData = pgTable(
   ]
 );
 
-export const roles = pgEnum("role", ["USER", "ADMIN", "SUPERADMIN"]);
+const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
+export const userRoles = pgEnum("role", roles);
+export type UserRole = (typeof roles)[number];
 
 export const users = pgTable("user", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 100 }).notNull().unique(),
   password: varchar("password", { length: 100 }).notNull(),
-  role: roles().notNull().default("USER"),
+  role: userRoles().notNull().default("USER"),
   location: varchar("location", { length: 100 }).notNull(),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
