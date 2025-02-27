@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useTransition } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { register } from "@/actions/register";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,44 +32,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
+import { FormError } from "./form-error";
+import { FormSuccess } from "./form-success";
 
 const countries = ["Morocco", "Lebanon", "Mexico"] as const;
 const centers = ["ICARDA", "CIMMYT"] as const;
 const positions = ["Engineer", "Researcher", "Associate"] as const;
 
-const passwordSchema = z
-  .string()
-  .min(8, { message: "Password must be at least 8 characters long" })
-  .max(128, { message: "Password must not exceed 128 characters" })
-  .regex(/[a-z]/, {
-    message: "Password must include at least one lowercase letter",
-  })
-  .regex(/[A-Z]/, {
-    message: "Password must include at least one uppercase letter",
-  })
-  .regex(/[0-9]/, { message: "Password must include at least one digit" })
-  .regex(/[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>/?]/, {
-    message: "Password must include at least one special character",
-  });
-
-const formSchema = z.object({
-  firstName: z.string().min(1, { message: "First Name is required" }),
-  lastName: z.string().min(1, { message: "Last Name is required" }),
-  country: z.enum(countries, { message: "Select a valid country" }),
-  location: z.string().min(1, { message: "Location is required" }),
-  center: z.enum(centers, { message: "Select a valid center" }),
-  position: z.enum(positions, { message: "Select a valid position" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: passwordSchema,
-});
-
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     mode: "onTouched",
     defaultValues: {
       firstName: "",
@@ -77,8 +60,15 @@ export function RegisterForm({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    setError("");
+    setSuccess("");
+    startTransition(() => {
+      register(values).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
+      });
+    });
   }
 
   return (
@@ -245,6 +235,8 @@ export function RegisterForm({
                   </FormItem>
                 )}
               />
+              <FormSuccess message={success} />
+              <FormError message={error} />
               <Button type="submit" className="w-full">
                 Register
               </Button>

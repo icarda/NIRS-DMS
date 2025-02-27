@@ -112,6 +112,40 @@ export const metadataDialog = z.object({
   maxValue: z.string(),
 });
 
+export const loginSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
+});
+
+const passwordSchema = z
+  .string()
+  .min(8, { message: "Password must be at least 8 characters long" })
+  .max(128, { message: "Password must not exceed 128 characters" })
+  .regex(/[a-z]/, {
+    message: "Password must include at least one lowercase letter",
+  })
+  .regex(/[A-Z]/, {
+    message: "Password must include at least one uppercase letter",
+  })
+  .regex(/[0-9]/, { message: "Password must include at least one digit" })
+  .regex(/[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>/?]/, {
+    message: "Password must include at least one special character",
+  });
+
+const countries = ["Morocco", "Lebanon", "Mexico"] as const;
+const centers = ["ICARDA", "CIMMYT"] as const;
+const positions = ["Engineer", "Researcher", "Associate"] as const;
+export const registerSchema = z.object({
+  firstName: z.string().min(1, { message: "First Name is required" }),
+  lastName: z.string().min(1, { message: "Last Name is required" }),
+  country: z.enum(countries, { message: "Select a valid country" }),
+  location: z.string().min(1, { message: "Location is required" }),
+  center: z.enum(centers, { message: "Select a valid center" }),
+  position: z.enum(positions, { message: "Select a valid position" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: passwordSchema,
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;

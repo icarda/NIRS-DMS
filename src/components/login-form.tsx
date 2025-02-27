@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useTransition } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { login } from "@/actions/login";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,19 +25,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { loginSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
-});
+import { FormError } from "./form-error";
+import { FormSuccess } from "./form-success";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     mode: "onTouched",
     defaultValues: {
       email: "",
@@ -42,8 +46,15 @@ export function LoginForm({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    setError("");
+    setSuccess("");
+    startTransition(() => {
+      login(values).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
+      });
+    });
   }
 
   return (
@@ -68,6 +79,7 @@ export function LoginForm({
                       <Input
                         type="email"
                         placeholder="m@example.com"
+                        disabled={isPending}
                         {...field}
                       />
                     </FormControl>
@@ -90,12 +102,14 @@ export function LoginForm({
                       </Link>
                     </div>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field} disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormSuccess message={success} />
+              <FormError message={error} />
               <Button type="submit" className="w-full">
                 Login
               </Button>
