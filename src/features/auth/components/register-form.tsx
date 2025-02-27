@@ -34,8 +34,8 @@ import {
 import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
+import { FormError } from "../../../components/form-error";
+import { FormSuccess } from "../../../components/form-success";
 
 const countries = ["Morocco", "Lebanon", "Mexico"] as const;
 const centers = ["ICARDA", "CIMMYT"] as const;

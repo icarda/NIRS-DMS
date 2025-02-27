@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/actions/login";
 import { loginSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { FormError } from "./form-error";
+import { FormError } from "../../../components/form-error";
 
 export function LoginForm({
   className,
