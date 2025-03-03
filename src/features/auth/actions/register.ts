@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
@@ -29,7 +30,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
     position,
   } = validatedFields.data;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = await bcrypt.genSalt(11);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   const existingUser = await getUserByEmail(email);
 
@@ -60,7 +62,5 @@ export async function register(values: z.infer<typeof registerSchema>) {
     position,
   });
 
-  return {
-    success: "User Created!",
-  };
+  redirect("/auth/signin");
 }

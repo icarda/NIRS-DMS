@@ -23,7 +23,7 @@ export function UserAvatar({ name, email }: UserAvatarProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="capitalize">
+            <AvatarFallback className="uppercase">
               {name.split(" ")[0][0] + name.split(" ")[1][0]}
             </AvatarFallback>
           </Avatar>
