@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
-import { centers, users } from "@/drizzle/schema";
+import { CenterTable, UserTable } from "@/drizzle/schema";
 import { getUserByEmail } from "@/features/users/db/users";
 import { registerSchema } from "@/lib/schemas";
 
@@ -41,8 +41,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
     };
   }
 
-  const userCenter = await db.query.centers.findFirst({
-    where: eq(centers.name, center),
+  const userCenter = await db.query.CenterTable.findFirst({
+    where: eq(CenterTable.name, center),
   });
 
   if (!userCenter) {
@@ -51,8 +51,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
     };
   }
 
-  await db.insert(users).values({
-    centerId: userCenter.centerId,
+  await db.insert(UserTable).values({
+    centerId: userCenter.id,
     country,
     email,
     firstName,
