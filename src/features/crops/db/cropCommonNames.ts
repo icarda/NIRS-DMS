@@ -8,16 +8,8 @@ import { getCropCommonNamesCropTag } from "./cache/cropCommonNames";
 export async function getCropCommonNames(cropId: number) {
   "use cache";
   cacheTag(getCropCommonNamesCropTag(cropId));
-  const crop = await db.query.CropTable.findFirst({
+  const cropCommonNames = await db.query.CropTable.findFirst({
     where: eq(CropTable.id, cropId),
-    with: {
-      commonNames: true,
-      species: true,
-      productTypes: true,
-      physiologicalStages: true,
-      trials: true,
-      cropTraits: true,
-    },
   });
-  return crop;
+  return cropCommonNames;
 }
