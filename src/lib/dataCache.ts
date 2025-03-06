@@ -11,6 +11,7 @@ type CACHE_TAG =
   | "trials"
   | "crops"
   | "nirsData"
+  | "nirModels"
   | "traits"
   | "qualityLabs"
   | "cropCommonNames"
