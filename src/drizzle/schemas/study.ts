@@ -41,9 +41,6 @@ export const StudyTable = pgTable(
     qualityLabId: integer("quality_lab_id")
       .notNull()
       .references(() => QualityLabTable.id, { onDelete: "cascade" }),
-    centerId: integer("center_id")
-      .notNull()
-      .references(() => CenterTable.id, { onDelete: "cascade" }),
     createdAt,
     updatedAt,
   },
@@ -108,10 +105,6 @@ export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   qualityLab: one(QualityLabTable, {
     fields: [StudyTable.qualityLabId],
     references: [QualityLabTable.id],
-  }),
-  center: one(CenterTable, {
-    fields: [StudyTable.centerId],
-    references: [CenterTable.id],
   }),
   traits: many(TraitTable),
   nirsData: many(NirsDataTable),

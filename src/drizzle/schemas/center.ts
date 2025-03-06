@@ -14,8 +14,7 @@ export const CenterTable = pgTable("center", {
   updatedAt,
 });
 
-export const centerRelations = relations(CenterTable, ({ one, many }) => ({
+export const centerRelations = relations(CenterTable, ({ many }) => ({
   qualityLabs: many(QualityLabTable),
   users: many(UserTable),
-  studies: many(StudyTable),
 }));
