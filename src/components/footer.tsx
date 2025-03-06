@@ -1,9 +1,9 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 
-export function Footer() {
+export async function Footer() {
+  await connection();
   const currentYear = new Date().getFullYear();
 
   return (
