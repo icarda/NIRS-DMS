@@ -179,7 +179,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
             </div>
 
             <DialogFooter>
-              <Button type="submit">Add Model</Button>
+              <Button type="submit">Add Metadata</Button>
             </DialogFooter>
           </form>
         </Form>
