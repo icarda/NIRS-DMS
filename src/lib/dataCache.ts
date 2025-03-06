@@ -1,8 +1,3 @@
-// lib/cache.ts
-import { cache } from "react";
-
-import { revalidateTag, unstable_cache } from "next/cache";
-
 export type ValidTags =
   | ReturnType<typeof getGlobalTag>
   | ReturnType<typeof getUserTag>
@@ -33,7 +28,7 @@ export function getUserTag(tag: CACHE_TAG, userId: number) {
   return `user:${userId}-${tag}` as const;
 }
 
-export function getIdTag(tag: CACHE_TAG, id: number) {
+export function getIdTag(tag: CACHE_TAG, id: number | string) {
   return `id:${id}-${tag}` as const;
 }
 
