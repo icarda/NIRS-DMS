@@ -22,9 +22,9 @@ export const TraitTable = pgTable(
     studyId: integer("study_id")
       .notNull()
       .references(() => StudyTable.id, { onDelete: "cascade" }),
-    cropTraitId: integer("crop_trait_id")
+    cropId: integer("crop_id")
       .notNull()
-      .references(() => CropTraitTable.id, { onDelete: "cascade" }),
+      .references(() => CropTable.id, { onDelete: "cascade" }),
     sampleId: integer("sample_id").notNull(),
     createdAt,
     updatedAt,
@@ -45,11 +45,11 @@ export const CropTraitTable = pgTable("crop_trait", {
     .notNull()
     .references(() => CropTable.id, { onDelete: "cascade" }),
   traitName: text("trait_name").notNull(),
-  entity: text("entity"),
+  entity: text("entity").notNull(),
   methodDescription: text("method_description"),
-  unit: text("unit"),
-  minimumAllowed: text("minimum_allowed"),
-  maximumAllowed: text("maximum_allowed"),
+  unit: text("unit").notNull(),
+  minimumAllowed: integer("minimum_allowed"),
+  maximumAllowed: integer("maximum_allowed"),
   createdAt,
   updatedAt,
 });
@@ -59,9 +59,9 @@ export const traitRelations = relations(TraitTable, ({ one }) => ({
     fields: [TraitTable.studyId],
     references: [StudyTable.id],
   }),
-  cropTrait: one(CropTraitTable, {
-    fields: [TraitTable.cropTraitId],
-    references: [CropTraitTable.id],
+  crop: one(CropTable, {
+    fields: [TraitTable.cropId],
+    references: [CropTable.id],
   }),
 }));
 
