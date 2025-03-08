@@ -43,7 +43,7 @@ export async function getCrops({ limit }: { limit?: number } = {}) {
 
 export async function insertCrop(
   data: typeof CropTable.$inferInsert,
-  commonNames?: (typeof CropCommonNameTable.$inferInsert)[]
+  commonNames?: Omit<typeof CropCommonNameTable.$inferInsert, "cropId">[]
 ) {
   const [newCrop] = await db
     .insert(CropTable)

@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import {
@@ -18,7 +17,6 @@ export async function createCenter(unsafeData: z.infer<typeof centerSchema>) {
   }
 
   await insertCenter(data);
-  redirect("/admin/centers");
 }
 
 export async function updateCenter(
@@ -32,7 +30,6 @@ export async function updateCenter(
   }
 
   await updateCenterDb({ id }, data);
-  redirect("/admin/centers");
 }
 
 export async function deleteCenter(id: number) {
