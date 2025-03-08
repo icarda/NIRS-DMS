@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/features/auth/actions/currentUser";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { UserAvatar } from "./user-avatar";
@@ -10,7 +10,7 @@ interface HeaderProps {
   title: string;
 }
 export async function Header({ title }: HeaderProps) {
-  const session = await auth();
+  const user = await getCurrentUser();
   return (
     <header className="flex h-16 items-center justify-between px-6">
       <div className="flex items-center gap-4">
@@ -19,8 +19,8 @@ export async function Header({ title }: HeaderProps) {
         <h1 className="text-2xl font-bold">{title}</h1>
       </div>
       <div className="flex items-center gap-4">
-        {session ? (
-          <UserAvatar name={session.user.name} email={session.user.email!} />
+        {user ? (
+          <UserAvatar name={user.name} email={user.email} />
         ) : (
           <>
             <Button variant="ghost" className="text-base md:text-sm" asChild>

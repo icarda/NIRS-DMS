@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { db } from "@/drizzle/db";
 import { CenterTable, UserTable } from "@/drizzle/schema";
-import { getUserByEmail } from "@/features/users/db/users";
+import { getUserByEmail, insertUser } from "@/features/users/db/users";
 import { registerSchema } from "@/lib/schemas";
 
 export async function register(values: z.infer<typeof registerSchema>) {
@@ -51,7 +51,7 @@ export async function register(values: z.infer<typeof registerSchema>) {
     };
   }
 
-  await db.insert(UserTable).values({
+  await insertUser({
     centerId: userCenter.id,
     country,
     email,

@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/features/auth/actions/currentUser";
 import { ClientSidebar } from "./client-sidebar";
 
 export async function AppSidebar() {
-  const session = await auth();
-  const isAuthenticated = !!session;
+  const user = await getCurrentUser();
+  const isAuthenticated = !!user;
 
   return <ClientSidebar isAuthenticated={isAuthenticated} />;
 }

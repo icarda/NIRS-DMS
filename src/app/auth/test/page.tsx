@@ -1,11 +1,9 @@
-import React from "react";
-
-import { auth } from "@/auth";
+import { getCurrentUser } from "@/features/auth/actions/currentUser";
 
 async function AuthTest() {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  return <div>{JSON.stringify(session, null, 2)}</div>;
+  return <div>{JSON.stringify(user, null, 2)}</div>;
 }
 
 export default AuthTest;
