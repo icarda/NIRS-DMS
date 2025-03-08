@@ -1,15 +1,13 @@
 "use server";
 
-import { z } from "zod";
-
 import {
   deleteCenter as deleteCenterDb,
   insertCenter,
   updateCenter as updateCenterDb,
 } from "../db/center";
-import { centerSchema } from "../schemas/center";
+import { CenterSchema, centerSchema } from "../schemas/center";
 
-export async function createCenter(unsafeData: z.infer<typeof centerSchema>) {
+export async function createCenter(unsafeData: CenterSchema) {
   const { success, data } = centerSchema.safeParse(unsafeData);
 
   if (!success) {
@@ -19,10 +17,7 @@ export async function createCenter(unsafeData: z.infer<typeof centerSchema>) {
   await insertCenter(data);
 }
 
-export async function updateCenter(
-  id: number,
-  unsafeData: z.infer<typeof centerSchema>
-) {
+export async function updateCenter(id: number, unsafeData: CenterSchema) {
   const { success, data } = centerSchema.safeParse(unsafeData);
 
   if (!success) {

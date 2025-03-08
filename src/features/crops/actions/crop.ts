@@ -1,15 +1,13 @@
 "use server";
 
-import { z } from "zod";
-
 import {
   deleteCrop as deleteCropDb,
   insertCrop,
   updateCrop as updateCropDb,
 } from "../db/crop";
-import { cropSchema } from "../schemas/crop";
+import { CropSchema, cropSchema } from "../schemas/crop";
 
-export async function createCrop(unsafeData: z.infer<typeof cropSchema>) {
+export async function createCrop(unsafeData: CropSchema) {
   const { success, data } = cropSchema.safeParse(unsafeData);
 
   if (!success) {
@@ -20,10 +18,7 @@ export async function createCrop(unsafeData: z.infer<typeof cropSchema>) {
   await insertCrop(cropData, commonNames);
 }
 
-export async function updateCrop(
-  id: number,
-  unsafeData: z.infer<typeof cropSchema>
-) {
+export async function updateCrop(id: number, unsafeData: CropSchema) {
   const { success, data } = cropSchema.safeParse(unsafeData);
 
   if (!success) {
