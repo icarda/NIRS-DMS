@@ -15,6 +15,7 @@ export const TraitTable = pgTable(
   "trait",
   {
     id,
+    traitName: text("trait_name").notNull(),
     measuredValue: doublePrecision("measured_value"),
     predictedValue: doublePrecision("predicted_value"),
     year: integer("year").notNull(),
