@@ -12,7 +12,8 @@ export async function login(values: z.infer<typeof loginSchema>) {
 
   if (!validatedFields.success) {
     return {
-      error: "Invalid fields",
+      error: true,
+      message: "Invalid fields!",
     };
   }
 
@@ -29,11 +30,13 @@ export async function login(values: z.infer<typeof loginSchema>) {
       switch (error.type) {
         case "CredentialsSignin":
           return {
-            error: "Invalid credentials!",
+            error: true,
+            message: "Invalid credentials!",
           };
         default:
           return {
-            error: "Something went wrong!",
+            error: true,
+            message: "Something went wrong!",
           };
       }
     }

@@ -1,6 +1,5 @@
 "use client";
 
-import { signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "../features/auth/components/logout-button";
 import { Avatar, AvatarFallback } from "./ui/avatar";

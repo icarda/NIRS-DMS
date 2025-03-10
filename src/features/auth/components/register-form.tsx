@@ -35,7 +35,6 @@ import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { FormError } from "../../../components/form-error";
-import { FormSuccess } from "../../../components/form-success";
 
 const countries = ["Morocco", "Lebanon", "Mexico"] as const;
 const centers = ["ICARDA", "CIMMYT"] as const;
@@ -46,7 +45,6 @@ export function RegisterForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -62,11 +60,9 @@ export function RegisterForm({
 
   async function onSubmit(values: z.infer<typeof registerSchema>) {
     setError("");
-    setSuccess("");
     startTransition(() => {
       register(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        setError(data.message);
       });
     });
   }
@@ -251,7 +247,6 @@ export function RegisterForm({
                   </FormItem>
                 )}
               />
-              <FormSuccess message={success} />
               <FormError message={error} />
               <Button disabled={isPending} type="submit" className="w-full">
                 Register

@@ -1,5 +1,7 @@
 "use server";
 
+import { error } from "console";
+
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -15,7 +17,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
 
   if (!validatedFields.success) {
     return {
-      error: "Invalid fields",
+      error: true,
+      message: "Invalid fields",
     };
   }
 
@@ -37,7 +40,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
 
   if (existingUser) {
     return {
-      error: "User already exists",
+      error: true,
+      message: "User already exists",
     };
   }
 
@@ -47,7 +51,8 @@ export async function register(values: z.infer<typeof registerSchema>) {
 
   if (!userCenter) {
     return {
-      error: "Center does not exist",
+      error: true,
+      message: "Center does not exist",
     };
   }
 
