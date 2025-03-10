@@ -39,7 +39,7 @@ export async function getTrials({ limit }: { limit?: number } = {}) {
 
 export async function insertTrial(
   data: typeof TrialTable.$inferInsert,
-  fertilizers?: (typeof TrialFertilizerTable.$inferInsert)[]
+  fertilizers?: Omit<typeof TrialFertilizerTable.$inferInsert, "trialId">[]
 ) {
   const [newTrial] = await db
     .insert(TrialTable)
