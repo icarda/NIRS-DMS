@@ -7,10 +7,10 @@ import { StudyTable } from "./study";
 export const NirModelTable = pgTable("nir_model", {
   id,
   name: text("name").notNull().unique(),
-  type: text("type"),
-  wavelengthRange: text("wavelength_range"),
-  resolution: text("resolution"),
-  manufacturer: text("manufacturer"),
+  type: text("type").notNull(),
+  wavelengthRange: text("wavelength_range").notNull(),
+  resolution: text("resolution").notNull(),
+  manufacturer: text("manufacturer").notNull(),
   createdAt,
   updatedAt,
 });

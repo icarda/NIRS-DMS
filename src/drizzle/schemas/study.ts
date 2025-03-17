@@ -31,9 +31,9 @@ export const StudyTable = pgTable(
     nirModelId: integer("nir_model_id")
       .notNull()
       .references(() => NirModelTable.id, { onDelete: "cascade" }),
-    requesterName: text("requester_name"),
-    requesterEmail: text("requester_email"),
-    sampleDate: date("sample_date"),
+    requesterName: text("requester_name").notNull(),
+    requesterEmail: text("requester_email").notNull(),
+    sampleDate: date("sample_date").notNull(),
     physiologicalStageId: integer("physiological_stage_id")
       .notNull()
       .references(() => PhysiologicalStageTable.id, { onDelete: "cascade" }),

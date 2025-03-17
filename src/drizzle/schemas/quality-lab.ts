@@ -11,8 +11,8 @@ export const QualityLabTable = pgTable("quality_lab", {
     .notNull()
     .references(() => CenterTable.id, { onDelete: "cascade" }),
   name: text("name").notNull().unique(),
-  location: text("location"),
-  country: text("country"),
+  location: text("location").notNull(),
+  country: text("country").notNull(),
   createdAt,
   updatedAt,
 });
