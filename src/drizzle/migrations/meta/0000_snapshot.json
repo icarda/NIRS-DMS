@@ -1,5 +1,5 @@
 {
-  "id": "350fbddd-12bc-4a21-b149-f9fb7cee153f",
+  "id": "4dfff85d-d890-45ef-8ed2-7cd2096c02e4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -796,7 +796,7 @@
           "name": "entity",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "method_description": {
           "name": "method_description",
@@ -808,17 +808,17 @@
           "name": "unit",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "minimum_allowed": {
           "name": "minimum_allowed",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
         "maximum_allowed": {
           "name": "maximum_allowed",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -869,6 +869,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "trait_name": {
+          "name": "trait_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "measured_value": {
           "name": "measured_value",
           "type": "double precision",
@@ -899,8 +905,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "crop_trait_id": {
-          "name": "crop_trait_id",
+        "crop_id": {
+          "name": "crop_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -941,12 +947,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "trait_crop_trait_id_crop_trait_id_fk": {
-          "name": "trait_crop_trait_id_crop_trait_id_fk",
+        "trait_crop_id_crop_id_fk": {
+          "name": "trait_crop_id_crop_id_fk",
           "tableFrom": "trait",
-          "tableTo": "crop_trait",
+          "tableTo": "crop",
           "columnsFrom": [
-            "crop_trait_id"
+            "crop_id"
           ],
           "columnsTo": [
             "id"

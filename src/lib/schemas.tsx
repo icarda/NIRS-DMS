@@ -21,7 +21,7 @@ export const trialFormSchema = z.object({
     .string()
     .min(1, "Coordinates are required")
     .regex(
-      /^-?\d+\.?\d*,\s-?\d+\.?\d*$/,
+      /^-?\d+\.\d*,\s-?\d+\.\d*$/,
       "Invalid coordinates format. Use lat, lon (e.g., 33.2315, -8.1515)"
     ),
   irrigation: z.boolean(),

@@ -108,23 +108,24 @@ CREATE TABLE "crop_trait" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"crop_id" integer NOT NULL,
 	"trait_name" text NOT NULL,
-	"entity" text,
+	"entity" text NOT NULL,
 	"method_description" text,
-	"unit" text,
-	"minimum_allowed" text,
-	"maximum_allowed" text,
+	"unit" text NOT NULL,
+	"minimum_allowed" integer,
+	"maximum_allowed" integer,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "trait" (
 	"id" serial PRIMARY KEY NOT NULL,
+	"trait_name" text NOT NULL,
 	"measured_value" double precision,
 	"predicted_value" double precision,
 	"year" integer NOT NULL,
 	"unit" text,
 	"study_id" integer NOT NULL,
-	"crop_trait_id" integer NOT NULL,
+	"crop_id" integer NOT NULL,
 	"sample_id" integer NOT NULL,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
@@ -199,7 +200,7 @@ ALTER TABLE "study" ADD CONSTRAINT "study_physiological_stage_id_physiological_s
 ALTER TABLE "study" ADD CONSTRAINT "study_quality_lab_id_quality_lab_id_fk" FOREIGN KEY ("quality_lab_id") REFERENCES "public"."quality_lab"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crop_trait" ADD CONSTRAINT "crop_trait_crop_id_crop_id_fk" FOREIGN KEY ("crop_id") REFERENCES "public"."crop"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trait" ADD CONSTRAINT "trait_study_id_study_id_fk" FOREIGN KEY ("study_id") REFERENCES "public"."study"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "trait" ADD CONSTRAINT "trait_crop_trait_id_crop_trait_id_fk" FOREIGN KEY ("crop_trait_id") REFERENCES "public"."crop_trait"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "trait" ADD CONSTRAINT "trait_crop_id_crop_id_fk" FOREIGN KEY ("crop_id") REFERENCES "public"."crop"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trial_fertilizer" ADD CONSTRAINT "trial_fertilizer_trial_id_trial_id_fk" FOREIGN KEY ("trial_id") REFERENCES "public"."trial"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trial" ADD CONSTRAINT "trial_species_id_species_id_fk" FOREIGN KEY ("species_id") REFERENCES "public"."species"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trial" ADD CONSTRAINT "trial_crop_id_crop_id_fk" FOREIGN KEY ("crop_id") REFERENCES "public"."crop"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
