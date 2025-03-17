@@ -122,7 +122,7 @@ CREATE TABLE "trait" (
 	"measured_value" double precision NOT NULL,
 	"predicted_value" double precision,
 	"year" integer NOT NULL,
-	"unit" text,
+	"unit" text NOT NULL,
 	"study_id" integer NOT NULL,
 	"crop_id" integer NOT NULL,
 	"sample_id" integer NOT NULL,

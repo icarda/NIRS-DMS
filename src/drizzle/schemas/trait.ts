@@ -19,7 +19,7 @@ export const TraitTable = pgTable(
     measuredValue: doublePrecision("measured_value").notNull(),
     predictedValue: doublePrecision("predicted_value"),
     year: integer("year").notNull(),
-    unit: text("unit"),
+    unit: text("unit").notNull(),
     studyId: integer("study_id")
       .notNull()
       .references(() => StudyTable.id, { onDelete: "cascade" }),

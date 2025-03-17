@@ -1,5 +1,5 @@
 {
-  "id": "1ac143ff-9e49-4137-97d5-235c03ae308f",
+  "id": "b5da34ac-627d-4f8a-86b9-47ba23e97c72",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -890,7 +890,7 @@
           "name": "unit",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "study_id": {
           "name": "study_id",
