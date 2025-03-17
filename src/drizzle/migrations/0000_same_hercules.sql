@@ -5,7 +5,6 @@ CREATE TABLE "center" (
 	"acronym" text NOT NULL,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "center_name_unique" UNIQUE("name"),
 	CONSTRAINT "center_acronym_unique" UNIQUE("acronym")
 );
 --> statement-breakpoint
@@ -31,10 +30,10 @@ CREATE TABLE "crop" (
 CREATE TABLE "nir_model" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"type" text,
-	"wavelength_range" text,
-	"resolution" text,
-	"manufacturer" text,
+	"type" text NOT NULL,
+	"wavelength_range" text NOT NULL,
+	"resolution" text NOT NULL,
+	"manufacturer" text NOT NULL,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "nir_model_name_unique" UNIQUE("name")
@@ -54,8 +53,8 @@ CREATE TABLE "quality_lab" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"center_id" integer NOT NULL,
 	"name" text NOT NULL,
-	"location" text,
-	"country" text,
+	"location" text NOT NULL,
+	"country" text NOT NULL,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "quality_lab_name_unique" UNIQUE("name")
@@ -94,9 +93,9 @@ CREATE TABLE "study" (
 	"study_code" text NOT NULL,
 	"product_type_id" integer NOT NULL,
 	"nir_model_id" integer NOT NULL,
-	"requester_name" text,
-	"requester_email" text,
-	"sample_date" date,
+	"requester_name" text NOT NULL,
+	"requester_email" text NOT NULL,
+	"sample_date" date NOT NULL,
 	"physiological_stage_id" integer NOT NULL,
 	"additional_metadata" jsonb DEFAULT '{}'::jsonb,
 	"quality_lab_id" integer NOT NULL,
@@ -120,7 +119,7 @@ CREATE TABLE "crop_trait" (
 CREATE TABLE "trait" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"trait_name" text NOT NULL,
-	"measured_value" double precision,
+	"measured_value" double precision NOT NULL,
 	"predicted_value" double precision,
 	"year" integer NOT NULL,
 	"unit" text,
@@ -135,7 +134,7 @@ CREATE TABLE "trial_fertilizer" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"trial_id" integer NOT NULL,
 	"fertilizer_type" text NOT NULL,
-	"fertilizer_amount" double precision,
+	"fertilizer_amount" double precision NOT NULL,
 	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -143,12 +142,12 @@ CREATE TABLE "trial_fertilizer" (
 CREATE TABLE "trial" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"planting_date" date,
-	"soil_type" text,
-	"irrigation" boolean,
-	"location" text,
-	"latitude" double precision,
-	"longitude" double precision,
+	"planting_date" date NOT NULL,
+	"soil_type" text NOT NULL,
+	"irrigation" boolean NOT NULL,
+	"location" text NOT NULL,
+	"latitude" double precision NOT NULL,
+	"longitude" double precision NOT NULL,
 	"additional_metadata" jsonb DEFAULT '{}'::jsonb,
 	"species_id" integer NOT NULL,
 	"crop_id" integer NOT NULL,
