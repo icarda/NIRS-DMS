@@ -46,7 +46,7 @@ export async function register(values: z.infer<typeof registerSchema>) {
   }
 
   const userCenter = await db.query.CenterTable.findFirst({
-    where: eq(CenterTable.name, center),
+    where: eq(CenterTable.acronym, center),
   });
 
   if (!userCenter) {
