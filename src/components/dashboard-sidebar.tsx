@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/features/auth/actions/currentUser";
+import { getCurrentUser } from "@/lib/currentUser";
 import { ClientSidebar } from "./client-sidebar";
 
 export async function AppSidebar() {

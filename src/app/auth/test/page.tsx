@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/features/auth/actions/currentUser";
+import { getCurrentUser } from "@/lib/currentUser";
 
 async function AuthTest() {
   const user = await getCurrentUser();

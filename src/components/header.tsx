@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/features/auth/actions/currentUser";
+import { getCurrentUser } from "@/lib/currentUser";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { UserAvatar } from "./user-avatar";
