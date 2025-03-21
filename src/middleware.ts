@@ -14,9 +14,12 @@ export default auth((req) => {
   const isLoggedin = !!req.auth;
 
   const isApiAuthRoute = req.nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.some((route) =>
-    req.nextUrl.pathname.startsWith(route)
-  );
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === "/") {
+      return req.nextUrl.pathname === "/";
+    }
+    return req.nextUrl.pathname.startsWith(route);
+  });
   const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
 
   if (isApiAuthRoute) {
