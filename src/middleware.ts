@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import {
   apiAuthPrefix,
+  apiPrefix,
   authRoutes,
   DEFAULT_LOGIN_REDIRECT,
   publicRoutes,
@@ -21,8 +22,16 @@ export default auth((req) => {
     return req.nextUrl.pathname.startsWith(route);
   });
   const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
+  const isApiRoute = req.nextUrl.pathname.startsWith(apiPrefix);
 
   if (isApiAuthRoute) {
+    return;
+  }
+
+  if (isApiRoute) {
+    if (!isLoggedin) {
+      return Response.json("Unauthorized", { status: 401 });
+    }
     return;
   }
 

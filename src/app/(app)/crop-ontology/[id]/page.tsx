@@ -74,7 +74,6 @@ export default function CropPage({
 
   function onSubmit(values: z.infer<typeof traitSchema>) {
     console.log(values);
-    // Handle form submission here
   }
 
   return (

@@ -111,7 +111,6 @@ export const columns: ColumnDef<ColumnSchema>[] = [
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
-      console.log(rowValue, value);
       if (isArrayOfDates(value) && rowValue instanceof Date) {
         if (value.length === 1) {
           return isSameDay(value[0], rowValue);
