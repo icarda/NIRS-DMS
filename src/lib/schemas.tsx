@@ -65,10 +65,10 @@ export const uploadFormSchema = z.object({
     )
     .refine(
       (file) => {
-        const MAX_SIZE_5MB = 5 * 1024 * 1024;
-        return file.size <= MAX_SIZE_5MB;
+        const MAX_SIZE_50MB = 50 * 1024 * 1024;
+        return file.size <= MAX_SIZE_50MB;
       },
-      { message: "File size must be less than 5MB" }
+      { message: "File size must be less than 50MB" }
     )
     .nullable(),
 });
@@ -94,10 +94,10 @@ export const traitUploadSchema = z.object({
     )
     .refine(
       (file) => {
-        const MAX_SIZE_5MB = 5 * 1024 * 1024;
-        return file.size <= MAX_SIZE_5MB;
+        const MAX_SIZE_50MB = 50 * 1024 * 1024;
+        return file.size <= MAX_SIZE_50MB;
       },
-      { message: "File size must be less than 5MB" }
+      { message: "File size must be less than 50MB" }
     )
     .nullable(),
 });
