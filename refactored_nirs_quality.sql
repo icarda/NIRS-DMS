@@ -173,7 +173,7 @@ CREATE TABLE study (
 CREATE TABLE trait (
   id SERIAL PRIMARY KEY NOT NULL,
   trait_name TEXT NOT NULL,
-  measured_value DOUBLE PRECISION NOT NULL,
+  measured_value DOUBLE PRECISION,
   predicted_value DOUBLE PRECISION,
   year INT NOT NULL,
   unit TEXT NOT NULL,

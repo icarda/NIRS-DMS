@@ -15,24 +15,21 @@ export const trialFormSchema = z.object({
   }),
   crop: z.string().min(1, "Crop is required"),
   species: z.string().min(1, "Species is required"),
-  soilType: z.string().min(1, "Soil type is required"),
+  soilType: z.string(),
   location: z.string().min(1, "Location is required"),
   coordinates: z
     .string()
-    .min(1, "Coordinates are required")
     .regex(
       /^-?\d+\.\d*,\s-?\d+\.\d*$/,
       "Invalid coordinates format. Use lat, lon (e.g., 33.2315, -8.1515)"
     ),
-  irrigation: z.boolean(),
-  fertilizers: z
-    .array(
-      z.object({
-        type: z.string().min(1, "Fertilizer type is required"),
-        amount: z.number().min(0, "Amount must be a positive number"),
-      })
-    )
-    .min(1, "At least one fertilizer entry is required"),
+  irrigation: z.boolean().optional(),
+  fertilizers: z.array(
+    z.object({
+      type: z.string().min(1, "Fertilizer type is required"),
+      amount: z.number().min(0, "Amount must be a positive number"),
+    })
+  ),
 });
 
 export const studyFormSchema = z.object({
@@ -44,8 +41,8 @@ export const studyFormSchema = z.object({
     required_error: "Sample date is required",
   }),
   program: z.string().min(1, "Program is required"),
-  requesterName: z.string().min(1, "Requester name is required"),
-  requesterEmail: z.string().email("Invalid email address"),
+  requesterName: z.string().optional(),
+  requesterEmail: z.string().email("Invalid email address").optional(),
 });
 
 export const uploadFormSchema = z.object({
