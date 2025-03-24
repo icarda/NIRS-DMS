@@ -70,8 +70,7 @@ export const uploadFormSchema = z.object({
         return file.size <= MAX_SIZE_50MB;
       },
       { message: "File size must be less than 50MB" }
-    )
-    .nullable(),
+    ),
 });
 
 export const traitUploadSchema = z.object({

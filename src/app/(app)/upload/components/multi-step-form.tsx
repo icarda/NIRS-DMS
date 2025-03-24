@@ -43,7 +43,6 @@ const MultiStepForm = () => {
       program: "",
       requesterName: "",
       requesterEmail: "",
-      file: null,
     },
   });
 
