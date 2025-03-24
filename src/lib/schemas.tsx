@@ -45,8 +45,9 @@ export const studyFormSchema = z.object({
   requesterName: z.string().optional(),
   requesterEmail: z
     .string()
-    .transform((val) => (val === "" ? undefined : val))
-    .pipe(z.string().email("Invalid email address").optional()),
+    .email("Please enter a valid email address")
+    .optional()
+    .or(z.literal("")),
 });
 
 export const uploadFormSchema = z.object({

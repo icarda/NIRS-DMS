@@ -41,6 +41,8 @@ const MultiStepForm = () => {
       nirModel: "",
       physiologicalStage: "",
       program: "",
+      sampleDate: undefined,
+      trialPlantingDate: undefined,
       requesterName: "",
       requesterEmail: "",
     },
