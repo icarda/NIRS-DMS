@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
   MultiFormData,
   studyFormSchema,
@@ -49,7 +50,39 @@ const MultiStepForm = () => {
   });
 
   const onSubmit = async (data: MultiFormData) => {
-    console.log(data);
+    if (!data.file) {
+      form.setError("file", { message: "File is required for submission." });
+      alert("Error: File is required. Please select a file to upload.");
+      setStep(3);
+      return;
+    }
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === "file" && value instanceof File) {
+        formData.append(key, value);
+      } else if (key === "fertilizers" && Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (value instanceof Date) {
+        formData.append(key, value.toISOString());
+      } else if (typeof value === "boolean") {
+        formData.append(key, String(value));
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const result = await uploadNirsData(formData);
+
+    if (result.error) {
+      // Handle error
+      alert(`Error: ${result.message}`);
+    } else {
+      alert(`Success: ${result.message}`);
+      setStep(1);
+      form.reset();
+    }
+
     setStep(1);
     form.reset();
   };
@@ -100,7 +133,12 @@ const MultiStepForm = () => {
 
         <div className="mt-8 flex justify-between">
           {step > 1 && (
-            <Button type="button" variant="outline" onClick={prevStep}>
+            <Button
+              type="button"
+              disabled={form.formState.isSubmitting}
+              variant="outline"
+              onClick={prevStep}
+            >
               Previous
             </Button>
           )}
@@ -109,8 +147,12 @@ const MultiStepForm = () => {
               Next
             </Button>
           ) : (
-            <Button type="submit" className="ml-auto">
-              Submit
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="ml-auto"
+            >
+              {form.formState.isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           )}
         </div>

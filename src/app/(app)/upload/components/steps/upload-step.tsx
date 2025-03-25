@@ -36,12 +36,6 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
     setPreview(null);
   };
 
-  console.log(
-    form.getValues("trial") +
-      form.getValues("crop") +
-      new Date(form.getValues("trialPlantingDate")).toLocaleDateString("en-US")
-  );
-
   return (
     <div className="space-y-8">
       <div className="space-y-2">
