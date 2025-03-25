@@ -23,7 +23,8 @@ export const trialFormSchema = z.object({
     .regex(
       /^-?\d+\.\d*,\s-?\d+\.\d*$/,
       "Invalid coordinates format. Use lat, lon (e.g., 33.2315, -8.1515)"
-    ),
+    )
+    .or(z.literal("")),
   irrigation: z.boolean().optional(),
   fertilizers: z.array(
     z.object({
@@ -102,6 +103,10 @@ export const traitUploadSchema = z.object({
     )
     .nullable(),
 });
+
+export const multiStepFormSchema = trialFormSchema
+  .merge(studyFormSchema)
+  .merge(uploadFormSchema);
 
 export const metadataDialog = z.object({
   id: z.number(),

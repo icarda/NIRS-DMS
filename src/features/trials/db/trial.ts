@@ -29,8 +29,9 @@ export async function getTrials({ limit }: { limit?: number } = {}) {
   const trials = await db.query.TrialTable.findMany({
     limit,
     with: {
-      crop: true,
-      species: true,
+      crop: {
+        with: { species: true },
+      },
       fertilizers: true,
     },
   });
