@@ -4,9 +4,11 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
+  MultiFormData,
   StudyFormData,
   studyFormSchema,
   TrialFormData,
@@ -14,24 +16,21 @@ import {
   UploadFormData,
   uploadFormSchema,
 } from "@/lib/schemas";
+import { validateCurrentStep } from "@/lib/validations";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
 
-type FormData = TrialFormData & StudyFormData & UploadFormData;
+const formSchema = trialFormSchema
+  .merge(studyFormSchema)
+  .merge(uploadFormSchema);
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
 
-  const form = useForm<FormData>({
+  const form = useForm<MultiFormData>({
     mode: "onTouched",
-    resolver: zodResolver(
-      step === 1
-        ? trialFormSchema
-        : step === 2
-          ? studyFormSchema
-          : uploadFormSchema
-    ),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       useExistingTrial: false,
       trial: "",
@@ -52,16 +51,25 @@ const MultiStepForm = () => {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: MultiFormData) => {
+    console.log(data);
     setStep(1);
     form.reset();
   };
 
   const nextStep = async () => {
-    // Trigger validation for current step
-    const isValid = await form.trigger();
+    const isStepValid = await validateCurrentStep(step, form);
+    if (!isStepValid) {
+      const fieldsToValidate =
+        step === 1
+          ? Object.keys(trialFormSchema.shape)
+          : step === 2
+            ? Object.keys(studyFormSchema.shape)
+            : Object.keys(uploadFormSchema.shape);
 
-    if (!isValid) return;
+      await form.trigger(fieldsToValidate as any);
+      return;
+    }
 
     setStep((prev) => prev + 1);
   };

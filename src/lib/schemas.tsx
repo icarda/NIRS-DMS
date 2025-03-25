@@ -12,6 +12,7 @@ export const trialFormSchema = z.object({
   trial: z.string().min(1, "Trial is required"),
   trialPlantingDate: z.date({
     required_error: "Trial planting date is required",
+    invalid_type_error: "Trial planting date is required",
   }),
   crop: z.string().min(1, "Crop is required"),
   species: z.string().min(1, "Species is required"),
@@ -42,7 +43,10 @@ export const studyFormSchema = z.object({
   }),
   program: z.string().min(1, "Program is required"),
   requesterName: z.string().optional(),
-  requesterEmail: z.string().email("Invalid email address").optional(),
+  requesterEmail: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().email("Invalid email address").optional()),
 });
 
 export const uploadFormSchema = z.object({
@@ -146,4 +150,5 @@ export const registerSchema = z.object({
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;
+export type MultiFormData = TrialFormData & StudyFormData & UploadFormData;
 export type TraitUploadFormData = z.infer<typeof traitUploadSchema>;
