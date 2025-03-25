@@ -27,7 +27,7 @@ export const trialFormSchema = z.object({
   irrigation: z.boolean().optional(),
   fertilizers: z.array(
     z.object({
-      type: z.string().min(1, "Fertilizer type is required"),
+      type: z.string().min(0, "Fertilizer type is required"),
       amount: z.number().min(0, "Amount must be a positive number"),
     })
   ),

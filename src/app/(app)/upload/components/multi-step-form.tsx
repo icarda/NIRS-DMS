@@ -4,19 +4,14 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
   MultiFormData,
-  StudyFormData,
   studyFormSchema,
-  TrialFormData,
   trialFormSchema,
-  UploadFormData,
   uploadFormSchema,
 } from "@/lib/schemas";
-import { validateCurrentStep } from "@/lib/validations";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
@@ -48,6 +43,7 @@ const MultiStepForm = () => {
       program: "",
       requesterName: "",
       requesterEmail: "",
+      file: null,
     },
   });
 
@@ -58,20 +54,9 @@ const MultiStepForm = () => {
   };
 
   const nextStep = async () => {
-    const isStepValid = await validateCurrentStep(step, form);
-    if (!isStepValid) {
-      const fieldsToValidate =
-        step === 1
-          ? Object.keys(trialFormSchema.shape)
-          : step === 2
-            ? Object.keys(studyFormSchema.shape)
-            : Object.keys(uploadFormSchema.shape);
-
-      await form.trigger(fieldsToValidate as any);
-      return;
-    }
-
-    setStep((prev) => prev + 1);
+    const currentSchema = step === 1 ? trialFormSchema : studyFormSchema;
+    const isValid = await form.trigger(Object.keys(currentSchema.shape) as any);
+    if (isValid) setStep((prev) => prev + 1);
   };
 
   const prevStep = () => {
