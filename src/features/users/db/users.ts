@@ -16,6 +16,9 @@ export async function getUser(id: number) {
   "use cache";
   cacheTag(getUserIdTag(id));
   const user = await db.query.UserTable.findFirst({
+    columns: {
+      password: false,
+    },
     where: eq(UserTable.id, id),
   });
   return user;
@@ -26,6 +29,9 @@ export async function getUsers({ limit }: { limit?: number }) {
   cacheTag(getUserGlobalTag());
 
   const users = await db.query.UserTable.findMany({
+    columns: {
+      password: false,
+    },
     limit,
   });
   return users;
