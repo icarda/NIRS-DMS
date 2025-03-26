@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
@@ -33,7 +33,30 @@ import {
 import { TRIALS } from "@/data/trails";
 import { cn } from "@/lib/utils";
 
-const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
+const DEFAULT_SPECIES = [
+  {
+    id: 1,
+    name: "Species 1",
+  },
+  {
+    id: 2,
+    name: "Species 2",
+  },
+  {
+    id: 3,
+    name: "Species 3",
+  },
+];
+
+const TrialStep = ({
+  form,
+  trials,
+  crops,
+}: {
+  form: UseFormReturn<any>;
+  trials: Record<string, any>[];
+  crops: Record<string, any>[];
+}) => {
   const {
     fields: fertilizers,
     append,
@@ -42,22 +65,28 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
     control: form.control,
     name: "fertilizers",
   });
-  const useExistingTrial = form.watch("useExistingTrial");
+  const useExistingTrial = form.watch("useExistingTrial") as boolean;
+  const [species, setSpecies] =
+    useState<{ name: string; id: number }[]>(DEFAULT_SPECIES);
+  console.log("trials", trials);
 
   // Reset form fields when switching between existing and new trial
   useEffect(() => {
-    if (!useExistingTrial) {
-      form.setValue("trial", "");
-      form.setValue("crop", "");
-      form.setValue("trialPlantingDate", null);
-      form.setValue("soilType", "");
-      form.setValue("location", "");
-      form.setValue("coordinates", "");
-      form.setValue("irrigation", false);
-      form.setValue("fertilizers", [{ type: "", amount: 0 }]);
-    }
+    form.setValue("trial", "");
+    form.setValue("crop", "");
+    form.setValue("trialPlantingDate", null);
+    form.setValue("soilType", "");
+    form.setValue("location", "");
+    form.setValue("coordinates", "");
+    form.setValue("species", "");
+    form.setValue("irrigation", false);
+    form.setValue("fertilizers", [{ type: "", amount: 0 }]);
+
+    setSpecies(DEFAULT_SPECIES);
     form.clearErrors();
-  }, [useExistingTrial, form]);
+  }, [useExistingTrial]);
+
+  console.log("crop", form.getValues("crop"));
 
   return (
     <div className="space-y-8">
@@ -120,17 +149,37 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
-                        const trial = TRIALS.find((t) => t.trial === value)!;
+                        const trial = trials.find((t) => t.name === value)!;
                         form.setValue(
                           "trialPlantingDate",
-                          trial.trialPlantingDate
+                          new Date(trial.plantingDate)
                         );
-                        form.setValue("crop", trial.crop);
+                        form.setValue("crop", trial.crop.name);
                         form.setValue("soilType", trial.soilType);
                         form.setValue("location", trial.location);
-                        form.setValue("coordinates", trial.coordinates);
+                        if (trial.latitude && trial.longitude) {
+                          form.setValue(
+                            "coordinates",
+                            `${trial.latitude}, ${trial.longitude}`
+                          );
+                        } else {
+                          form.setValue("coordinates", "");
+                        }
                         form.setValue("irrigation", trial.irrigation);
-                        form.setValue("fertilizers", trial.fertilizers);
+                        setSpecies(trial.crop.species);
+
+                        form.setValue(
+                          "fertilizers",
+                          trial.fertilizers.map(
+                            (f: {
+                              fertilizerType: string;
+                              fertilizerAmount: number;
+                            }) => ({
+                              type: f.fertilizerType,
+                              amount: f.fertilizerAmount,
+                            })
+                          )
+                        );
                       }}
                       value={field.value}
                     >
@@ -140,9 +189,9 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {TRIALS.map((trial) => (
-                          <SelectItem key={trial.trial} value={trial.trial}>
-                            {trial.trial}
+                        {trials.map((trial) => (
+                          <SelectItem key={trial.id} value={trial.name}>
+                            {trial.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -217,16 +266,28 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Crop</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      const cropSpecies = crops.find(
+                        (c) => c.name === val
+                      )?.species;
+                      setSpecies(cropSpecies || []);
+                      form.setValue("species", "");
+                    }}
+                    value={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger disabled={useExistingTrial}>
                         <SelectValue placeholder="Select crop" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="wheat">Wheat</SelectItem>
-                      <SelectItem value="corn">Corn</SelectItem>
-                      <SelectItem value="soybean">Soybean</SelectItem>
+                      {crops.map((crop) => (
+                        <SelectItem value={crop.name} key={crop.id}>
+                          {crop.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -247,8 +308,11 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="species1">Species 1</SelectItem>
-                      <SelectItem value="species2">Species 2</SelectItem>
+                      {species.map((sp) => (
+                        <SelectItem value={sp.name} key={sp.id}>
+                          {sp.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -356,9 +420,9 @@ const TrialStep = ({ form }: { form: UseFormReturn<any> }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="nitrogen">Nitrogen</SelectItem>
-                        <SelectItem value="phosphorus">Phosphorus</SelectItem>
-                        <SelectItem value="potassium">Potassium</SelectItem>
+                        <SelectItem value="Nitrogen">Nitrogen</SelectItem>
+                        <SelectItem value="Phosphorus">Phosphorus</SelectItem>
+                        <SelectItem value="Potassium">Potassium</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

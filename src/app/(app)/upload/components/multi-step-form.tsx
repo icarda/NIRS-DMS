@@ -9,24 +9,24 @@ import { Button } from "@/components/ui/button";
 import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
   MultiFormData,
+  multiStepFormSchema,
   studyFormSchema,
   trialFormSchema,
-  uploadFormSchema,
 } from "@/lib/schemas";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
 
-const formSchema = trialFormSchema
-  .merge(studyFormSchema)
-  .merge(uploadFormSchema);
+interface MultiStepFormProps {
+  data: { trials: Record<string, any>[]; crops: Record<string, any>[] };
+}
 
-const MultiStepForm = () => {
+const MultiStepForm = ({ data }: MultiStepFormProps) => {
   const [step, setStep] = useState(1);
 
   const form = useForm<MultiFormData>({
     mode: "onTouched",
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(multiStepFormSchema),
     defaultValues: {
       useExistingTrial: false,
       trial: "",
@@ -50,18 +50,12 @@ const MultiStepForm = () => {
   });
 
   const onSubmit = async (data: MultiFormData) => {
-    if (!data.file) {
-      form.setError("file", { message: "File is required for submission." });
-      alert("Error: File is required. Please select a file to upload.");
-      setStep(3);
-      return;
-    }
-
     const formData = new FormData();
+
     Object.entries(data).forEach(([key, value]) => {
       if (key === "file" && value instanceof File) {
         formData.append(key, value);
-      } else if (key === "fertilizers" && Array.isArray(value)) {
+      } else if (Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof Date) {
         formData.append(key, value.toISOString());
@@ -75,7 +69,6 @@ const MultiStepForm = () => {
     const result = await uploadNirsData(formData);
 
     if (result.error) {
-      // Handle error
       alert(`Error: ${result.message}`);
     } else {
       alert(`Success: ${result.message}`);
@@ -127,7 +120,9 @@ const MultiStepForm = () => {
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {step === 1 && <TrialStep form={form} />}
+        {step === 1 && (
+          <TrialStep form={form} trials={data.trials} crops={data.crops} />
+        )}
         {step === 2 && <StudyStep form={form} />}
         {step === 3 && <UploadStep form={form} />}
 

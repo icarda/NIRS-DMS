@@ -1,8 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getCrops } from "@/features/crops/db/crop";
+import { getTrials } from "@/features/trials/db/trial";
 import MultiStepForm from "./components/multi-step-form";
 import TraitUpload from "./components/trait-upload";
 
-export default function UploadData() {
+export default async function UploadData() {
+  const trials = await getTrials();
+  const crops = await getCrops();
   return (
     <div>
       <div className="flex items-center">
@@ -25,7 +29,7 @@ export default function UploadData() {
           </div>
           <div>
             <TabsContent value="spectral_data">
-              <MultiStepForm />
+              <MultiStepForm data={{ trials, crops }} />
             </TabsContent>
             <TabsContent value="traits">
               <TraitUpload />
