@@ -68,7 +68,6 @@ const TrialStep = ({
   const useExistingTrial = form.watch("useExistingTrial") as boolean;
   const [species, setSpecies] =
     useState<{ name: string; id: number }[]>(DEFAULT_SPECIES);
-  console.log("trials", trials);
 
   // Reset form fields when switching between existing and new trial
   useEffect(() => {
@@ -85,8 +84,6 @@ const TrialStep = ({
     setSpecies(DEFAULT_SPECIES);
     form.clearErrors();
   }, [useExistingTrial]);
-
-  console.log("crop", form.getValues("crop"));
 
   return (
     <div className="space-y-8">
@@ -155,6 +152,7 @@ const TrialStep = ({
                           new Date(trial.plantingDate)
                         );
                         form.setValue("crop", trial.crop.name);
+                        form.setValue("species", "");
                         form.setValue("soilType", trial.soilType);
                         form.setValue("location", trial.location);
                         if (trial.latitude && trial.longitude) {
