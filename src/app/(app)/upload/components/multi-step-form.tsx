@@ -121,7 +121,12 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {step === 1 && (
-          <TrialStep form={form} trials={data.trials} crops={data.crops} />
+          <TrialStep
+            form={form}
+            trials={data.trials}
+            crops={data.crops}
+            step={step}
+          />
         )}
         {step === 2 && <StudyStep form={form} />}
         {step === 3 && <UploadStep form={form} />}

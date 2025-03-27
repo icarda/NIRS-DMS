@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
@@ -52,10 +52,12 @@ const TrialStep = ({
   form,
   trials,
   crops,
+  step,
 }: {
   form: UseFormReturn<any>;
   trials: Record<string, any>[];
   crops: Record<string, any>[];
+  step: number;
 }) => {
   const {
     fields: fertilizers,
@@ -66,23 +68,34 @@ const TrialStep = ({
     name: "fertilizers",
   });
   const useExistingTrial = form.watch("useExistingTrial") as boolean;
+  const previousUseExistingTrial = useRef<boolean | null>(null);
   const [species, setSpecies] =
     useState<{ name: string; id: number }[]>(DEFAULT_SPECIES);
 
-  // Reset form fields when switching between existing and new trial
   useEffect(() => {
-    form.setValue("trial", "");
-    form.setValue("crop", "");
-    form.setValue("trialPlantingDate", null);
-    form.setValue("soilType", "");
-    form.setValue("location", "");
-    form.setValue("coordinates", "");
-    form.setValue("species", "");
-    form.setValue("irrigation", false);
-    form.setValue("fertilizers", [{ type: "", amount: 0 }]);
+    const isFirstRender = previousUseExistingTrial.current === null;
+    const switchedMode = useExistingTrial !== previousUseExistingTrial.current;
 
-    setSpecies(DEFAULT_SPECIES);
-    form.clearErrors();
+    if (isFirstRender) {
+      previousUseExistingTrial.current = useExistingTrial;
+      return;
+    }
+
+    if (switchedMode) {
+      form.setValue("trial", "");
+      form.setValue("crop", "");
+      form.setValue("trialPlantingDate", null);
+      form.setValue("soilType", "");
+      form.setValue("location", "");
+      form.setValue("coordinates", "");
+      form.setValue("species", "");
+      form.setValue("irrigation", false);
+      form.setValue("fertilizers", [{ type: "", amount: 0 }]);
+
+      setSpecies(DEFAULT_SPECIES);
+
+      previousUseExistingTrial.current = useExistingTrial;
+    }
   }, [useExistingTrial]);
 
   return (
