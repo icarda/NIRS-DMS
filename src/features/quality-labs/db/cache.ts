@@ -1,9 +1,13 @@
 import { revalidateTag } from "next/cache";
 
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { getCenterTag, getGlobalTag, getIdTag } from "@/lib/dataCache";
 
 export function getQualityLabGlobalTag() {
   return getGlobalTag("qualityLabs");
+}
+
+export function getQualityLabsByCenterTag(center: string) {
+  return getCenterTag("qualityLabs", center);
 }
 
 export function getQualityLabIdTag(id: number) {

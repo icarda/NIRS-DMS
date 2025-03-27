@@ -1,10 +1,11 @@
 import NextAuth, { DefaultSession } from "next-auth";
 
-type ExtendedUser = DefaultSession["user"] & {
+export type ExtendedUser = DefaultSession["user"] & {
   role: UserRole;
   id: string;
   name: string;
   email: string;
+  center: string;
 };
 
 declare module "next-auth" {

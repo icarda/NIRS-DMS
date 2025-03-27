@@ -1,12 +1,20 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCrops } from "@/features/crops/db/crop";
+import { getNirModels } from "@/features/nir-models/db/nir-model";
+import { getQualityLabsByCenter } from "@/features/quality-labs/db/quality-lab";
 import { getTrials } from "@/features/trials/db/trial";
+import { getCurrentUser } from "@/lib/currentUser";
 import MultiStepForm from "./components/multi-step-form";
 import TraitUpload from "./components/trait-upload";
 
 export default async function UploadData() {
-  const trials = await getTrials();
-  const crops = await getCrops();
+  const center = (await getCurrentUser())?.center as string;
+  const [trials, crops, qualityLabs, nirModels] = await Promise.all([
+    getTrials(),
+    getCrops(),
+    getQualityLabsByCenter({ center }),
+    getNirModels(),
+  ]);
   return (
     <div>
       <div className="flex items-center">
@@ -29,7 +37,7 @@ export default async function UploadData() {
           </div>
           <div>
             <TabsContent value="spectral_data">
-              <MultiStepForm data={{ trials, crops }} />
+              <MultiStepForm data={{ trials, crops, qualityLabs, nirModels }} />
             </TabsContent>
             <TabsContent value="traits">
               <TraitUpload />

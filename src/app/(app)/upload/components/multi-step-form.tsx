@@ -13,12 +13,18 @@ import {
   studyFormSchema,
   trialFormSchema,
 } from "@/lib/schemas";
+import { ExtendedUser } from "@/types/next-auth";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
 
 interface MultiStepFormProps {
-  data: { trials: Record<string, any>[]; crops: Record<string, any>[] };
+  data: {
+    trials: Record<string, any>[];
+    crops: Record<string, any>[];
+    qualityLabs: Record<string, any>[];
+    nirModels: Record<string, any>[];
+  };
 }
 
 const MultiStepForm = ({ data }: MultiStepFormProps) => {
@@ -50,6 +56,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   });
 
   const onSubmit = async (data: MultiFormData) => {
+    console.log(data);
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
@@ -121,14 +128,16 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {step === 1 && (
-          <TrialStep
+          <TrialStep form={form} trials={data.trials} crops={data.crops} />
+        )}
+        {step === 2 && (
+          <StudyStep
             form={form}
-            trials={data.trials}
             crops={data.crops}
-            step={step}
+            qualityLabs={data.qualityLabs}
+            nirModels={data.nirModels}
           />
         )}
-        {step === 2 && <StudyStep form={form} />}
         {step === 3 && <UploadStep form={form} />}
 
         <div className="mt-8 flex justify-between">

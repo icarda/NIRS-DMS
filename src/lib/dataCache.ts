@@ -33,8 +33,8 @@ export function getIdTag(tag: CACHE_TAG, id: number | string) {
   return `id:${id}-${tag}` as const;
 }
 
-export function getCenterTag(tag: CACHE_TAG, centerId: number) {
-  return `center:${centerId}-${tag}` as const;
+export function getCenterTag(tag: CACHE_TAG, center: string) {
+  return `center:${center}-${tag}` as const;
 }
 
 export function getCropTag(tag: CACHE_TAG, cropId: number) {

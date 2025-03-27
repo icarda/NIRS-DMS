@@ -23,6 +23,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.name && session.user) {
         session.user.name = token.name;
       }
+      if (token.center && session.user) {
+        session.user.center = token.center as string;
+      }
       return session;
     },
     async jwt({ token }) {
@@ -31,6 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user) return token;
       token.role = user.role;
       token.name = `${user.firstName} ${user.lastName}`;
+      token.center = user.center.acronym;
       return token;
     },
   },

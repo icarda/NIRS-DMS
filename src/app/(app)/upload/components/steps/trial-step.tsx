@@ -52,12 +52,10 @@ const TrialStep = ({
   form,
   trials,
   crops,
-  step,
 }: {
   form: UseFormReturn<any>;
   trials: Record<string, any>[];
   crops: Record<string, any>[];
-  step: number;
 }) => {
   const {
     fields: fertilizers,

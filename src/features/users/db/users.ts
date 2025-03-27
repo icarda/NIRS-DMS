@@ -8,6 +8,9 @@ import { getUserGlobalTag, getUserIdTag, revalidateUserCache } from "./cache";
 export async function getUserByEmail(email: string) {
   const user = await db.query.UserTable.findFirst({
     where: eq(UserTable.email, email),
+    with: {
+      center: true,
+    },
   });
   return user;
 }

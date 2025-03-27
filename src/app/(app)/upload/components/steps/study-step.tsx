@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+} from "react";
+
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
@@ -27,13 +35,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { nirModels } from "@/data/nir_models";
 import { physiologicalStages } from "@/data/physiological-stages";
-import { productTypes } from "@/data/product-types";
-import { qualityLabs } from "@/data/quality-labs";
 import { cn } from "@/lib/utils";
 
-const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
+const StudyStep = ({
+  form,
+  crops,
+  qualityLabs,
+  nirModels,
+}: {
+  form: UseFormReturn<any>;
+  crops: Record<string, any>[];
+  qualityLabs: Record<string, any>[];
+  nirModels: Record<string, any>[];
+}) => {
+  const selectedCrop = form.getValues("crop");
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -62,13 +78,15 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Array.from(
-                        new Set(productTypes.map((type) => type.type))
-                      ).map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      {crops
+                        .find((c) => c.name == selectedCrop)
+                        ?.productTypes.map(
+                          (type: { id: number; name: string }) => (
+                            <SelectItem key={type.id} value={type.name}>
+                              {type.name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -93,8 +111,8 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                     </FormControl>
                     <SelectContent>
                       {qualityLabs.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                        <SelectItem key={type.id} value={type.name}>
+                          {type.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -150,13 +168,15 @@ const StudyStep = ({ form }: { form: UseFormReturn<any> }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Array.from(
-                        new Set(physiologicalStages.map((stage) => stage.stage))
-                      ).map((stage) => (
-                        <SelectItem key={stage} value={stage}>
-                          {stage}
-                        </SelectItem>
-                      ))}
+                      {crops
+                        .find((c) => c.name == selectedCrop)
+                        ?.physiologicalStages.map(
+                          (stage: { id: number; name: string }) => (
+                            <SelectItem key={stage.id} value={stage.name}>
+                              {stage.name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
