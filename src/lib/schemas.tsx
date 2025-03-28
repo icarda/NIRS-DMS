@@ -152,8 +152,110 @@ export const registerSchema = z.object({
   password: passwordSchema,
 });
 
+export const multiStepFormSchemaFinal = z.object({
+  // Trial Fields
+  useExistingTrial: z.boolean(),
+  trial: z.string().min(1, "Trial name is required"),
+  trialPlantingDate: z.date({
+    required_error: "Trial planting date is required",
+    invalid_type_error: "Valid Trial planting date is required",
+  }),
+  soilType: z.string(),
+  location: z.string().min(1, "Location is required"),
+  coordinates: z
+    .string()
+    .regex(
+      /^-?\d+\.\d*,\s-?\d+\.\d*$/,
+      "Invalid coordinates format. Use lat, lon (e.g., 33.2315, -8.1515)"
+    )
+    .or(z.literal(""))
+    .optional(),
+  irrigation: z.boolean().optional(),
+  fertilizers: z.array(
+    z.object({
+      type: z.string().min(0, "Fertilizer type is required"),
+      amount: z.number().min(0, "Amount must be positive"),
+    })
+  ),
+
+  // Study Fields
+  sampleDate: z.date({
+    required_error: "Sample date is required",
+  }),
+  program: z.string().min(1, "Program is required"),
+  requesterName: z.string().optional(),
+  requesterEmail: z
+    .string()
+    .email("Please enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+
+  // File Upload
+  file: z
+    .instanceof(File, { message: "File is required" })
+    .refine((file) => file.size <= 50 * 1024 * 1024, {
+      message: "File size must be less than 50MB",
+    })
+    .refine(
+      (file) =>
+        [
+          "text/csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ].includes(file.type),
+      { message: "File must be CSV or XLSX format" }
+    ),
+
+  // IDs
+  cropID: z
+    .number({
+      required_error: "Crop ID is required",
+      invalid_type_error: "Crop ID must be a number",
+    })
+    .int()
+    .positive(),
+  speciesID: z
+    .number({
+      required_error: "Species ID is required",
+      invalid_type_error: "Species ID must be a number",
+    })
+    .int()
+    .positive(),
+  productTypeID: z
+    .number({
+      required_error: "Product Type ID is required",
+      invalid_type_error: "Product Type ID must be a number",
+    })
+    .int()
+    .positive(),
+  qualityLabID: z
+    .number({
+      required_error: "Quality Lab ID is required",
+      invalid_type_error: "Quality Lab ID must be a number",
+    })
+    .int()
+    .positive(),
+  nirModelID: z
+    .number({
+      required_error: "NIR Model ID is required",
+      invalid_type_error: "NIR Model ID must be a number",
+    })
+    .int()
+    .positive(),
+  physiologicalStageID: z
+    .number({
+      required_error: "Physiological Stage ID is required",
+      invalid_type_error: "Physiological Stage ID must be a number",
+    })
+    .int()
+    .positive(),
+
+  // Study Code
+  studyCode: z.string().min(1, "Study Code is required"),
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;
 export type MultiFormData = TrialFormData & StudyFormData & UploadFormData;
+export type MultiStepFormSchemaFinal = z.infer<typeof multiStepFormSchemaFinal>;
 export type TraitUploadFormData = z.infer<typeof traitUploadSchema>;
