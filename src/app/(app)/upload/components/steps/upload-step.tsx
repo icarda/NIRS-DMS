@@ -18,7 +18,9 @@ import { Input } from "@/components/ui/input";
 import { fileSize } from "@/lib/utils";
 
 const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(
+    form.getValues("file")?.name || null
+  );
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -40,7 +42,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
     <div className="space-y-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
-          Upload data file for study:{" "}
+          Upload data file for study code:{" "}
           {[
             form.getValues("trial"),
             form.getValues("productType"),
@@ -76,7 +78,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
                             or drag and drop
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            CSV or XLSX files only - 5MB max
+                            CSV or XLSX files only - 50MB max
                           </p>
                         </div>
                         <Input
