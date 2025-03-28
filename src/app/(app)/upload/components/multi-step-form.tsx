@@ -6,14 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
   MultiFormData,
   multiStepFormSchema,
   studyFormSchema,
   trialFormSchema,
 } from "@/lib/schemas";
-import { ExtendedUser } from "@/types/next-auth";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
@@ -55,36 +53,65 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     },
   });
 
-  const onSubmit = async (data: MultiFormData) => {
+  const onSubmit = async (multiFormData: MultiFormData) => {
     console.log(data);
-    const formData = new FormData();
+    // const formData = new FormData();
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "file" && value instanceof File) {
-        formData.append(key, value);
-      } else if (Array.isArray(value)) {
-        formData.append(key, JSON.stringify(value));
-      } else if (value instanceof Date) {
-        formData.append(key, value.toISOString());
-      } else if (typeof value === "boolean") {
-        formData.append(key, String(value));
-      } else if (value !== null && value !== undefined) {
-        formData.append(key, String(value));
-      }
+    const crop = data.crops.find((crop) => crop.name === multiFormData.crop)!;
+    const cropID = crop?.id;
+    const speciesID = crop.species.find(
+      (species: { name: string }) => species.name === multiFormData.species
+    )?.id as number;
+    const productTypeID = crop.productTypes.find(
+      (productType: { name: string }) =>
+        productType.name === multiFormData.productType
+    )?.id as number;
+    const physiologicalStageID = crop.physiologicalStages.find(
+      (physiologicalStage: { name: string }) =>
+        physiologicalStage.name === multiFormData.physiologicalStage
+    )?.id as number;
+    const qualityLabID = data.qualityLabs.find(
+      (qualityLab) => qualityLab.name === multiFormData.qualityLab
+    )?.id as number;
+    const nirModelID = data.nirModels.find(
+      (nirModel) => nirModel.name === multiFormData.nirModel
+    )?.id as number;
+    console.log("submitting");
+
+    console.log({
+      cropID,
+      speciesID,
+      productTypeID,
+      physiologicalStageID,
+      qualityLabID,
+      nirModelID,
     });
+    // Object.entries(multiFormData).forEach(([key, value]) => {
+    //   if (key === "file" && value instanceof File) {
+    //     formData.append(key, value);
+    //   } else if (Array.isArray(value)) {
+    //     formData.append(key, JSON.stringify(value));
+    //   } else if (value instanceof Date) {
+    //     formData.append(key, value.toISOString());
+    //   } else if (typeof value === "boolean") {
+    //     formData.append(key, String(value));
+    //   } else if (value !== null && value !== undefined) {
+    //     formData.append(key, String(value));
+    //   }
+    // });
 
-    const result = await uploadNirsData(formData);
+    // const result = await uploadNirsData(formData);
 
-    if (result.error) {
-      alert(`Error: ${result.message}`);
-    } else {
-      alert(`Success: ${result.message}`);
-      setStep(1);
-      form.reset();
-    }
+    // if (result.error) {
+    //   alert(`Error: ${result.message}`);
+    // } else {
+    //   alert(`Success: ${result.message}`);
+    //   setStep(1);
+    //   form.reset();
+    // }
 
-    setStep(1);
-    form.reset();
+    // setStep(1);
+    // form.reset();
   };
 
   const nextStep = async () => {
@@ -152,12 +179,18 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
             </Button>
           )}
           {step < 3 ? (
-            <Button type="button" onClick={nextStep} className="ml-auto">
+            <Button
+              type="button"
+              onClick={nextStep}
+              className="ml-auto"
+              key="next"
+            >
               Next
             </Button>
           ) : (
             <Button
               type="submit"
+              key="submit"
               disabled={form.formState.isSubmitting}
               className="ml-auto"
             >
