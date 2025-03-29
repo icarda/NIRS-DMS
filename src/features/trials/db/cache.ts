@@ -6,10 +6,10 @@ export function getTrialGlobalTag() {
   return getGlobalTag("traits");
 }
 
-export function getTrialIdTag(id: number) {
+export function getTrialIdTag(id: string | number) {
   return getIdTag("traits", id);
 }
-export function revalidateTrialCache(id: number) {
+export function revalidateTrialCache(id: number | string) {
   revalidateTag(getTrialGlobalTag());
   revalidateTag(getTrialIdTag(id));
 }

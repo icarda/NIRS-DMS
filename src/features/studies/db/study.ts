@@ -18,7 +18,10 @@ export async function getStudyByCode(studyCode: string, qualityLabId: number) {
   return study;
 }
 
-export async function insertStudy(data: typeof StudyTable.$inferInsert) {
+export async function insertStudy(
+  data: typeof StudyTable.$inferInsert,
+  trx: Omit<typeof db, "$client"> = db
+) {
   const existingStudy = await getStudyByCode(data.studyCode, data.qualityLabId);
   if (existingStudy) {
     throw new Error(
@@ -26,7 +29,7 @@ export async function insertStudy(data: typeof StudyTable.$inferInsert) {
     );
   }
 
-  const [newStudy] = await db.insert(StudyTable).values(data).returning();
+  const [newStudy] = await trx.insert(StudyTable).values(data).returning();
 
   if (newStudy == null) throw new Error("Failed to create study");
   revalidateStudyCache(newStudy.id);

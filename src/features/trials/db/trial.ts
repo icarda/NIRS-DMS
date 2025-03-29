@@ -9,6 +9,18 @@ import {
   revalidateTrialCache,
 } from "./cache";
 
+export async function getTrialByName(name: string) {
+  "use cache";
+  cacheTag(getTrialIdTag(name));
+  const trial = await db.query.TrialTable.findFirst({
+    where: eq(TrialTable.name, name),
+    columns: {
+      id: true,
+    },
+  });
+  return trial;
+}
+
 export async function getTrial(id: number) {
   "use cache";
   cacheTag(getTrialIdTag(id));
@@ -40,9 +52,10 @@ export async function getTrials({ limit }: { limit?: number } = {}) {
 
 export async function insertTrial(
   data: typeof TrialTable.$inferInsert,
-  fertilizers?: Omit<typeof TrialFertilizerTable.$inferInsert, "trialId">[]
+  fertilizers?: Omit<typeof TrialFertilizerTable.$inferInsert, "trialId">[],
+  trx: Omit<typeof db, "$client"> = db
 ) {
-  const [newTrial] = await db
+  const [newTrial] = await trx
     .insert(TrialTable)
     .values(data)
     .returning()
@@ -54,7 +67,7 @@ export async function insertTrial(
   if (newTrial == null) throw new Error("Failed to create trial");
 
   if (fertilizers?.length) {
-    await db.insert(TrialFertilizerTable).values(
+    await trx.insert(TrialFertilizerTable).values(
       fertilizers.map((fertilizer) => ({
         ...fertilizer,
         trialId: newTrial.id,
@@ -62,7 +75,7 @@ export async function insertTrial(
     );
   }
 
-  revalidateTrialCache(newTrial.id);
+  revalidateTrialCache(newTrial.name);
   return newTrial;
 }
 

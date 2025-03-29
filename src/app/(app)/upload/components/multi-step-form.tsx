@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
+import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
   MultiFormData,
   multiStepFormSchema,
@@ -54,19 +55,18 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   });
 
   const onSubmit = async (multiFormData: MultiFormData) => {
-    console.log(data);
-    // const formData = new FormData();
-
-    const crop = data.crops.find((crop) => crop.name === multiFormData.crop)!;
-    const cropID = crop?.id;
-    const speciesID = crop.species.find(
+    const selectedCrop = data.crops.find(
+      (crop) => crop.name === multiFormData.crop
+    )!;
+    const cropID = selectedCrop?.id as number;
+    const speciesID = selectedCrop.species.find(
       (species: { name: string }) => species.name === multiFormData.species
     )?.id as number;
-    const productTypeID = crop.productTypes.find(
+    const productTypeID = selectedCrop.productTypes.find(
       (productType: { name: string }) =>
         productType.name === multiFormData.productType
     )?.id as number;
-    const physiologicalStageID = crop.physiologicalStages.find(
+    const physiologicalStageID = selectedCrop.physiologicalStages.find(
       (physiologicalStage: { name: string }) =>
         physiologicalStage.name === multiFormData.physiologicalStage
     )?.id as number;
@@ -78,37 +78,47 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     )?.id as number;
     console.log("submitting");
 
-    console.log({
+    const multiFormDataWithIDs = {
+      ...multiFormData,
+
       cropID,
       speciesID,
       productTypeID,
       physiologicalStageID,
       qualityLabID,
       nirModelID,
+      studyCode: [
+        multiFormData.trial,
+        multiFormData.productType,
+        new Date(multiFormData.sampleDate).toLocaleDateString("fr-FR"),
+      ].join("+"),
+    };
+
+    const formData = new FormData();
+    Object.entries(multiFormDataWithIDs).forEach(([key, value]) => {
+      if (key === "file" && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (value instanceof Date) {
+        formData.append(key, value.toISOString());
+      } else if (typeof value === "boolean") {
+        formData.append(key, String(value));
+      } else if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, String(value));
+      }
     });
-    // Object.entries(multiFormData).forEach(([key, value]) => {
-    //   if (key === "file" && value instanceof File) {
-    //     formData.append(key, value);
-    //   } else if (Array.isArray(value)) {
-    //     formData.append(key, JSON.stringify(value));
-    //   } else if (value instanceof Date) {
-    //     formData.append(key, value.toISOString());
-    //   } else if (typeof value === "boolean") {
-    //     formData.append(key, String(value));
-    //   } else if (value !== null && value !== undefined) {
-    //     formData.append(key, String(value));
-    //   }
-    // });
+    console.log(multiFormDataWithIDs);
 
-    // const result = await uploadNirsData(formData);
+    const result = await uploadNirsData(formData);
 
-    // if (result.error) {
-    //   alert(`Error: ${result.message}`);
-    // } else {
-    //   alert(`Success: ${result.message}`);
-    //   setStep(1);
-    //   form.reset();
-    // }
+    if (result.error) {
+      alert(`Error: ${result.message}`);
+    } else {
+      alert(`Success: ${result.message}`);
+      // setStep(1);
+      // form.reset();
+    }
 
     // setStep(1);
     // form.reset();

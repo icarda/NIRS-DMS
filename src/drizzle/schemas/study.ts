@@ -24,15 +24,15 @@ export const StudyTable = pgTable(
     trialId: integer("trial_id")
       .notNull()
       .references(() => TrialTable.id, { onDelete: "cascade" }),
-    studyCode: text("study_code").notNull(),
+    studyCode: text("study_code").notNull().unique(),
     productTypeId: integer("product_type_id")
       .notNull()
       .references(() => ProductTypeTable.id, { onDelete: "cascade" }),
     nirModelId: integer("nir_model_id")
       .notNull()
       .references(() => NirModelTable.id, { onDelete: "cascade" }),
-    requesterName: text("requester_name").notNull(),
-    requesterEmail: text("requester_email").notNull(),
+    requesterName: text("requester_name"),
+    requesterEmail: text("requester_email"),
     sampleDate: date("sample_date").notNull(),
     physiologicalStageId: integer("physiological_stage_id")
       .notNull()

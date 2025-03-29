@@ -20,8 +20,8 @@ export const TrialTable = pgTable("trial", {
   soilType: text("soil_type").notNull(),
   irrigation: boolean("irrigation").notNull(),
   location: text("location").notNull(),
-  latitude: doublePrecision("latitude").notNull(),
-  longitude: doublePrecision("longitude").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   additionalMetadata: jsonb("additional_metadata").default({}),
   speciesId: integer("species_id")
     .notNull()
@@ -38,8 +38,8 @@ export const TrialFertilizerTable = pgTable("trial_fertilizer", {
   trialId: integer("trial_id")
     .notNull()
     .references(() => TrialTable.id, { onDelete: "cascade" }),
-  fertilizerType: text("fertilizer_type").notNull(),
-  fertilizerAmount: doublePrecision("fertilizer_amount").notNull(),
+  type: text("type").notNull(),
+  amount: doublePrecision("amount").notNull(),
   createdAt,
   updatedAt,
 });

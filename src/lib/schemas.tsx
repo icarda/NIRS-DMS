@@ -173,8 +173,8 @@ export const multiStepFormSchemaFinal = z.object({
   irrigation: z.boolean().optional(),
   fertilizers: z.array(
     z.object({
-      type: z.string().min(0, "Fertilizer type is required"),
-      amount: z.number().min(0, "Amount must be positive"),
+      fertilizerType: z.string().min(0, "Fertilizer type is required"),
+      fertilizerAmount: z.number().min(0, "Amount must be positive"),
     })
   ),
 
