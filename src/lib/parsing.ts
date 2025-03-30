@@ -1,6 +1,3 @@
-import fs from "fs/promises"; // Node.js file system module
-import path from "path";
-
 import Papa from "papaparse";
 import XLSX from "xlsx";
 
@@ -183,5 +180,24 @@ export async function parseXlsx(file: File): Promise<ParsedFileRow[]> {
   } catch (error: any) {
     console.error("Error parsing XLSX file:", error);
     throw new Error(`Failed to parse XLSX file: ${error.message}`);
+  }
+}
+
+export async function parseNirsFile(file: File): Promise<ParsedFileRow[]> {
+  const fileType = file.type;
+  const fileNameLower = file.name.toLowerCase();
+
+  if (fileType === "text/csv" || fileNameLower.endsWith(".csv")) {
+    return await parseCsv(file);
+  } else if (
+    fileType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    fileNameLower.endsWith(".xlsx")
+  ) {
+    return await parseXlsx(file);
+  } else {
+    throw new Error(
+      `Unsupported file type: ${fileType || "unknown"}. Please upload CSV or XLSX.`
+    );
   }
 }
