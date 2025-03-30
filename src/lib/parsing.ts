@@ -1,4 +1,8 @@
+import fs from "fs/promises"; // Node.js file system module
+import path from "path";
+
 import Papa from "papaparse";
+import XLSX from "xlsx";
 
 interface ParsedFileRow {
   plotId: number;
@@ -17,8 +21,6 @@ function isNumericString(str: string): boolean {
 
 export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
   const text = await file.text();
-
-  // 2. Parse using PapaParse
   return new Promise((resolve, reject) => {
     Papa.parse<Record<string, string>>(text, {
       header: true,
@@ -32,16 +34,11 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
             )
           );
         }
-        // empty file or only have headers
-        if (!results.data || results.data.length === 0) {
-          return resolve([]);
-        }
+        if (!results.data) return resolve([]);
 
         const parsedRows: ParsedFileRow[] = [];
         const headers = results.meta.fields;
-        if (!headers) {
-          return reject(new Error("Could not detect headers in CSV file."));
-        }
+        if (!headers) return reject(new Error("Could not detect CSV headers."));
 
         const plotIdHeader = headers.find(
           (h) => h?.toLowerCase() === "plot_id"
@@ -53,7 +50,6 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
           (h) => h?.toLowerCase() === "qualitylabplotnumber"
         );
 
-        // Check if required headers were found
         if (!plotIdHeader || !sampleIdHeader || !qlpNumberHeader) {
           return reject(
             new Error(
@@ -69,24 +65,21 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
             row[qlpNumberHeader!] ?? "",
             10
           );
+          // Use string as key for spectrumData
           const spectrumData: Record<string, number> = {};
 
           if (isNaN(plotId) || isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+            console.warn(
+              `Skipping CSV row ${index + 2} due to invalid metadata.`
+            );
             return;
           }
 
           for (const header of headers) {
             if (isNumericString(header)) {
-              const wavelength = parseFloat(header.trim());
               const value = parseFloat(row[header]);
-
-              if (
-                !isNaN(wavelength) &&
-                isFinite(wavelength) &&
-                !isNaN(value) &&
-                isFinite(value)
-              ) {
-                spectrumData[wavelength] = value;
+              if (!isNaN(value) && isFinite(value)) {
+                spectrumData[header.trim()] = value;
               }
             }
           }
@@ -105,4 +98,90 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
       },
     });
   });
+}
+
+export async function parseXlsx(file: File): Promise<ParsedFileRow[]> {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) throw new Error("XLSX file contains no sheets.");
+
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet, {
+      raw: true,
+      defval: null,
+    });
+
+    if (!jsonData || jsonData.length === 0) return [];
+
+    const parsedRows: ParsedFileRow[] = [];
+    const headers = Object.keys(jsonData[0]);
+
+    const plotIdHeader = headers.find((h) => h?.toLowerCase() === "plot_id");
+    const sampleIdHeader = headers.find(
+      (h) => h?.toLowerCase() === "sample_id"
+    );
+    const qlpNumberHeader = headers.find(
+      (h) => h?.toLowerCase() === "qualitylabplotnumber"
+    );
+
+    if (!plotIdHeader || !sampleIdHeader || !qlpNumberHeader) {
+      throw new Error(
+        "XLSX must contain 'plot_id', 'sample_id', and 'QualityLabPlotNumber' columns."
+      );
+    }
+
+    jsonData.forEach((row, index) => {
+      const rawPlotId = row[plotIdHeader!];
+      const rawSampleId = row[sampleIdHeader!];
+      const rawQlpNumber = row[qlpNumberHeader!];
+      const plotId =
+        typeof rawPlotId === "number"
+          ? rawPlotId
+          : parseInt(String(rawPlotId ?? ""), 10);
+      const sampleId =
+        typeof rawSampleId === "number"
+          ? rawSampleId
+          : parseInt(String(rawSampleId ?? ""), 10);
+      const qualityLabPlotNumber =
+        typeof rawQlpNumber === "number"
+          ? rawQlpNumber
+          : parseInt(String(rawQlpNumber ?? ""), 10);
+      // Use string as key for spectrumData
+      const spectrumData: Record<string, number> = {};
+
+      if (isNaN(plotId) || isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+        console.warn(`Skipping XLSX row ${index + 2} due to invalid metadata.`);
+        return;
+      }
+
+      for (const header of headers) {
+        const trimmedHeader = header.trim();
+        // Check if header looks like a wavelength number
+        if (isNumericString(trimmedHeader)) {
+          const rawValue = row[header];
+          const value =
+            typeof rawValue === "number"
+              ? rawValue
+              : parseFloat(String(rawValue ?? "NaN"));
+
+          if (!isNaN(value) && isFinite(value)) {
+            spectrumData[trimmedHeader] = value;
+          }
+        }
+      }
+
+      parsedRows.push({
+        plotId,
+        sampleId,
+        qualityLabPlotNumber,
+        spectrumData,
+      });
+    });
+    return parsedRows;
+  } catch (error: any) {
+    console.error("Error parsing XLSX file:", error);
+    throw new Error(`Failed to parse XLSX file: ${error.message}`);
+  }
 }
