@@ -1,7 +1,16 @@
 import Papa from "papaparse";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 
-interface ParsedFileRow {
+export interface NIRSData {
+  studyId: number;
+  sampleId: number;
+  gid: number;
+  plotId: number;
+  wavelength: number;
+  value: number;
+}
+
+export interface ParsedFileRow {
   plotId: number;
   sampleId: number;
   qualityLabPlotNumber: number;
@@ -200,4 +209,43 @@ export async function parseNirsFile(file: File): Promise<ParsedFileRow[]> {
       `Unsupported file type: ${fileType || "unknown"}. Please upload CSV or XLSX.`
     );
   }
+}
+
+export function transformParsedDataForDb(
+  parsedData: ParsedFileRow[],
+  studyId: number
+): NIRSData[] {
+  const nirsDataToInsert: NIRSData[] = [];
+  if (!parsedData || parsedData.length === 0) {
+    return nirsDataToInsert;
+  }
+
+  for (const row of parsedData) {
+    for (const [wavelengthStr, value] of Object.entries(row.spectrumData)) {
+      const wavelength = parseInt(wavelengthStr, 10);
+
+      if (
+        !isNaN(wavelength) &&
+        isFinite(wavelength) &&
+        typeof value === "number" &&
+        isFinite(value)
+      ) {
+        const gid = row.qualityLabPlotNumber;
+
+        if (isNaN(gid) || !isFinite(gid)) {
+          continue;
+        }
+
+        nirsDataToInsert.push({
+          studyId: studyId,
+          sampleId: row.sampleId,
+          gid: gid,
+          plotId: row.plotId,
+          wavelength: wavelength,
+          value: value,
+        });
+      }
+    }
+  }
+  return nirsDataToInsert;
 }
