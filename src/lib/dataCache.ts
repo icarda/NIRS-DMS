@@ -37,6 +37,10 @@ export function getCenterTag(tag: CACHE_TAG, centerId: number) {
   return `center:${centerId}-${tag}` as const;
 }
 
+export function getStudyTag(tag: CACHE_TAG, centerId: number) {
+  return `center:${centerId}-${tag}` as const;
+}
+
 export function getCropTag(tag: CACHE_TAG, cropId: number) {
   return `crop:${cropId}-${tag}` as const;
 }

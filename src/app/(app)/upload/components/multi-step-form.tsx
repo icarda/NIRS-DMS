@@ -76,7 +76,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const nirModelID = data.nirModels.find(
       (nirModel) => nirModel.name === multiFormData.nirModel
     )?.id as number;
-    console.log("submitting");
 
     const multiFormDataWithIDs = {
       ...multiFormData,
@@ -108,7 +107,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
         formData.append(key, String(value));
       }
     });
-    console.log(multiFormDataWithIDs);
 
     const result = await uploadNirsData(formData);
 
