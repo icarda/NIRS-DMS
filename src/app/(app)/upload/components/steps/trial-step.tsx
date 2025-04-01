@@ -181,11 +181,11 @@ const TrialStep = ({
                           "fertilizers",
                           trial.fertilizers.map(
                             (f: {
-                              fertilizerType: string;
-                              fertilizerAmount: number;
+                              type: string;
+                              amount: number;
                             }) => ({
-                              type: f.fertilizerType,
-                              amount: f.fertilizerAmount,
+                              type: f.type,
+                              amount: f.amount,
                             })
                           )
                         );

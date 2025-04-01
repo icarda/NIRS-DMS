@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const trialFertilizerSchema = z.object({
-  fertilizerType: z.string().min(1, "Fertilizer type is required"),
-  fertilizerAmount: z.number(),
+  type: z.string().min(1, "Fertilizer type is required"),
+  amount: z.number().min(0, "Amount must be greater than 0"),
 });
 
 export const trialSchema = z.object({

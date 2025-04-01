@@ -34,8 +34,8 @@ export async function uploadNirsData(formData: FormData) {
     fertilizers: rawData.fertilizers
       ? JSON.parse(rawData.fertilizers).map(
           (f: { type: string; amount: number }) => ({
-            fertilizerType: f.type,
-            fertilizerAmount: f.amount,
+            type: f.type,
+            amount: f.amount,
           })
         )
       : [],
