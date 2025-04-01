@@ -158,12 +158,15 @@ export async function uploadNirsData(formData: FormData) {
         await insertNirsDataBatch(nirsDataToInsert, tx);
       }
 
-      return { studyId: studyId, insertedNirsCount: nirsDataToInsert.length };
+      return {
+        studyCode: newStudy.studyCode,
+        insertedNirsCount: nirsDataToInsert.length,
+      };
     });
 
     return {
       error: false,
-      message: `Study created/found (ID: ${result.studyId}). File processed. ${result.insertedNirsCount} NIRS data rows inserted successfully.`,
+      message: `Study created/found (ID: ${result.studyCode}). File processed. ${result.insertedNirsCount} NIRS data rows inserted successfully.`,
     };
   } catch (error: any) {
     console.error("Error during NIRS data processing:", error);
