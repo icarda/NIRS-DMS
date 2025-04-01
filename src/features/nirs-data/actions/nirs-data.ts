@@ -1,18 +1,18 @@
 "use server";
 
-import { z } from "zod";
-
 import { db } from "@/drizzle/db";
 import { insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
-  MultiFormData,
+  NIRSData,
+  parseNirsFile,
+  transformParsedDataForDb,
+} from "@/lib/parsing";
+import {
   multiStepFormSchemaFinal,
   MultiStepFormSchemaFinal,
-  studyFormSchema,
-  trialFormSchema,
-  uploadFormSchema,
 } from "@/lib/schemas";
+import { insertNirsDataBatch } from "../db/nirs-data";
 
 export async function uploadNirsData(formData: FormData) {
   const rawData: Record<string, any> = {};
@@ -68,7 +68,6 @@ export async function uploadNirsData(formData: FormData) {
 
   try {
     const result = await db.transaction(async (tx) => {
-      // Create or use existing trial
       let trialId: number;
       // get trial ID
       if (validatedData.useExistingTrial) {
@@ -140,11 +139,31 @@ export async function uploadNirsData(formData: FormData) {
         throw new Error("Failed to create new study record.");
       }
       const studyId = newStudy.id;
+
+      // Parse file
+      const file = validatedData.file as File;
+
+      const parsedFileData = await parseNirsFile(file);
+
+      if (!parsedFileData) {
+        throw new Error("File parsing failed or returned no result.");
+      }
+
+      let nirsDataToInsert: NIRSData[] = [];
+      if (parsedFileData.length > 0) {
+        nirsDataToInsert = transformParsedDataForDb(parsedFileData, studyId);
+      }
+
+      if (nirsDataToInsert.length > 0) {
+        await insertNirsDataBatch(nirsDataToInsert, tx);
+      }
+
+      return { studyId: studyId, insertedNirsCount: nirsDataToInsert.length };
     });
 
     return {
       error: false,
-      message: `Data submitted and processed successfully.`,
+      message: `Study created/found (ID: ${result.studyId}). File processed. ${result.insertedNirsCount} NIRS data rows inserted successfully.`,
     };
   } catch (error: any) {
     console.error("Error during NIRS data processing:", error);
