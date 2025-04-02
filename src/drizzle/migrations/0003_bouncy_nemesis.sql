@@ -1,0 +1,1 @@
+ALTER TABLE "crop_trait" ADD COLUMN "trait_variable" text NOT NULL;

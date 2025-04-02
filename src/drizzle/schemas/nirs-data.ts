@@ -21,7 +21,7 @@ export const NirsDataTable = pgTable(
     sampleId: integer("sample_id").notNull(),
     gid: integer("gid").notNull(),
     plotId: integer("plot_id").notNull(),
-    wavelength: integer("wavelength").unique().notNull(),
+    wavelength: integer("wavelength").notNull(),
     value: doublePrecision("value").notNull(),
   },
   (table) => [
@@ -31,7 +31,13 @@ export const NirsDataTable = pgTable(
         foreignColumns: [TraitTable.sampleId, TraitTable.studyId],
       }),
     },
-    unique().on(table.studyId, table.sampleId, table.gid, table.plotId),
+    unique().on(
+      table.studyId,
+      table.sampleId,
+      table.gid,
+      table.plotId,
+      table.wavelength
+    ),
   ]
 );
 

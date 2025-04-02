@@ -1,0 +1,2 @@
+ALTER TABLE "nirs_data" DROP CONSTRAINT "nirs_data_study_id_sample_id_gid_plot_id_unique";--> statement-breakpoint
+ALTER TABLE "nirs_data" ADD CONSTRAINT "nirs_data_study_id_sample_id_gid_plot_id_wavelength_unique" UNIQUE("study_id","sample_id","gid","plot_id","wavelength");

@@ -1,0 +1,1 @@
+ALTER TABLE "nirs_data" DROP CONSTRAINT "nirs_data_wavelength_unique";
