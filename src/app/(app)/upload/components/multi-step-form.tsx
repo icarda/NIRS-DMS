@@ -1,9 +1,11 @@
 "use client";
 
+import { error } from "console";
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
@@ -111,15 +113,14 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const result = await uploadNirsData(formData);
 
     if (result.error) {
-      alert(`Error: ${result.message}`);
+      toast.error(`Error: ${result.message}`);
     } else {
-      alert(`Success: ${result.message}`);
-      // setStep(1);
-      // form.reset();
+      toast.success(`Success: ${result.message}`);
+      setTimeout(() => {
+        setStep(1);
+        form.reset();
+      }, 300);
     }
-
-    // setStep(1);
-    // form.reset();
   };
 
   const nextStep = async () => {
