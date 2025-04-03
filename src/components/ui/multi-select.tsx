@@ -111,7 +111,7 @@ export function MultiSelect({
         <CommandList>
           {open && selectables.length > 0 ? (
             <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-              <ScrollArea className="h-48">
+              <ScrollArea>
                 <CommandGroup className="h-full overflow-auto">
                   {selectables.map((selectable) => {
                     return (

@@ -166,7 +166,7 @@ export async function uploadNirsData(formData: FormData) {
 
     return {
       error: false,
-      message: `Study created/found (ID: ${result.studyCode}). File processed. ${result.insertedNirsCount} NIRS data rows inserted successfully.`,
+      message: `Study created (Code: ${result.studyCode}). File processed. ${result.insertedNirsCount} NIRS data rows inserted successfully.`,
     };
   } catch (error: any) {
     console.error("Error during NIRS data processing:", error);

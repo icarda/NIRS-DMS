@@ -36,6 +36,7 @@ export async function getCrops({ limit }: { limit?: number } = {}) {
       species: true,
       productTypes: true,
       physiologicalStages: true,
+      cropTraits: true,
     },
   });
   return crops;

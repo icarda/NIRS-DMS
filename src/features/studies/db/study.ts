@@ -3,7 +3,34 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { StudyTable } from "@/drizzle/schema";
-import { getStudyIdTag, revalidateStudyCache } from "./cache/study";
+import {
+  getStudyGlobalTag,
+  getStudyIdTag,
+  revalidateStudyCache,
+} from "./cache/study";
+
+export async function getStudies() {
+  "use cache";
+  cacheTag(getStudyGlobalTag());
+  const studies = await db.query.StudyTable.findMany({
+    with: {
+      trial: {
+        with: {
+          crop: {
+            columns: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    columns: {
+      id: true,
+      studyCode: true,
+    },
+  });
+  return studies;
+}
 
 export async function getStudyByCode(studyCode: string, qualityLabId: number) {
   "use cache";

@@ -1,6 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useState,
+} from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileUp as FileUpload, X } from "lucide-react";
@@ -10,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,18 +34,17 @@ import {
 import { TraitUploadFormData, traitUploadSchema } from "@/lib/schemas";
 import { fileSize } from "@/lib/utils";
 
-const traits = [
-  { value: "protein", label: "Protein" },
-  { value: "starch", label: "Starch" },
-  { value: "height", label: "Height" },
-  { value: "yield", label: "Yield" },
-  { value: "moisture", label: "Moisture" },
-  { value: "oil", label: "Oil Content" },
-  { value: "fiber", label: "Fiber" },
-  { value: "weight", label: "Weight" },
-];
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 8 }, (_, i) => (currentYear - i).toString());
 
-const TraitUpload = () => {
+interface TraitUploadProps {
+  data: {
+    crops: Record<string, any>[];
+    studies: Record<string, any>[];
+  };
+}
+
+const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
   const [preview, setPreview] = useState<string | null>(null);
 
   const form = useForm<TraitUploadFormData>({
@@ -64,20 +69,18 @@ const TraitUpload = () => {
   };
 
   const handleRemoveFile = () => {
+    // @ts-ignore
     form.setValue("file", null);
     setPreview(null);
   };
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) =>
-    (currentYear - i).toString()
-  );
 
   function onSubmit(data: TraitUploadFormData) {
     console.log(data);
     setPreview(null);
     form.reset();
   }
+
+  const cropName = form.watch("crop");
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-6">
@@ -86,7 +89,7 @@ const TraitUpload = () => {
           Upload Trait Data
         </h1>
         <p className="text-base text-muted-foreground">
-          Select the crop, trial, and trait, then upload the file containing
+          Select the crop, study, and trait, then upload the file containing
           measured values for the selected trait.
         </p>
       </div>
@@ -109,10 +112,11 @@ const TraitUpload = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="wheat">Wheat</SelectItem>
-                      <SelectItem value="corn">Corn</SelectItem>
-                      <SelectItem value="soybean">Soybean</SelectItem>
-                      <SelectItem value="rice">Rice</SelectItem>
+                      {crops.map((crop) => (
+                        <SelectItem key={crop.id} value={crop.name}>
+                          {crop.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -164,15 +168,16 @@ const TraitUpload = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="trial3+barley+02/02/2025">
-                        trial3+barley+02/02/2025
-                      </SelectItem>
-                      <SelectItem value="trial2+wheat+05/02/2025">
-                        trial2+wheat+05/02/2025
-                      </SelectItem>
-                      <SelectItem value="trial2+barley+16/01/2025">
-                        trial2+barley+16/01/2025
-                      </SelectItem>
+                      {studies
+                        .filter((study) => study.trial.crop.name === cropName)
+                        .map((study) => (
+                          <SelectItem
+                            key={study.studyCode}
+                            value={study.studyCode}
+                          >
+                            {study.studyCode}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -188,8 +193,20 @@ const TraitUpload = () => {
                   <FormControl>
                     <MultiSelect
                       value={field.value}
-                      onChange={field.onChange}
-                      data={traits}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        console.log(form.getValues("crop"));
+                      }}
+                      data={
+                        crops
+                          .find((crop) => crop.name === cropName)
+                          ?.cropTraits.map(
+                            (cropTrait: { traitVariable: string }) => ({
+                              label: cropTrait.traitVariable,
+                              value: cropTrait.traitVariable,
+                            })
+                          ) || []
+                      }
                     />
                   </FormControl>
 
