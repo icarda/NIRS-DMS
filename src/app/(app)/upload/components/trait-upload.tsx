@@ -195,7 +195,6 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
                       value={field.value}
                       onChange={(val) => {
                         field.onChange(val);
-                        console.log(form.getValues("crop"));
                       }}
                       data={
                         crops
@@ -238,7 +237,7 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              CSV or XLSX files only - 5MB max
+                              CSV or XLSX files only - 50MB max
                             </p>
                           </div>
                           <Input

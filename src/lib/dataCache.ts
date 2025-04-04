@@ -44,3 +44,7 @@ export function getStudyTag(tag: CACHE_TAG, studyId: number) {
 export function getCropTag(tag: CACHE_TAG, cropId: number) {
   return `crop:${cropId}-${tag}` as const;
 }
+
+export function getCropTraitTag(tag: CACHE_TAG, cropTraitId: number) {
+  return `cropTrait:${cropTraitId}-${tag}` as const;
+}

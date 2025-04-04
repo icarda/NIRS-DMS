@@ -6,7 +6,7 @@ import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
   NIRSData,
   parseNirsFile,
-  transformParsedDataForDb,
+  transformParsedNirsDataForDb,
 } from "@/lib/parsing";
 import {
   multiStepFormSchemaFinal,
@@ -151,7 +151,10 @@ export async function uploadNirsData(formData: FormData) {
 
       let nirsDataToInsert: NIRSData[] = [];
       if (parsedFileData.length > 0) {
-        nirsDataToInsert = transformParsedDataForDb(parsedFileData, studyId);
+        nirsDataToInsert = transformParsedNirsDataForDb(
+          parsedFileData,
+          studyId
+        );
       }
 
       if (nirsDataToInsert.length > 0) {

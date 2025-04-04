@@ -363,7 +363,7 @@ async function parseTraitCsv(
 
 async function parseTraitXlsx(
   file: File,
-  selectedTraitsToProcess: string[] // Accept the list
+  selectedTraitsToProcess: string[]
 ): Promise<ParsedTraitFileRow[]> {
   try {
     const arrayBuffer = await file.arrayBuffer();

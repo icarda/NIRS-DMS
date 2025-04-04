@@ -7,7 +7,7 @@ export const traitSchema = z.object({
   year: z.number().int().min(1900, "Invalid year"),
   unit: z.string(),
   studyId: z.number().min(1, "Study is required"),
-  cropId: z.number().min(1, "Crop is required"),
+  cropTraitId: z.number().min(1, "Crop is required"),
   sampleId: z.number().min(1, "Sample ID is required"),
 });
 

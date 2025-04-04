@@ -3,15 +3,28 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { TraitTable } from "@/drizzle/schema";
-import { getCropTraitTag, revalidateTraitCache } from "./cache/trait";
+import { getTraitTag, revalidateTraitCache } from "./cache/trait";
 
-export async function getTraits({ cropId }: { cropId: number }) {
+export async function getTraits({ cropTraitId }: { cropTraitId: number }) {
   "use cache";
-  cacheTag(getCropTraitTag(cropId));
+  cacheTag(getTraitTag(cropTraitId));
   const traits = await db.query.TraitTable.findMany({
-    where: eq(TraitTable.cropId, cropId),
+    where: eq(TraitTable.cropTraitId, cropTraitId),
   });
   return traits;
+}
+
+export async function insertTraitBatch(
+  data: (typeof TraitTable.$inferInsert)[],
+  trx: Omit<typeof db, "$client"> = db
+) {
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  await trx.insert(TraitTable).values(data);
+
+  if (data.length > 0) revalidateTraitCache(data[0].cropTraitId);
 }
 
 export async function insertTrait(data: typeof TraitTable.$inferInsert) {
@@ -25,7 +38,7 @@ export async function insertTrait(data: typeof TraitTable.$inferInsert) {
     });
 
   if (newTrait == null) throw new Error("Failed to create trait");
-  revalidateTraitCache(newTrait.cropId);
+  revalidateTraitCache(newTrait.cropTraitId);
 
   return newTrait;
 }
@@ -37,7 +50,7 @@ export async function deleteTrait({ id }: { id: number }) {
     .returning();
 
   if (deletedTrait == null) throw new Error("Failed to delete trait");
-  revalidateTraitCache(deletedTrait.cropId);
+  revalidateTraitCache(deletedTrait.cropTraitId);
 
   return deletedTrait;
 }

@@ -17,7 +17,6 @@ export default async function UploadData() {
     getNirModels(),
     getStudies(),
   ]);
-  console.log("crops", crops[0]);
   return (
     <div>
       <div className="flex items-center">
