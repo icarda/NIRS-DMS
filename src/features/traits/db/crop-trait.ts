@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
@@ -7,6 +7,29 @@ import {
   getCropCropTraitsTag,
   revalidateCropTraitCache,
 } from "./cache/cropTrait";
+
+export async function getCropTraitIdMapForTraits(
+  cropId: number,
+  traitVariables: string[]
+): Promise<Map<string, number>> {
+  "use cache";
+  cacheTag(getCropCropTraitsTag(cropId));
+  if (!traitVariables || traitVariables.length === 0) return new Map();
+
+  const cropTraits = await db
+    .select({ id: CropTraitTable.id, name: CropTraitTable.traitVariable })
+    .from(CropTraitTable)
+    .where(
+      and(
+        eq(CropTraitTable.cropId, cropId),
+        inArray(CropTraitTable.traitVariable, traitVariables)
+      )
+    );
+
+  const map = new Map<string, number>();
+  cropTraits.forEach((ct) => map.set(ct.name, ct.id));
+  return map;
+}
 
 export async function getCropTraits({ cropId }: { cropId: number }) {
   "use cache";
