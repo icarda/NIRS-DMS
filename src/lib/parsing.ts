@@ -360,3 +360,131 @@ async function parseTraitCsv(
     });
   });
 }
+
+async function parseTraitXlsx(
+  file: File,
+  selectedTraitsToProcess: string[] // Accept the list
+): Promise<ParsedTraitFileRow[]> {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) throw new Error("XLSX file contains no sheets.");
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet, {
+      raw: true,
+      defval: null,
+    });
+
+    if (!jsonData || jsonData.length === 0) return [];
+
+    const parsedRows: ParsedTraitFileRow[] = [];
+    const headers = Object.keys(jsonData[0]);
+
+    const sampleIdHeader = headers.find(
+      (h) => h?.toLowerCase() === "sample_id"
+    );
+    const qlpNumberHeader = headers.find(
+      (h) => h?.toLowerCase() === "qualitylabplotnumber"
+    );
+
+    if (!sampleIdHeader || !qlpNumberHeader) {
+      throw new Error(
+        "XLSX must contain 'sample_id' and 'QualityLabPlotNumber' columns."
+      );
+    }
+
+    // Find which selected traits exist as headers
+    const availableTraitHeaders = new Map<string, string>();
+    const lowerCaseHeaders = new Map(headers.map((h) => [h.toLowerCase(), h]));
+
+    for (const traitName of selectedTraitsToProcess) {
+      const actualHeader = lowerCaseHeaders.get(traitName.toLowerCase());
+      if (actualHeader) {
+        availableTraitHeaders.set(traitName, actualHeader);
+      } else {
+        throw new Error(
+          `Selected trait '${traitName}' not found as a column header in the XLSX file.`
+        );
+      }
+    }
+
+    // Process rows
+    jsonData.forEach((row, index) => {
+      const rawSampleId = row[sampleIdHeader!];
+      const rawQlpNumber = row[qlpNumberHeader!];
+      const sampleId =
+        typeof rawSampleId === "number"
+          ? rawSampleId
+          : parseInt(String(rawSampleId ?? ""), 10);
+      const qualityLabPlotNumber =
+        typeof rawQlpNumber === "number"
+          ? rawQlpNumber
+          : parseInt(String(rawQlpNumber ?? ""), 10);
+      const traitValues: Record<string, number> = {};
+
+      if (isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+        console.warn(
+          `Skipping Trait XLSX row ${index + 2} due to invalid IDs.`
+        );
+        return;
+      }
+
+      availableTraitHeaders.forEach((actualHeader, selectedTraitName) => {
+        const rawValue = row[actualHeader];
+        const value =
+          typeof rawValue === "number"
+            ? rawValue
+            : parseFloat(String(rawValue ?? "NaN"));
+        if (!isNaN(value) && isFinite(value)) {
+          traitValues[selectedTraitName] = value;
+        } else {
+          console.warn(
+            `Invalid value for trait '${selectedTraitName}' in XLSX row ${index + 2}. Skipping value.`
+          );
+        }
+      });
+
+      if (Object.keys(traitValues).length > 0) {
+        parsedRows.push({
+          sampleId,
+          qualityLabPlotNumber,
+          traitValues,
+        });
+      } else {
+        console.warn(
+          `Skipping Trait XLSX row ${index + 2}: No valid values found for selected traits.`
+        );
+      }
+    });
+    return parsedRows;
+  } catch (error: any) {
+    throw new Error(`Failed to parse XLSX file: ${error.message}`);
+  }
+}
+
+export async function parseTraitFile(
+  file: File,
+  selectedTraitsToProcess: string[]
+): Promise<ParsedTraitFileRow[]> {
+  if (!selectedTraitsToProcess || selectedTraitsToProcess.length === 0) {
+    return [];
+  }
+
+  const fileType = file.type;
+  const fileNameLower = file.name.toLowerCase();
+
+  if (fileType === "text/csv" || fileNameLower.endsWith(".csv")) {
+    return await parseTraitCsv(file, selectedTraitsToProcess);
+  } else if (
+    fileType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    fileNameLower.endsWith(".xlsx")
+  ) {
+    return await parseTraitXlsx(file, selectedTraitsToProcess);
+  } else {
+    throw new Error(
+      `Unsupported file type for Trait upload: ${fileType || "unknown"}. Please upload CSV or XLSX.`
+    );
+  }
+}
