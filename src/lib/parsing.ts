@@ -10,11 +10,17 @@ export interface NIRSData {
   value: number;
 }
 
-export interface ParsedFileRow {
+export interface ParsedNirsDataFileRow {
   plotId: number;
   sampleId: number;
   qualityLabPlotNumber: number;
   spectrumData: Record<string, number>;
+}
+
+export interface ParsedTraitFileRow {
+  sampleId: number;
+  qualityLabPlotNumber: number;
+  traitValues: Record<string, number>;
 }
 
 function isNumericString(str: string): boolean {
@@ -25,7 +31,7 @@ function isNumericString(str: string): boolean {
   );
 }
 
-export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
+export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
   const text = await file.text();
   return new Promise((resolve, reject) => {
     Papa.parse<Record<string, string>>(text, {
@@ -42,7 +48,7 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
         }
         if (!results.data) return resolve([]);
 
-        const parsedRows: ParsedFileRow[] = [];
+        const parsedRows: ParsedNirsDataFileRow[] = [];
         const headers = results.meta.fields;
         if (!headers) return reject(new Error("Could not detect CSV headers."));
 
@@ -106,7 +112,7 @@ export async function parseCsv(file: File): Promise<ParsedFileRow[]> {
   });
 }
 
-export async function parseXlsx(file: File): Promise<ParsedFileRow[]> {
+export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
   try {
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
@@ -121,7 +127,7 @@ export async function parseXlsx(file: File): Promise<ParsedFileRow[]> {
 
     if (!jsonData || jsonData.length === 0) return [];
 
-    const parsedRows: ParsedFileRow[] = [];
+    const parsedRows: ParsedNirsDataFileRow[] = [];
     const headers = Object.keys(jsonData[0]);
 
     const plotIdHeader = headers.find((h) => h?.toLowerCase() === "plot_id");
@@ -192,7 +198,9 @@ export async function parseXlsx(file: File): Promise<ParsedFileRow[]> {
   }
 }
 
-export async function parseNirsFile(file: File): Promise<ParsedFileRow[]> {
+export async function parseNirsFile(
+  file: File
+): Promise<ParsedNirsDataFileRow[]> {
   const fileType = file.type;
   const fileNameLower = file.name.toLowerCase();
 
@@ -211,8 +219,8 @@ export async function parseNirsFile(file: File): Promise<ParsedFileRow[]> {
   }
 }
 
-export function transformParsedDataForDb(
-  parsedData: ParsedFileRow[],
+export function transformParsedNirsDataForDb(
+  parsedData: ParsedNirsDataFileRow[],
   studyId: number
 ): NIRSData[] {
   const nirsDataToInsert: NIRSData[] = [];
@@ -248,4 +256,107 @@ export function transformParsedDataForDb(
     }
   }
   return nirsDataToInsert;
+}
+
+async function parseTraitCsv(
+  file: File,
+  selectedTraitsToProcess: string[]
+): Promise<ParsedTraitFileRow[]> {
+  const text = await file.text();
+  return new Promise((resolve, reject) => {
+    Papa.parse<Record<string, string>>(text, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: (results) => {
+        if (results.errors.length > 0) {
+          return reject(
+            new Error(
+              `Error parsing CSV structure: ${results.errors[0].message}`
+            )
+          );
+        }
+        if (!results.data) return resolve([]);
+
+        const parsedRows: ParsedTraitFileRow[] = [];
+        const headers = results.meta.fields;
+        if (!headers) return reject(new Error("Could not detect CSV headers."));
+
+        // Find required metadata headers
+        const sampleIdHeader = headers.find(
+          (h) => h?.toLowerCase() === "sample_id"
+        );
+        const qlpNumberHeader = headers.find(
+          (h) => h?.toLowerCase() === "qualitylabplotnumber"
+        );
+
+        if (!sampleIdHeader || !qlpNumberHeader) {
+          return reject(
+            new Error(
+              "CSV must contain 'sample_id' and 'QualityLabPlotNumber' columns."
+            )
+          );
+        }
+
+        const availableTraitHeaders = new Map<string, string>();
+        const lowerCaseHeaders = new Map(
+          headers.map((h) => [h.toLowerCase(), h])
+        );
+
+        for (const traitName of selectedTraitsToProcess) {
+          const actualHeader = lowerCaseHeaders.get(traitName.toLowerCase());
+          if (actualHeader) {
+            availableTraitHeaders.set(traitName, actualHeader);
+          } else {
+            return reject(
+              new Error(
+                `Selected trait '${traitName}' not found as a column header in the CSV file.`
+              )
+            );
+          }
+        }
+
+        // Process rows
+        results.data.forEach((row, index) => {
+          const sampleId = parseInt(row[sampleIdHeader!] ?? "", 10);
+          const qualityLabPlotNumber = parseInt(
+            row[qlpNumberHeader!] ?? "",
+            10
+          );
+          const traitValues: Record<string, number> = {};
+
+          if (isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+            return;
+          }
+
+          availableTraitHeaders.forEach((actualHeader, selectedTraitName) => {
+            const value = parseFloat(row[actualHeader]);
+            if (!isNaN(value) && isFinite(value)) {
+              traitValues[selectedTraitName] = value;
+            } else {
+              console.warn(
+                `Invalid value for trait '${selectedTraitName}' in CSV row ${index + 2}. Skipping value.`
+              );
+            }
+          });
+
+          if (Object.keys(traitValues).length > 0) {
+            parsedRows.push({
+              sampleId,
+              qualityLabPlotNumber,
+              traitValues,
+            });
+          } else {
+            console.warn(
+              `Skipping Trait CSV row ${index + 2}: No valid values found for selected traits.`
+            );
+          }
+        });
+        resolve(parsedRows);
+      },
+      error: (error: Error) => {
+        reject(new Error(`CSV parsing failed: ${error.message}`));
+      },
+    });
+  });
 }
