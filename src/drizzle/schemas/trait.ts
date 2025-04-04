@@ -53,6 +53,7 @@ export const CropTraitTable = pgTable(
     unit: text("unit").notNull(),
     minimumAllowed: integer("minimum_allowed"),
     maximumAllowed: integer("maximum_allowed"),
+    gid: integer("gid"),
     createdAt,
     updatedAt,
   },

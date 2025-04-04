@@ -1,6 +1,9 @@
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
+import { getCropTraitIdMapForTraits } from "@/features/traits/db/crop-trait";
+import { TraitSchema } from "@/features/traits/schemas/trait";
+
 export interface NIRSData {
   studyId: number;
   sampleId: number;
@@ -487,4 +490,68 @@ export async function parseTraitFile(
       `Unsupported file type for Trait upload: ${fileType || "unknown"}. Please upload CSV or XLSX.`
     );
   }
+}
+
+export async function transformTraitDataForDb(
+  parsedData: ParsedTraitFileRow[],
+  studyId: number,
+  year: number,
+  cropId: number
+): Promise<TraitSchema[]> {
+  const traitDataToInsert: TraitSchema[] = [];
+  if (!parsedData || parsedData.length === 0) {
+    return traitDataToInsert;
+  }
+
+  const uniqueTraitNames = new Set<string>();
+  parsedData.forEach((row) => {
+    Object.keys(row.traitValues).forEach((traitName) =>
+      uniqueTraitNames.add(traitName)
+    );
+  });
+  const traitNamesArray = Array.from(uniqueTraitNames);
+
+  if (traitNamesArray.length === 0) {
+    return [];
+  }
+
+  const cropTraitMap = await getCropTraitIdMapForTraits(
+    cropId,
+    traitNamesArray
+  );
+
+  if (cropTraitMap.size === 0) {
+    console.warn(
+      `No valid CropTraits found for Crop ID ${cropId} matching headers in the file.`
+    );
+
+    throw new Error(
+      `None of the traits in the file are defined for Crop ID ${cropId}.`
+    );
+  }
+
+  for (const row of parsedData) {
+    for (const [traitName, measuredValue] of Object.entries(row.traitValues)) {
+      const cropTraitId = cropTraitMap.get(traitName);
+
+      if (cropTraitId !== undefined) {
+        traitDataToInsert.push({
+          studyId: studyId,
+          sampleId: row.sampleId,
+          year: year,
+          traitName: traitName,
+          measuredValue: measuredValue,
+          cropTraitId: cropTraitId,
+          predictedValue: null,
+          gid: row.qualityLabPlotNumber,
+        });
+      } else {
+        throw new Error(
+          `Trait '${traitName}' not found in CropTraitTable for Crop ID ${cropId}.`
+        );
+      }
+    }
+  }
+
+  return traitDataToInsert;
 }
