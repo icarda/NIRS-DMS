@@ -2,8 +2,79 @@
 
 import { z } from "zod";
 
-import { deleteTrait as deleteTraitDb, insertTrait } from "../db/trait";
+import { db } from "@/drizzle/db";
+import { parseTraitFile, transformTraitDataForDb } from "@/lib/parsing";
+import { traitUploadSchemaFinal } from "@/lib/schemas";
+import {
+  deleteTrait as deleteTraitDb,
+  insertTrait,
+  insertTraitBatch,
+} from "../db/trait";
 import { traitSchema } from "../schemas/trait";
+
+export async function uploadTraitDataAction(formData: FormData) {
+  const dataToValidate = {
+    studyId: parseInt(formData.get("studyId") as string, 10),
+    studyCode: formData.get("studyCode") as string,
+    cropId: parseInt(formData.get("cropId") as string, 10),
+    year: parseInt(formData.get("year") as string, 10),
+    traits: JSON.parse(formData.get("traits") as string),
+    file: formData.get("file"),
+  };
+  const validationResult = traitUploadSchemaFinal.safeParse(dataToValidate);
+
+  if (!validationResult.success) {
+    const errorMessages = validationResult.error.errors
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join("; ");
+    return { error: true, message: `Invalid input: ${errorMessages}` };
+  }
+
+  const { studyId, studyCode, cropId, year, traits, file } =
+    validationResult.data;
+
+  try {
+    const parsedFileData = await parseTraitFile(file, traits);
+
+    if (parsedFileData.length === 0) {
+      return {
+        error: false,
+        message:
+          "File parsed, but contained 0 data rows matching selected traits.",
+      };
+    }
+
+    const traitDataToInsert = await transformTraitDataForDb(
+      parsedFileData,
+      studyId,
+      year,
+      cropId
+    );
+
+    if (traitDataToInsert.length === 0) {
+      return {
+        error: false,
+        message: `File parsed, but no data matched valid traits defined for crop ${cropId}. No traits inserted.`,
+      };
+    }
+
+    await db.transaction(async (tx) => {
+      await insertTraitBatch(traitDataToInsert, tx);
+    });
+
+    return {
+      error: false,
+      message: `Trait data uploaded successfully. ${traitDataToInsert.length} trait records inserted for study ${studyCode}.`,
+    };
+  } catch (error: any) {
+    return {
+      error: true,
+      message:
+        error.message ||
+        "An unexpected server error occurred during trait processing.",
+    };
+  }
+}
 
 export async function createTrait(unsafeData: z.infer<typeof traitSchema>) {
   const { success, data } = traitSchema.safeParse(unsafeData);

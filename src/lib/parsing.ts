@@ -143,7 +143,7 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
 
     if (!plotIdHeader || !sampleIdHeader || !qlpNumberHeader) {
       throw new Error(
-        "XLSX must contain 'plot_id', 'sample_id', and 'QualityLabPlotNumber' columns."
+        "must contain 'plot_id', 'sample_id', and 'QualityLabPlotNumber' columns."
       );
     }
 
@@ -393,7 +393,7 @@ async function parseTraitXlsx(
 
     if (!sampleIdHeader || !qlpNumberHeader) {
       throw new Error(
-        "XLSX must contain 'sample_id' and 'QualityLabPlotNumber' columns."
+        "must contain 'sample_id' and 'QualityLabPlotNumber' columns."
       );
     }
 
@@ -521,10 +521,6 @@ export async function transformTraitDataForDb(
   );
 
   if (cropTraitMap.size === 0) {
-    console.warn(
-      `No valid CropTraits found for Crop ID ${cropId} matching headers in the file.`
-    );
-
     throw new Error(
       `None of the traits in the file are defined for Crop ID ${cropId}.`
     );

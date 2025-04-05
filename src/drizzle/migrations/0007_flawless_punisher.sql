@@ -1,0 +1,1 @@
+ALTER TABLE "trait" ADD COLUMN "gid" integer NOT NULL;
