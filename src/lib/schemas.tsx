@@ -103,6 +103,52 @@ export const traitUploadSchema = z.object({
     ),
 });
 
+export const traitUploadSchemaFinal = z.object({
+  studyCode: z.string().min(1, "Study code is required"),
+  studyId: z
+    .number({
+      required_error: "Study ID is required.",
+      invalid_type_error: "Study ID must be a valid number.",
+    })
+    .int()
+    .positive({ message: "Study ID must be positive." }),
+  cropId: z
+    .number({
+      required_error: "Crop ID is required.",
+      invalid_type_error: "Crop ID must be a valid number.",
+    })
+    .int()
+    .positive({ message: "Crop ID must be positive." }),
+  year: z
+    .number({
+      required_error: "Year is required.",
+      invalid_type_error: "Year must be a valid number.",
+    })
+    .int()
+    .min(1900, { message: "Year seems too old." })
+    .max(new Date().getFullYear() + 1, {
+      message: "Year cannot be in the future.",
+    }),
+
+  traits: z
+    .array(z.string().min(1, "Trait name cannot be empty string."))
+    .min(1, "At least one trait must be selected."),
+
+  file: z
+    .instanceof(File, { message: "File is required" })
+    .refine((file) => file.size <= 50 * 1024 * 1024, {
+      message: "File size must be less than 50MB",
+    })
+    .refine(
+      (file) =>
+        [
+          "text/csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ].includes(file.type),
+      { message: "File must be CSV or XLSX format" }
+    ),
+});
+
 export const multiStepFormSchema = trialFormSchema
   .merge(studyFormSchema)
   .merge(uploadFormSchema);
@@ -258,3 +304,4 @@ export type UploadFormData = z.infer<typeof uploadFormSchema>;
 export type MultiFormData = TrialFormData & StudyFormData & UploadFormData;
 export type MultiStepFormSchemaFinal = z.infer<typeof multiStepFormSchemaFinal>;
 export type TraitUploadFormData = z.infer<typeof traitUploadSchema>;
+export type TraitUploadFormDataFinal = z.infer<typeof traitUploadSchemaFinal>;

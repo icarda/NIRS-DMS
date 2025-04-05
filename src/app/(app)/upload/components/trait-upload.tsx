@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-  useState,
-} from "react";
+import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileUp as FileUpload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { uploadTraitDataAction } from "@/features/traits/actions/trait";
 import { TraitUploadFormData, traitUploadSchema } from "@/lib/schemas";
 import { fileSize } from "@/lib/utils";
 
@@ -54,6 +49,7 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
       year: "",
       study: "",
       traits: [],
+      file: undefined,
     },
   });
 
@@ -74,10 +70,45 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
     setPreview(null);
   };
 
-  function onSubmit(data: TraitUploadFormData) {
-    console.log(data);
-    setPreview(null);
-    form.reset();
+  console.log(form.getValues());
+  async function onSubmit(data: TraitUploadFormData) {
+    const cropId = crops.find((c) => c.name === data.crop)?.id as number;
+    const studyId = studies.find((s) => s.studyCode === data.study)
+      ?.id as number;
+
+    const dataForFormData = {
+      cropId: cropId,
+      studyId: studyId,
+      studyCode: data.study,
+      year: data.year,
+      traits: data.traits,
+      file: data.file,
+    };
+
+    const formData = new FormData();
+    Object.entries(dataForFormData).forEach(([key, value]) => {
+      if (key === "file" && value instanceof File) {
+        formData.append(key, value);
+      } else if (key === "traits" && Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+
+    const result = await uploadTraitDataAction(formData);
+    // const result = {
+    //   error: true,
+    //   message: "Test error message",
+    // };
+
+    if (result.error) {
+      toast.error(result.message);
+    } else {
+      toast.success(result.message);
+      setPreview(null);
+      form.reset();
+    }
   }
 
   const cropName = form.watch("crop");
@@ -93,7 +124,7 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
           measured values for the selected trait.
         </p>
       </div>
-      <Form {...form}>
+      <Form {...form} key={form.formState.submitCount}>
         <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
             <FormField
@@ -281,8 +312,12 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
             />
           </div>
           <div className="mt-8 flex justify-between">
-            <Button type="submit" className="ml-auto">
-              Submit
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="ml-auto"
+            >
+              {form.formState.isSubmitting ? "Submitting..." : "Upload Data"}
             </Button>
           </div>
         </form>
