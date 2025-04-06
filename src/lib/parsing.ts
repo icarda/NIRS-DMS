@@ -540,7 +540,20 @@ export async function transformTraitDataForDb(
 
   for (const row of parsedData) {
     for (const [traitName, measuredValue] of Object.entries(row.traitValues)) {
-      const cropTraitId = cropTraitMap.get(traitName);
+      const cropTraitDetails = cropTraitMap.get(traitName)!;
+
+      const { id: cropTraitId, min, max } = cropTraitDetails;
+
+      if (min !== null && measuredValue < min) {
+        throw new Error(
+          `Data Quality Error: Trait '${traitName}' value ${measuredValue} (SampleID: ${row.sampleId}) is less than minimum allowed value (${min}).`
+        );
+      }
+      if (max !== null && measuredValue > max) {
+        throw new Error(
+          `Data Quality Error: Trait '${traitName}' value ${measuredValue} (SampleID: ${row.sampleId}) is greater than maximum allowed value (${max}).`
+        );
+      }
 
       if (cropTraitId !== undefined) {
         traitDataToInsert.push({

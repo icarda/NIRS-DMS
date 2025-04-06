@@ -11,13 +11,20 @@ import {
 export async function getCropTraitIdMapForTraits(
   cropId: number,
   traitVariables: string[]
-): Promise<Map<string, number>> {
+): Promise<
+  Map<string, { id: number; min: number | null; max: number | null }>
+> {
   "use cache";
   cacheTag(getCropCropTraitsTag(cropId));
   if (!traitVariables || traitVariables.length === 0) return new Map();
 
   const cropTraits = await db
-    .select({ id: CropTraitTable.id, name: CropTraitTable.traitVariable })
+    .select({
+      id: CropTraitTable.id,
+      name: CropTraitTable.traitVariable,
+      minimumAllowed: CropTraitTable.minimumAllowed,
+      maximumAllowed: CropTraitTable.maximumAllowed,
+    })
     .from(CropTraitTable)
     .where(
       and(
@@ -26,8 +33,18 @@ export async function getCropTraitIdMapForTraits(
       )
     );
 
-  const map = new Map<string, number>();
-  cropTraits.forEach((ct) => map.set(ct.name, ct.id));
+  const map = new Map<
+    string,
+    { id: number; min: number | null; max: number | null }
+  >();
+  cropTraits.forEach((ct) =>
+    map.set(ct.name, {
+      id: ct.id,
+      min: ct.minimumAllowed,
+      max: ct.maximumAllowed,
+    })
+  );
+
   return map;
 }
 
