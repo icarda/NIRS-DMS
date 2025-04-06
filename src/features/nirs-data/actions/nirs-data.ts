@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/drizzle/db";
+import { getNirModelById } from "@/features/nir-models/db/nir-model";
 import { insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
@@ -13,6 +14,19 @@ import {
   MultiStepFormSchemaFinal,
 } from "@/lib/schemas";
 import { insertNirsDataBatch } from "../db/nirs-data";
+
+function parseWavelengthRange(
+  rangeString: string
+): { min: number; max: number } | null {
+  if (!rangeString || typeof rangeString !== "string") return null;
+  const parts = rangeString.split("-");
+  if (parts.length !== 2) return null;
+  const min = parseFloat(parts[0].trim());
+  const max = parseFloat(parts[1].trim());
+  if (isNaN(min) || isNaN(max) || !isFinite(min) || !isFinite(max) || min > max)
+    return null;
+  return { min, max };
+}
 
 export async function uploadNirsData(formData: FormData) {
   const rawData: Record<string, any> = {};
@@ -67,6 +81,15 @@ export async function uploadNirsData(formData: FormData) {
   const validatedData = validationResult.data;
 
   try {
+    const nirModel = await getNirModelById({ id: validatedData.nirModelID });
+    if (!nirModel) throw new Error(/*...*/);
+    const wavelengthRange = parseWavelengthRange(nirModel.wavelengthRange);
+    if (!wavelengthRange) {
+      throw new Error(
+        `Invalid wavelength range for NIR model ID ${validatedData.nirModelID}.`
+      );
+    }
+
     const result = await db.transaction(async (tx) => {
       let trialId: number;
       // get trial ID
@@ -153,7 +176,8 @@ export async function uploadNirsData(formData: FormData) {
       if (parsedFileData.length > 0) {
         nirsDataToInsert = transformParsedNirsDataForDb(
           parsedFileData,
-          studyId
+          studyId,
+          wavelengthRange
         );
       }
 

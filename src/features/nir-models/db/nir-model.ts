@@ -3,7 +3,20 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { NirModelTable } from "@/drizzle/schema";
-import { getNirModelGlobalTag, revalidateNirModelCache } from "./cache";
+import {
+  getNirModelGlobalTag,
+  getNirModelIdTag,
+  revalidateNirModelCache,
+} from "./cache";
+
+export async function getNirModelById({ id }: { id: number }) {
+  "use cache";
+  cacheTag(getNirModelIdTag(id));
+  const nirModel = await db.query.NirModelTable.findFirst({
+    where: eq(NirModelTable.id, id),
+  });
+  return nirModel;
+}
 
 export async function getNirModels({ limit }: { limit?: number } = {}) {
   "use cache";

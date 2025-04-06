@@ -1,6 +1,5 @@
 "use client";
 
-import { error } from "console";
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -113,9 +112,9 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const result = await uploadNirsData(formData);
 
     if (result.error) {
-      toast.error(`Error: ${result.message}`);
+      toast.error(result.message);
     } else {
-      toast.success(`Success: ${result.message}`);
+      toast.success(result.message);
       setTimeout(() => {
         setStep(1);
         form.reset();

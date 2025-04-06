@@ -224,7 +224,8 @@ export async function parseNirsFile(
 
 export function transformParsedNirsDataForDb(
   parsedData: ParsedNirsDataFileRow[],
-  studyId: number
+  studyId: number,
+  wavelengthRange?: { min: number; max: number }
 ): NIRSData[] {
   const nirsDataToInsert: NIRSData[] = [];
   if (!parsedData || parsedData.length === 0) {
@@ -241,6 +242,17 @@ export function transformParsedNirsDataForDb(
         typeof value === "number" &&
         isFinite(value)
       ) {
+        if (wavelengthRange) {
+          if (
+            wavelength < wavelengthRange.min ||
+            wavelength > wavelengthRange.max
+          ) {
+            throw new Error(
+              `Data Quality Error: Wavelength ${wavelength} (SampleID: ${row.sampleId}, PlotID: ${row.plotId}) is outside the allowed range [${wavelengthRange.min}-${wavelengthRange.max}] for the selected NIR Model.`
+            );
+          }
+        }
+
         const gid = row.qualityLabPlotNumber;
 
         if (isNaN(gid) || !isFinite(gid)) {
