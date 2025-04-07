@@ -97,10 +97,6 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
     });
 
     const result = await uploadTraitDataAction(formData);
-    // const result = {
-    //   error: true,
-    //   message: "Test error message",
-    // };
 
     if (result.error) {
       toast.error(result.message);
@@ -194,7 +190,7 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={!cropName}>
                         <SelectValue placeholder="Select study" />
                       </SelectTrigger>
                     </FormControl>
