@@ -55,15 +55,29 @@ export const StudyTable = pgTable(
   ]
 );
 
-export const SpeciesTable = pgTable("species", {
-  id,
-  cropId: integer("crop_id")
-    .notNull()
-    .references(() => CropTable.id, { onDelete: "cascade" }),
-  name: text("name").notNull().unique(),
-  createdAt,
-  updatedAt,
-});
+export const SpeciesTable = pgTable(
+  "species",
+  {
+    id,
+    trialId: integer("trial_id")
+      .notNull()
+      .references(() => TrialTable.id, { onDelete: "cascade" }),
+    cropId: integer("crop_id")
+      .notNull()
+      .references(() => CropTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    {
+      speciesUnique: uniqueIndex("species_unique").on(
+        table.trialId,
+        table.name
+      ),
+    },
+  ]
+);
 
 export const ProductTypeTable = pgTable("product_type", {
   id,
@@ -110,12 +124,15 @@ export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   nirsData: many(NirsDataTable),
 }));
 
-export const speciesRelations = relations(SpeciesTable, ({ one, many }) => ({
+export const speciesRelations = relations(SpeciesTable, ({ one }) => ({
+  trial: one(TrialTable, {
+    fields: [SpeciesTable.trialId],
+    references: [TrialTable.id],
+  }),
   crop: one(CropTable, {
     fields: [SpeciesTable.cropId],
     references: [CropTable.id],
   }),
-  trials: many(TrialTable),
 }));
 
 export const productTypeRelations = relations(

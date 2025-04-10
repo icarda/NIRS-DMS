@@ -57,6 +57,27 @@
       "when": 1743863516737,
       "tag": "0007_flawless_punisher",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1744328514079,
+      "tag": "0008_sudden_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1744328909826,
+      "tag": "0009_fresh_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1744330624113,
+      "tag": "0010_hesitant_hiroim",
+      "breakpoints": true
     }
   ]
 }

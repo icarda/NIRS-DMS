@@ -1,0 +1,2 @@
+ALTER TABLE "species" ADD COLUMN "crop_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "species" ADD CONSTRAINT "species_crop_id_crop_id_fk" FOREIGN KEY ("crop_id") REFERENCES "public"."crop"("id") ON DELETE cascade ON UPDATE no action;

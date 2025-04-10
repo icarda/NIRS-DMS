@@ -59,6 +59,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const selectedCrop = data.crops.find(
       (crop) => crop.name === multiFormData.crop
     )!;
+
     const cropID = selectedCrop?.id as number;
     const speciesID = selectedCrop.species.find(
       (species: { name: string }) => species.name === multiFormData.species

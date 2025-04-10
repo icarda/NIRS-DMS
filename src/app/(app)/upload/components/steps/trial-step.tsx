@@ -158,6 +158,7 @@ const TrialStep = ({
                       onValueChange={(value) => {
                         field.onChange(value);
                         const trial = trials.find((t) => t.name === value)!;
+                        console.log(trial);
                         form.setValue(
                           "trialPlantingDate",
                           new Date(trial.plantingDate)
@@ -180,10 +181,7 @@ const TrialStep = ({
                         form.setValue(
                           "fertilizers",
                           trial.fertilizers.map(
-                            (f: {
-                              type: string;
-                              amount: number;
-                            }) => ({
+                            (f: { type: string; amount: number }) => ({
                               type: f.type,
                               amount: f.amount,
                             })

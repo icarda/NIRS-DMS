@@ -1,7 +1,11 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+
 import { db } from "@/drizzle/db";
+import { SpeciesTable } from "@/drizzle/schema";
 import { getNirModelById } from "@/features/nir-models/db/nir-model";
+import { getSpeciesById, insertSpecies } from "@/features/studies/db/species";
 import { insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
@@ -95,12 +99,32 @@ export async function uploadNirsData(formData: FormData) {
       // get trial ID
       if (validatedData.useExistingTrial) {
         const existingTrial = await getTrialByName(validatedData.trial);
+
         if (!existingTrial) {
           throw new Error(
             `Existing trial named "${validatedData.trial}" was selected but not found in the database.`
           );
         }
         trialId = existingTrial.id;
+
+        const existingSpecies = await getSpeciesById(validatedData.speciesID);
+
+        if (!existingSpecies) {
+          throw new Error(
+            `Existing species ID ${validatedData.speciesID} was selected but not found in the database.`
+          );
+        }
+
+        if (existingSpecies.trialId !== trialId) {
+          await insertSpecies(
+            {
+              name: existingSpecies.name,
+              trialId,
+              cropId: validatedData.cropID,
+            },
+            tx
+          );
+        }
       } else {
         // Create new trial
         let latitude: number | null = null;

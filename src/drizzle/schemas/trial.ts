@@ -23,9 +23,7 @@ export const TrialTable = pgTable("trial", {
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
   additionalMetadata: jsonb("additional_metadata").default({}),
-  speciesId: integer("species_id")
-    .notNull()
-    .references(() => SpeciesTable.id, { onDelete: "cascade" }),
+
   cropId: integer("crop_id")
     .notNull()
     .references(() => CropTable.id, { onDelete: "cascade" }),
@@ -49,10 +47,7 @@ export const trialRelations = relations(TrialTable, ({ one, many }) => ({
     fields: [TrialTable.cropId],
     references: [CropTable.id],
   }),
-  species: one(SpeciesTable, {
-    fields: [TrialTable.speciesId],
-    references: [SpeciesTable.id],
-  }),
+  species: many(SpeciesTable),
   fertilizers: many(TrialFertilizerTable),
   studies: many(StudyTable),
 }));
