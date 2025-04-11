@@ -6,7 +6,9 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 import { createdAt, id, updatedAt } from "../schemaHelpers";
@@ -42,14 +44,27 @@ export const TrialFertilizerTable = pgTable("trial_fertilizer", {
   updatedAt,
 });
 
+export const TrialSpeciesTable = pgTable(
+  "trial_species",
+  {
+    trialId: integer("trial_id")
+      .notNull()
+      .references(() => TrialTable.id, { onDelete: "cascade" }),
+    speciesId: integer("species_id")
+      .notNull()
+      .references(() => SpeciesTable.id, { onDelete: "cascade" }),
+    createdAt,
+  },
+  (table) => [{ pk: primaryKey({ columns: [table.trialId, table.speciesId] }) }]
+);
+
 export const trialRelations = relations(TrialTable, ({ one, many }) => ({
   crop: one(CropTable, {
     fields: [TrialTable.cropId],
     references: [CropTable.id],
   }),
-  species: many(SpeciesTable),
   fertilizers: many(TrialFertilizerTable),
-  studies: many(StudyTable),
+  trialSpecies: many(TrialSpeciesTable),
 }));
 
 export const trialFertilizerRelations = relations(
@@ -58,6 +73,20 @@ export const trialFertilizerRelations = relations(
     trial: one(TrialTable, {
       fields: [TrialFertilizerTable.trialId],
       references: [TrialTable.id],
+    }),
+  })
+);
+
+export const trialSpeciesRelations = relations(
+  TrialSpeciesTable,
+  ({ one }) => ({
+    trial: one(TrialTable, {
+      fields: [TrialSpeciesTable.trialId],
+      references: [TrialTable.id],
+    }),
+    species: one(SpeciesTable, {
+      fields: [TrialSpeciesTable.speciesId],
+      references: [SpeciesTable.id],
     }),
   })
 );

@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { SpeciesTable } from "@/drizzle/schema";
+import { SpeciesTable, TrialSpeciesTable } from "@/drizzle/schema";
 import { getSpeciesIdTag, revalidateSpeciesCache } from "./cache/species";
 
 export async function getSpeciesById(id: number) {
@@ -13,20 +13,40 @@ export async function getSpeciesById(id: number) {
     columns: {
       id: true,
       name: true,
-      trialId: true,
     },
   });
   return species;
 }
 
-export async function insertSpecies(
-  data: typeof SpeciesTable.$inferInsert,
+export async function getTrialSpecies(trialId: number, speciesId: number) {
+  "use cache";
+  cacheTag(getSpeciesIdTag(speciesId));
+  const trialSpecies = await db.query.TrialSpeciesTable.findFirst({
+    where: (trialSpecies) =>
+      and(
+        eq(trialSpecies.trialId, trialId),
+        eq(trialSpecies.speciesId, speciesId)
+      ),
+    columns: {
+      trialId: true,
+      speciesId: true,
+    },
+  });
+  return trialSpecies;
+}
+
+export async function insertTrialSpecies(
+  data: typeof TrialSpeciesTable.$inferInsert,
   trx: Omit<typeof db, "$client"> = db
 ) {
-  const [newSpecies] = await trx.insert(SpeciesTable).values(data).returning();
+  const [newTrialSpecies] = await trx
+    .insert(TrialSpeciesTable)
+    .values(data)
+    .returning();
 
-  if (newSpecies == null) throw new Error("Failed to create species");
-  revalidateSpeciesCache(newSpecies.id, data.trialId);
+  if (newTrialSpecies == null)
+    throw new Error("Failed to create trial species");
+  revalidateSpeciesCache(newTrialSpecies.speciesId, data.trialId);
 
-  return newSpecies;
+  return newTrialSpecies;
 }

@@ -5,7 +5,11 @@ import { eq } from "drizzle-orm";
 import { db } from "@/drizzle/db";
 import { SpeciesTable } from "@/drizzle/schema";
 import { getNirModelById } from "@/features/nir-models/db/nir-model";
-import { getSpeciesById, insertSpecies } from "@/features/studies/db/species";
+import {
+  getSpeciesById,
+  getTrialSpecies,
+  insertTrialSpecies,
+} from "@/features/studies/db/species";
 import { insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
@@ -86,7 +90,7 @@ export async function uploadNirsData(formData: FormData) {
 
   try {
     const nirModel = await getNirModelById({ id: validatedData.nirModelID });
-    if (!nirModel) throw new Error(/*...*/);
+    if (!nirModel) throw new Error("NIR model not found in the database.");
     const wavelengthRange = parseWavelengthRange(nirModel.wavelengthRange);
     if (!wavelengthRange) {
       throw new Error(
@@ -107,6 +111,7 @@ export async function uploadNirsData(formData: FormData) {
         }
         trialId = existingTrial.id;
 
+        // Check if the species ID is valid
         const existingSpecies = await getSpeciesById(validatedData.speciesID);
 
         if (!existingSpecies) {
@@ -115,15 +120,17 @@ export async function uploadNirsData(formData: FormData) {
           );
         }
 
-        if (existingSpecies.trialId !== trialId) {
-          await insertSpecies(
-            {
-              name: existingSpecies.name,
-              trialId,
-              cropId: validatedData.cropID,
-            },
-            tx
-          );
+        const trialSpecies = await getTrialSpecies(
+          trialId,
+          validatedData.speciesID
+        );
+
+        if (!trialSpecies) {
+          const trialSpeciesData = {
+            trialId,
+            speciesId: validatedData.speciesID,
+          };
+          await insertTrialSpecies(trialSpeciesData, tx);
         }
       } else {
         // Create new trial
@@ -151,7 +158,6 @@ export async function uploadNirsData(formData: FormData) {
           latitude: latitude,
           longitude: longitude,
           cropId: validatedData.cropID,
-          speciesId: validatedData.speciesID,
           // additionalMetadata: {}
         };
 
@@ -164,6 +170,20 @@ export async function uploadNirsData(formData: FormData) {
           throw new Error("Failed to create new trial record.");
         }
         trialId = newTrial.id;
+
+        const species = await getSpeciesById(validatedData.speciesID);
+
+        if (!species) {
+          throw new Error(
+            `Species ID ${validatedData.speciesID} was selected but not found in the database.`
+          );
+        }
+
+        const trialSpeciesData = {
+          trialId,
+          speciesId: validatedData.speciesID,
+        };
+        await insertTrialSpecies(trialSpeciesData, tx);
       }
 
       // Create new study

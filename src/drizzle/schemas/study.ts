@@ -15,7 +15,7 @@ import { NirModelTable } from "./nir-model";
 import { NirsDataTable } from "./nirs-data";
 import { QualityLabTable } from "./quality-lab";
 import { TraitTable } from "./trait";
-import { TrialTable } from "./trial";
+import { TrialSpeciesTable, TrialTable } from "./trial";
 
 export const StudyTable = pgTable(
   "study",
@@ -59,9 +59,7 @@ export const SpeciesTable = pgTable(
   "species",
   {
     id,
-    trialId: integer("trial_id")
-      .notNull()
-      .references(() => TrialTable.id, { onDelete: "cascade" }),
+
     cropId: integer("crop_id")
       .notNull()
       .references(() => CropTable.id, { onDelete: "cascade" }),
@@ -71,10 +69,7 @@ export const SpeciesTable = pgTable(
   },
   (table) => [
     {
-      speciesUnique: uniqueIndex("species_unique").on(
-        table.trialId,
-        table.name
-      ),
+      speciesUnique: uniqueIndex("species_unique").on(table.cropId, table.name),
     },
   ]
 );
@@ -124,15 +119,12 @@ export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   nirsData: many(NirsDataTable),
 }));
 
-export const speciesRelations = relations(SpeciesTable, ({ one }) => ({
-  trial: one(TrialTable, {
-    fields: [SpeciesTable.trialId],
-    references: [TrialTable.id],
-  }),
+export const speciesRelations = relations(SpeciesTable, ({ one, many }) => ({
   crop: one(CropTable, {
     fields: [SpeciesTable.cropId],
     references: [CropTable.id],
   }),
+  trialSpecies: many(TrialSpeciesTable),
 }));
 
 export const productTypeRelations = relations(
