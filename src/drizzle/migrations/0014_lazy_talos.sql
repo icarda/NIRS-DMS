@@ -1,0 +1,1 @@
+ALTER TABLE "trait" DROP COLUMN "gid";

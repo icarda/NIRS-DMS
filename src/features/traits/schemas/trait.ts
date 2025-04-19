@@ -8,7 +8,6 @@ export const traitSchema = z.object({
   studyId: z.number().min(1, "Study is required"),
   cropTraitId: z.number().min(1, "Crop is required"),
   sampleId: z.number().min(1, "Sample ID is required"),
-  gid: z.number(),
 });
 
 export type TraitSchema = z.infer<typeof traitSchema>;

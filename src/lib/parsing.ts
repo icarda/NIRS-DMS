@@ -22,7 +22,6 @@ export interface ParsedNirsDataFileRow {
 
 export interface ParsedTraitFileRow {
   sampleId: number;
-  qualityLabPlotNumber: number;
   traitValues: Record<string, number>;
 }
 
@@ -299,17 +298,12 @@ async function parseTraitCsv(
 
         // Find required metadata headers
         const sampleIdHeader = headers.find(
-          (h) => h?.toLowerCase() === "sample_id"
-        );
-        const qlpNumberHeader = headers.find(
           (h) => h?.toLowerCase() === "qualitylabplotnumber"
         );
 
-        if (!sampleIdHeader || !qlpNumberHeader) {
+        if (!sampleIdHeader) {
           return reject(
-            new Error(
-              "CSV must contain 'sample_id' and 'QualityLabPlotNumber' columns."
-            )
+            new Error("CSV must contain 'QualityLabPlotNumber' column.")
           );
         }
 
@@ -334,13 +328,10 @@ async function parseTraitCsv(
         // Process rows
         results.data.forEach((row, index) => {
           const sampleId = parseInt(row[sampleIdHeader!] ?? "", 10);
-          const qualityLabPlotNumber = parseInt(
-            row[qlpNumberHeader!] ?? "",
-            10
-          );
+
           const traitValues: Record<string, number> = {};
 
-          if (isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+          if (isNaN(sampleId)) {
             return;
           }
 
@@ -358,7 +349,6 @@ async function parseTraitCsv(
           if (Object.keys(traitValues).length > 0) {
             parsedRows.push({
               sampleId,
-              qualityLabPlotNumber,
               traitValues,
             });
           } else {
@@ -397,16 +387,11 @@ async function parseTraitXlsx(
     const headers = Object.keys(jsonData[0]);
 
     const sampleIdHeader = headers.find(
-      (h) => h?.toLowerCase() === "sample_id"
-    );
-    const qlpNumberHeader = headers.find(
       (h) => h?.toLowerCase() === "qualitylabplotnumber"
     );
 
-    if (!sampleIdHeader || !qlpNumberHeader) {
-      throw new Error(
-        "must contain 'sample_id' and 'QualityLabPlotNumber' columns."
-      );
+    if (!sampleIdHeader) {
+      throw new Error("XLSX file must contain 'QualityLabPlotNumber' column.");
     }
 
     // Find which selected traits exist as headers
@@ -427,18 +412,14 @@ async function parseTraitXlsx(
     // Process rows
     jsonData.forEach((row, index) => {
       const rawSampleId = row[sampleIdHeader!];
-      const rawQlpNumber = row[qlpNumberHeader!];
       const sampleId =
         typeof rawSampleId === "number"
           ? rawSampleId
           : parseInt(String(rawSampleId ?? ""), 10);
-      const qualityLabPlotNumber =
-        typeof rawQlpNumber === "number"
-          ? rawQlpNumber
-          : parseInt(String(rawQlpNumber ?? ""), 10);
+
       const traitValues: Record<string, number> = {};
 
-      if (isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+      if (isNaN(sampleId)) {
         console.warn(
           `Skipping Trait XLSX row ${index + 2} due to invalid IDs.`
         );
@@ -463,7 +444,6 @@ async function parseTraitXlsx(
       if (Object.keys(traitValues).length > 0) {
         parsedRows.push({
           sampleId,
-          qualityLabPlotNumber,
           traitValues,
         });
       } else {
@@ -564,7 +544,6 @@ export async function transformTraitDataForDb(
           measuredValue: measuredValue,
           cropTraitId: cropTraitId,
           predictedValue: null,
-          gid: row.qualityLabPlotNumber,
         });
       } else {
         throw new Error(
