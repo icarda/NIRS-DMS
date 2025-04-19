@@ -28,6 +28,7 @@ export const StudyTable = pgTable(
     productTypeId: integer("product_type_id")
       .notNull()
       .references(() => ProductTypeTable.id, { onDelete: "cascade" }),
+    program: text("program").notNull(),
     nirModelId: integer("nir_model_id")
       .notNull()
       .references(() => NirModelTable.id, { onDelete: "cascade" }),

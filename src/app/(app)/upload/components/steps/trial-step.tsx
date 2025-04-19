@@ -80,6 +80,7 @@ const TrialStep = ({
     }
 
     if (switchedMode) {
+      form.clearErrors();
       form.setValue("trial", "");
       form.setValue("crop", "");
       form.setValue("trialPlantingDate", null);

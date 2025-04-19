@@ -8,18 +8,17 @@ import {
   pgTable,
   primaryKey,
   text,
-  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { CropTable } from "./crop";
-import { SpeciesTable, StudyTable } from "./study";
+import { SpeciesTable } from "./study";
 
 export const TrialTable = pgTable("trial", {
   id,
   name: text("name").notNull(),
   plantingDate: date("planting_date").notNull(),
-  soilType: text("soil_type").notNull(),
+  soilType: text("soil_type"),
   irrigation: boolean("irrigation").notNull(),
   location: text("location").notNull(),
   latitude: doublePrecision("latitude"),
