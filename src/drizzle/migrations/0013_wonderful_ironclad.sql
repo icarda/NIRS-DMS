@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "study_lab_unique" ON "study" USING btree ("quality_lab_id","study_code");--> statement-breakpoint
+CREATE UNIQUE INDEX "trait_sample_unique" ON "trait" USING btree ("crop_trait_id","sample_id");

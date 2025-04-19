@@ -48,11 +48,8 @@ export const StudyTable = pgTable(
   (table) => [
     {
       studyCodeUnique: uniqueIndex("study_code_unique").on(table.studyCode),
-      studyLabUnique: uniqueIndex("study_lab_unique").on(
-        table.qualityLabId,
-        table.studyCode
-      ),
     },
+    uniqueIndex("study_lab_unique").on(table.qualityLabId, table.studyCode),
   ]
 );
 
