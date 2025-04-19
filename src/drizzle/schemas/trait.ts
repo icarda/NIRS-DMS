@@ -36,6 +36,10 @@ export const TraitTable = pgTable(
         table.studyId,
         table.sampleId
       ),
+      traitSampleUnique: uniqueIndex("trait_sample_unique").on(
+        table.cropTraitId,
+        table.sampleId
+      ),
     },
   ]
 );
