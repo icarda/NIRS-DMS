@@ -10,7 +10,7 @@ import {
   getTrialSpecies,
   insertTrialSpecies,
 } from "@/features/studies/db/species";
-import { insertStudy } from "@/features/studies/db/study";
+import { getStudyByCode, insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import {
   NIRSData,
@@ -186,26 +186,32 @@ export async function uploadNirsData(formData: FormData) {
         await insertTrialSpecies(trialSpeciesData, tx);
       }
 
-      // Create new study
-      const studyData = {
-        trialId,
-        studyCode: validatedData.studyCode,
-        productTypeId: validatedData.productTypeID,
-        nirModelId: validatedData.nirModelID,
-        requesterName: validatedData.requesterName,
-        requesterEmail: validatedData.requesterEmail,
-        sampleDate: validatedData.sampleDate.toISOString(),
-        physiologicalStageId: validatedData.physiologicalStageID,
-        qualityLabId: validatedData.qualityLabID,
-        program: validatedData.program,
-        // additionalMetadata: {}
-      };
+      let studyId;
+      let newStudy;
+      const existingStudy = await getStudyByCode(validatedData.studyCode);
 
-      const newStudy = await insertStudy(studyData, tx);
-      if (!newStudy || !newStudy.id) {
-        throw new Error("Failed to create new study record.");
+      if (existingStudy) {
+        // Use the ID from the existing study
+        studyId = existingStudy.id;
+      } else {
+        // Create new study if code doesn't exist
+        const studyData = {
+          trialId,
+          studyCode: validatedData.studyCode,
+          productTypeId: validatedData.productTypeID,
+          nirModelId: validatedData.nirModelID,
+          requesterName: validatedData.requesterName,
+          requesterEmail: validatedData.requesterEmail,
+          sampleDate: validatedData.sampleDate.toISOString(),
+          physiologicalStageId: validatedData.physiologicalStageID,
+          qualityLabId: validatedData.qualityLabID,
+          program: validatedData.program,
+          // additionalMetadata: {}
+        };
+        newStudy = await insertStudy(studyData, tx);
+        if (!newStudy?.id) throw new Error("Failed to create study.");
+        studyId = newStudy.id;
       }
-      const studyId = newStudy.id;
 
       // Parse file
       const file = validatedData.file as File;
@@ -230,7 +236,7 @@ export async function uploadNirsData(formData: FormData) {
       }
 
       return {
-        studyCode: newStudy.studyCode,
+        studyCode: newStudy ? newStudy.studyCode : validatedData.studyCode,
         insertedNirsCount: nirsDataToInsert.length,
       };
     });

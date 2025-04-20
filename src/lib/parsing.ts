@@ -16,7 +16,7 @@ export interface NIRSData {
 export interface ParsedNirsDataFileRow {
   plotId: number;
   sampleId: number;
-  qualityLabPlotNumber: number;
+  gid: number;
   spectrumData: Record<string, number>;
 }
 
@@ -58,16 +58,14 @@ export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
           (h) => h?.toLowerCase() === "plot_id"
         );
         const sampleIdHeader = headers.find(
-          (h) => h?.toLowerCase() === "sample_id"
-        );
-        const qlpNumberHeader = headers.find(
           (h) => h?.toLowerCase() === "qualitylabplotnumber"
         );
+        const gidHeader = headers.find((h) => h?.toLowerCase() === "gid");
 
-        if (!plotIdHeader || !sampleIdHeader || !qlpNumberHeader) {
+        if (!plotIdHeader || !sampleIdHeader || !gidHeader) {
           return reject(
             new Error(
-              "CSV must contain 'plot_id', 'sample_id', and 'QualityLabPlotNumber' columns."
+              "CSV must contain 'plot_id', 'gid', and 'QualityLabPlotNumber' columns."
             )
           );
         }
@@ -75,14 +73,11 @@ export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
         results.data.forEach((row, index) => {
           const plotId = parseInt(row[plotIdHeader!] ?? "", 10);
           const sampleId = parseInt(row[sampleIdHeader!] ?? "", 10);
-          const qualityLabPlotNumber = parseInt(
-            row[qlpNumberHeader!] ?? "",
-            10
-          );
+          const gid = parseInt(row[gidHeader!] ?? "", 10);
           // Use string as key for spectrumData
           const spectrumData: Record<string, number> = {};
 
-          if (isNaN(plotId) || isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+          if (isNaN(plotId) || isNaN(sampleId) || isNaN(gid)) {
             console.warn(
               `Skipping CSV row ${index + 2} due to invalid metadata.`
             );
@@ -101,7 +96,7 @@ export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
           parsedRows.push({
             plotId,
             sampleId,
-            qualityLabPlotNumber,
+            gid,
             spectrumData,
           });
         });
@@ -134,22 +129,20 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
 
     const plotIdHeader = headers.find((h) => h?.toLowerCase() === "plot_id");
     const sampleIdHeader = headers.find(
-      (h) => h?.toLowerCase() === "sample_id"
-    );
-    const qlpNumberHeader = headers.find(
       (h) => h?.toLowerCase() === "qualitylabplotnumber"
     );
+    const gidHeader = headers.find((h) => h?.toLowerCase() === "gid");
 
-    if (!plotIdHeader || !sampleIdHeader || !qlpNumberHeader) {
+    if (!plotIdHeader || !sampleIdHeader || !gidHeader) {
       throw new Error(
-        "must contain 'plot_id', 'sample_id', and 'QualityLabPlotNumber' columns."
+        "must contain 'plot_id', 'gid', and 'QualityLabPlotNumber' columns."
       );
     }
 
     jsonData.forEach((row, index) => {
       const rawPlotId = row[plotIdHeader!];
       const rawSampleId = row[sampleIdHeader!];
-      const rawQlpNumber = row[qlpNumberHeader!];
+      const rawGID = row[gidHeader!];
       const plotId =
         typeof rawPlotId === "number"
           ? rawPlotId
@@ -158,14 +151,14 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
         typeof rawSampleId === "number"
           ? rawSampleId
           : parseInt(String(rawSampleId ?? ""), 10);
-      const qualityLabPlotNumber =
-        typeof rawQlpNumber === "number"
-          ? rawQlpNumber
-          : parseInt(String(rawQlpNumber ?? ""), 10);
+      const gid =
+        typeof rawGID === "number"
+          ? rawGID
+          : parseInt(String(rawGID ?? ""), 10);
       // Use string as key for spectrumData
       const spectrumData: Record<string, number> = {};
 
-      if (isNaN(plotId) || isNaN(sampleId) || isNaN(qualityLabPlotNumber)) {
+      if (isNaN(plotId) || isNaN(sampleId) || isNaN(gid)) {
         console.warn(`Skipping XLSX row ${index + 2} due to invalid metadata.`);
         return;
       }
@@ -189,7 +182,7 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
       parsedRows.push({
         plotId,
         sampleId,
-        qualityLabPlotNumber,
+        gid,
         spectrumData,
       });
     });
@@ -252,16 +245,10 @@ export function transformParsedNirsDataForDb(
           }
         }
 
-        const gid = row.qualityLabPlotNumber;
-
-        if (isNaN(gid) || !isFinite(gid)) {
-          continue;
-        }
-
         nirsDataToInsert.push({
           studyId: studyId,
           sampleId: row.sampleId,
-          gid: gid,
+          gid: row.gid,
           plotId: row.plotId,
           wavelength: wavelength,
           value: value,

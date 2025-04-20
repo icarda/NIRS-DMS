@@ -32,15 +32,11 @@ export async function getStudies() {
   return studies;
 }
 
-export async function getStudyByCode(studyCode: string, qualityLabId: number) {
+export async function getStudyByCode(studyCode: string) {
   "use cache";
   cacheTag(getStudyIdTag(studyCode));
   const study = await db.query.StudyTable.findFirst({
-    where: (studies, { and, eq }) =>
-      and(
-        eq(studies.studyCode, studyCode),
-        eq(studies.qualityLabId, qualityLabId)
-      ),
+    where: eq(StudyTable.studyCode, studyCode),
   });
   return study;
 }
@@ -49,7 +45,7 @@ export async function insertStudy(
   data: typeof StudyTable.$inferInsert,
   trx: Omit<typeof db, "$client"> = db
 ) {
-  const existingStudy = await getStudyByCode(data.studyCode, data.qualityLabId);
+  const existingStudy = await getStudyByCode(data.studyCode);
   if (existingStudy) {
     throw new Error(
       `Study with code ${data.studyCode} already exists in this quality lab`
