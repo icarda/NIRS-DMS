@@ -70,7 +70,6 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
     setPreview(null);
   };
 
-  console.log(form.getValues());
   async function onSubmit(data: TraitUploadFormData) {
     const cropId = crops.find((c) => c.name === data.crop)?.id as number;
     const studyId = studies.find((s) => s.studyCode === data.study)
@@ -108,6 +107,7 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
   }
 
   const cropName = form.watch("crop");
+  const year = form.watch("year");
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-6">
@@ -190,13 +190,17 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger disabled={!cropName}>
+                      <SelectTrigger disabled={!cropName || !year}>
                         <SelectValue placeholder="Select study" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {studies
-                        .filter((study) => study.trial.crop.name === cropName)
+                        .filter(
+                          (study) =>
+                            study.trial.crop.name === cropName &&
+                            study.studyCode.split("+")[2].split("/")[2] === year
+                        )
                         .map((study) => (
                           <SelectItem
                             key={study.studyCode}

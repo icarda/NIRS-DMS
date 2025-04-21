@@ -10,7 +10,7 @@ export async function insertNirsDataBatch(
     return;
   }
 
-  await trx.insert(NirsDataTable).values(data);
+  await trx.insert(NirsDataTable).values(data).onConflictDoNothing();
 
   if (data.length > 0) revalidateNIRSDataCache(data[0].studyId);
 }

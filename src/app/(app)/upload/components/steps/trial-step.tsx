@@ -97,7 +97,6 @@ const TrialStep = ({
     }
   }, [useExistingTrial]);
 
-  console.log("species", species);
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -160,7 +159,6 @@ const TrialStep = ({
                       onValueChange={(value) => {
                         field.onChange(value);
                         const trial = trials.find((t) => t.name === value)!;
-                        console.log(trial);
                         form.setValue(
                           "trialPlantingDate",
                           new Date(trial.plantingDate)
