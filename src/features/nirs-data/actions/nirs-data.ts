@@ -1,10 +1,8 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-
 import { db } from "@/drizzle/db";
-import { SpeciesTable } from "@/drizzle/schema";
 import { getNirModelById } from "@/features/nir-models/db/nir-model";
+import { insertOtherIdsBatch } from "@/features/other_ids/db/other_ids";
 import {
   getSpeciesById,
   getTrialSpecies,
@@ -34,6 +32,12 @@ function parseWavelengthRange(
   if (isNaN(min) || isNaN(max) || !isFinite(min) || !isFinite(max) || min > max)
     return null;
   return { min, max };
+}
+
+export interface OtherIdInsertData {
+  sampleId: number;
+  plotId: number;
+  gid: number;
 }
 
 export async function uploadNirsData(formData: FormData) {
@@ -220,6 +224,28 @@ export async function uploadNirsData(formData: FormData) {
 
       if (!parsedFileData) {
         throw new Error("File parsing failed or returned no result.");
+      }
+
+      let otherIdsToInsert: OtherIdInsertData[] = [];
+      if (parsedFileData.length > 0) {
+        const uniqueIdsMap = new Map<string, OtherIdInsertData>();
+        for (const row of parsedFileData) {
+          const key = `${row.sampleId}-${row.plotId}-${row.gid}`;
+
+          if (!uniqueIdsMap.has(key)) {
+            uniqueIdsMap.set(key, {
+              sampleId: row.sampleId,
+              plotId: row.plotId,
+              gid: row.gid,
+            });
+          }
+        }
+
+        otherIdsToInsert = Array.from(uniqueIdsMap.values());
+
+        if (otherIdsToInsert.length > 0) {
+          await insertOtherIdsBatch(otherIdsToInsert, tx);
+        }
       }
 
       let nirsDataToInsert: NIRSData[] = [];

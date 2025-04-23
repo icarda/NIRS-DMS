@@ -7,8 +7,6 @@ import { TraitSchema } from "@/features/traits/schemas/trait";
 export interface NIRSData {
   studyId: number;
   sampleId: number;
-  gid: number;
-  plotId: number;
   wavelength: number;
   value: number;
 }
@@ -248,8 +246,6 @@ export function transformParsedNirsDataForDb(
         nirsDataToInsert.push({
           studyId: studyId,
           sampleId: row.sampleId,
-          gid: row.gid,
-          plotId: row.plotId,
           wavelength: wavelength,
           value: value,
         });

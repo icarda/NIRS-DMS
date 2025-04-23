@@ -7,3 +7,4 @@ export * from "./schemas/study";
 export * from "./schemas/trait";
 export * from "./schemas/trial";
 export * from "./schemas/user";
+export * from "./schemas/other_ids";
