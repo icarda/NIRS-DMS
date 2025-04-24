@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
+import { getDistinctSampleIdsForStudy } from "@/features/nirs-data/db/nirs-data";
 import { parseTraitFile, transformTraitDataForDb } from "@/lib/parsing";
 import { traitUploadSchemaFinal } from "@/lib/schemas";
 import {
@@ -42,6 +43,29 @@ export async function uploadTraitDataAction(formData: FormData) {
         message:
           "File parsed, but contained 0 data rows matching selected traits.",
       };
+    }
+
+    const traitSampleIds = [
+      ...new Set(parsedFileData.map((row) => row.sampleId)),
+    ];
+
+    if (traitSampleIds.length > 0) {
+      const existingNirsSampleIds = await getDistinctSampleIdsForStudy(studyId);
+      const existingNirsSampleIdSet = new Set(existingNirsSampleIds);
+
+      const missingSampleIds = traitSampleIds.filter(
+        (id) => !existingNirsSampleIdSet.has(id)
+      );
+
+      if (missingSampleIds.length > 0) {
+        throw new Error(
+          `Data Quality Error: Sample ID consistency check failed. The following sample IDs from the trait file were not found in the NIRS data for study ${studyId}: ${missingSampleIds.slice(0, 6).join(", ")}${missingSampleIds.length > 6 ? "..." : ""}. Please ensure sample IDs match existing NIRS data.`
+        );
+      }
+    } else {
+      throw new Error(
+        "Could not extract valid Sample IDs from the Trait file."
+      );
     }
 
     const traitDataToInsert = await transformTraitDataForDb(
