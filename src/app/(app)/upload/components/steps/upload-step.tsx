@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { FileUp as FileUpload, X } from "lucide-react";
+import Link from "next/link";
 import { UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,21 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
             name="file"
             render={({ field: { onChange, value, ...field } }) => (
               <FormItem>
-                <FormLabel>Upload Data File</FormLabel>
+                <FormLabel>
+                  <div className="flex items-center justify-between">
+                    Upload Data File
+                    <p className="font-light">
+                      File example:{" "}
+                      <Link
+                        href="/examples/nirs_data.csv"
+                        target="_blank"
+                        className="font-semibold"
+                      >
+                        nirs_data.csv
+                      </Link>
+                    </p>
+                  </div>
+                </FormLabel>
                 <FormControl>
                   <div className="flex w-full flex-col items-center justify-center">
                     {!preview ? (

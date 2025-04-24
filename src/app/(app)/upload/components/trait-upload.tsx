@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileUp as FileUpload, X } from "lucide-react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -251,7 +252,21 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
               name="file"
               render={({ field: { onChange, value, ...field } }) => (
                 <FormItem>
-                  <FormLabel>Upload Data File</FormLabel>
+                  <FormLabel>
+                    <div className="flex items-center justify-between">
+                      Upload Data File
+                      <p className="font-light">
+                        File example:{" "}
+                        <Link
+                          href="/examples/traits.xlsx"
+                          target="_blank"
+                          className="font-semibold"
+                        >
+                          trait.xslx
+                        </Link>
+                      </p>
+                    </div>
+                  </FormLabel>
                   <FormControl>
                     <div className="flex w-full flex-col items-center justify-center">
                       {!preview ? (
