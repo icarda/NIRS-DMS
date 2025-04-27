@@ -15,6 +15,7 @@ import { CenterTable } from "./center";
 import { CropTable } from "./crop";
 import { NirModelTable } from "./nir-model";
 import { NirsDataTable } from "./nirs-data";
+import { OtherIdsTable } from "./other_ids";
 import { QualityLabTable } from "./quality-lab";
 import { TraitTable } from "./trait";
 import { TrialSpeciesTable, TrialTable } from "./trial";
@@ -117,6 +118,7 @@ export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   }),
   traits: many(TraitTable),
   nirsData: many(NirsDataTable),
+  otherIds: many(OtherIdsTable),
 }));
 
 export const speciesRelations = relations(SpeciesTable, ({ one, many }) => ({
