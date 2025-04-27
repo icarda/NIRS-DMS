@@ -1,9 +1,128 @@
-import { eq } from "drizzle-orm";
+import { and, eq, SQL } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { TraitTable } from "@/drizzle/schema";
+import {
+  CropTable,
+  CropTraitTable,
+  NirModelTable,
+  QualityLabTable,
+  StudyTable,
+  TraitTable,
+  TrialTable,
+} from "@/drizzle/schema";
 import { getTraitTag, revalidateTraitCache } from "./cache/trait";
+
+export interface TraitFilters {
+  studyCode?: string;
+  trial?: string;
+  crop?: string;
+  sampleId?: number;
+  trait?: string;
+  year?: number;
+  location?: string;
+  qualityLab?: string;
+  nirModel?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export type TraitFilteredResult = {
+  traitId: number;
+  traitName: string;
+  measuredValue: number;
+  predictedValue: number | null;
+  year: number;
+  sampleId: number;
+  studyCode: string | null;
+  trialName: string | null;
+  location: string | null;
+  cropName: string | null;
+  unit: string | null;
+  qualityLabName: string | null;
+  nirModelName: string | null;
+};
+
+export async function getTraitsFiltered(
+  filters: TraitFilters
+): Promise<TraitFilteredResult[]> {
+  const conditions: (SQL | undefined)[] = [];
+
+  if (filters.sampleId !== undefined) {
+    conditions.push(eq(TraitTable.sampleId, filters.sampleId));
+  }
+  if (filters.trait !== undefined) {
+    conditions.push(eq(TraitTable.traitName, filters.trait));
+  }
+  if (filters.year !== undefined) {
+    conditions.push(eq(TraitTable.year, filters.year));
+  }
+
+  if (filters.studyCode !== undefined) {
+    conditions.push(eq(StudyTable.studyCode, filters.studyCode));
+  }
+  if (filters.trial !== undefined) {
+    conditions.push(eq(TrialTable.name, filters.trial));
+  }
+  if (filters.crop !== undefined) {
+    conditions.push(eq(CropTable.name, filters.crop));
+  }
+  if (filters.location !== undefined) {
+    conditions.push(eq(TrialTable.location, filters.location));
+  }
+  if (filters.qualityLab !== undefined) {
+    conditions.push(eq(QualityLabTable.name, filters.qualityLab));
+  }
+  if (filters.nirModel !== undefined) {
+    conditions.push(eq(NirModelTable.name, filters.nirModel));
+  }
+
+  const whereClause =
+    conditions.length > 0
+      ? and(...conditions.filter((c): c is SQL => !!c))
+      : undefined;
+
+  try {
+    const query = db
+      .select({
+        traitId: TraitTable.id,
+        traitName: TraitTable.traitName,
+        measuredValue: TraitTable.measuredValue,
+        predictedValue: TraitTable.predictedValue,
+        year: TraitTable.year,
+        sampleId: TraitTable.sampleId,
+        studyCode: StudyTable.studyCode,
+        trialName: TrialTable.name,
+        location: TrialTable.location,
+        cropName: CropTable.name,
+        qualityLabName: QualityLabTable.name,
+        nirModelName: NirModelTable.name,
+        unit: CropTraitTable.unit,
+      })
+      .from(TraitTable)
+      .leftJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id))
+      .leftJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+      .leftJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
+      .leftJoin(
+        QualityLabTable,
+        eq(StudyTable.qualityLabId, QualityLabTable.id)
+      )
+      .leftJoin(NirModelTable, eq(StudyTable.nirModelId, NirModelTable.id))
+      .leftJoin(CropTraitTable, eq(TraitTable.cropTraitId, CropTraitTable.id))
+      .where(whereClause)
+      .limit(filters.limit ?? 1000)
+      .offset(filters.offset ?? 0)
+
+      .orderBy(TraitTable.studyId, TraitTable.sampleId, TraitTable.traitName);
+
+    const results = await query;
+
+    return results as TraitFilteredResult[];
+  } catch (error: any) {
+    console.error("Error fetching filtered Trait data:", error);
+    throw new Error(`Database error fetching Trait data: ${error.message}`);
+  }
+}
 
 export async function getTraits({ cropTraitId }: { cropTraitId: number }) {
   "use cache";
