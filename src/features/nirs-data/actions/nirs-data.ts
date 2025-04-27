@@ -38,6 +38,7 @@ export interface OtherIdInsertData {
   sampleId: number;
   plotId: number;
   gid: number;
+  studyId: number;
 }
 
 export async function uploadNirsData(formData: FormData) {
@@ -234,6 +235,7 @@ export async function uploadNirsData(formData: FormData) {
 
           if (!uniqueIdsMap.has(key)) {
             uniqueIdsMap.set(key, {
+              studyId,
               sampleId: row.sampleId,
               plotId: row.plotId,
               gid: row.gid,
