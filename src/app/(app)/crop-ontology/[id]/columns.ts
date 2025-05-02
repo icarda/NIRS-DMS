@@ -1,15 +1,17 @@
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Trait } from "@/data/crops";
+import { Crop } from "@/components/crop-page-client";
 
-export const traitColumns: ColumnDef<Trait>[] = [
+type CropTrait = Exclude<Crop, undefined>["cropTraits"][number];
+
+export const traitColumns: ColumnDef<CropTrait>[] = [
   {
     header: "Trait variable",
-    accessorKey: "variable",
+    accessorKey: "traitVariable",
   },
   {
     header: "Trait name",
-    accessorKey: "name",
+    accessorKey: "traitName",
   },
   {
     header: "Entity",
@@ -17,7 +19,7 @@ export const traitColumns: ColumnDef<Trait>[] = [
   },
   {
     header: "Method",
-    accessorKey: "method",
+    accessorKey: "methodDescription",
   },
   {
     header: "Unit",

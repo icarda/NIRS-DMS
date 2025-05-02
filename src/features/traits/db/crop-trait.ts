@@ -1,8 +1,10 @@
 import { and, eq, inArray } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { CropTraitTable } from "@/drizzle/schema";
+import { revalidateCropCache } from "@/features/crops/db/cache/crop";
 import {
   getCropCropTraitsTag,
   revalidateCropTraitCache,
@@ -71,6 +73,7 @@ export async function insertCropTrait(
 
   if (newCropTrait == null) throw new Error("Failed to create trait");
   revalidateCropTraitCache(newCropTrait.cropId);
+  revalidateCropCache(newCropTrait.cropId);
 
   return newCropTrait;
 }

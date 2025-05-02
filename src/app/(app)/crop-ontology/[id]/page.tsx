@@ -1,6 +1,6 @@
 import { use } from "react";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import CropPageClient from "@/components/crop-page-client";
 import { getCrop } from "@/features/crops/db/crop";
@@ -14,7 +14,7 @@ export default async function CropPageServer({ params }: CropPageServerProps) {
   const crop = await getCrop(parseInt(cropId, 10));
 
   if (!crop) {
-    notFound();
+    redirect("/crop-ontology");
   }
 
   return <CropPageClient crop={crop} />;
