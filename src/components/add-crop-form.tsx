@@ -1,8 +1,11 @@
 "use client";
 
+import { useCallback, useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon } from "lucide-react";
+import { Loader2, PlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -24,14 +27,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-const MAX_FILE_SIZE = 5000000;
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
+import { createCrop } from "@/features/crops/actions/crop";
+import { uploadFile } from "@/lib/upload-asset";
 
 const formSchema = z.object({
   cropName: z.string().min(2, {
@@ -42,35 +39,83 @@ const formSchema = z.object({
   }),
   description: z.string().optional(),
   image: z
-    .custom<FileList>()
-    .refine((files) => files?.length === 1, "Image is required.")
+    .instanceof(File, { message: "Image is required" })
     .refine(
-      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-      "Max file size is 5MB."
+      (file) => {
+        const validTypes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+        ];
+        return validTypes.includes(file.type);
+      },
+      {
+        message: "Only .jpg, .jpeg, .png and .webp formats are supported.",
+      }
     )
     .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
+      (file) => {
+        const MAX_SIZE_5MB = 5 * 1024 * 1024;
+        return file.size <= MAX_SIZE_5MB;
+      },
+      { message: "Image size must be less than 5MB" }
     ),
 });
 
 const AddCropForm = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cropName: "",
       commonName: "",
       description: "",
+      image: undefined,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // In a real scenario, you would send this data to the server
-  }
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append("file", values.image);
+
+      const name = values.cropName;
+      let url: string | undefined;
+      try {
+        url = await uploadFile(formData, name);
+      } catch (error: any) {
+        toast.error(`Failed to upload image: ${error.message}`);
+        return; // Stop submission if image upload fails
+      }
+
+      const cropData = {
+        name,
+        cropImageUrl: url,
+        description: values.description ?? "",
+        commonNames: [{ commonName: values.commonName }],
+      };
+
+      const { error, message } = await createCrop(cropData);
+
+      if (error) {
+        setIsLoading(false);
+        toast.error(message);
+        return;
+      }
+
+      setIsLoading(false);
+      setIsOpen(false);
+      toast.success(message);
+      form.reset();
+    },
+    [form]
+  );
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <PlusIcon className="h-4 w-4" />
@@ -115,13 +160,17 @@ const AddCropForm = () => {
             <FormField
               control={form.control}
               name="image"
-              render={({ field: { onChange, value, ...field } }) => (
+              render={({ field: { onChange, value, ...field }, formState }) => (
                 <FormItem>
                   <FormLabel>Crop Image</FormLabel>
                   <FormControl>
                     <FileUpload
-                      accept="image/*"
-                      onFileChange={onChange}
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onFileChange={(files) => {
+                        if (files && files[0]) {
+                          onChange(files[0]); // Pass the File object
+                        }
+                      }}
                       {...field}
                     />
                   </FormControl>
@@ -147,8 +196,15 @@ const AddCropForm = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Add Crop
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Adding crop...
+                </>
+              ) : (
+                "Add Crop"
+              )}
             </Button>
           </form>
         </Form>

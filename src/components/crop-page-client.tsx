@@ -1,10 +1,20 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, FlaskConical, PlusIcon, Wheat } from "lucide-react";
+import { set } from "date-fns";
+import {
+  ArrowLeft,
+  FlaskConical,
+  Loader2,
+  PlusIcon,
+  Wheat,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { traitColumns } from "@/app/(app)/crop-ontology/[id]/columns";
@@ -36,24 +46,37 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getCrop } from "@/features/crops/db/crop";
+import { addCropTrait } from "@/features/traits/actions/crop-trait";
 
-const traitSchema = z.object({
-  variable: z.string({ required_error: "Trait variable is required" }),
-  name: z.string({ required_error: "Trait name is required" }),
-  entity: z.string({ required_error: "Entity is required" }),
-  description: z.string({ required_error: "Method is required" }),
-  unit: z.string({ required_error: "Unit is required" }),
+export const traitSchema = z.object({
+  variable: z.string().min(1, {
+    message: "Trait variable is required",
+  }),
+  name: z.string().min(1, {
+    message: "Trait name is required",
+  }),
+  entity: z.string().min(1, {
+    message: "Entity is required",
+  }),
+  description: z.string().min(1, {
+    message: "Method description is required",
+  }),
+  unit: z.string().min(1, {
+    message: "Unit is required",
+  }),
   minimum: z.number().optional(),
   maximum: z.number().optional(),
 });
 
-export type Crop = Awaited<ReturnType<typeof getCrop>>;
+export type Crop = Exclude<Awaited<ReturnType<typeof getCrop>>, undefined>;
 
 interface CropPageClientProps {
   crop: Crop;
 }
 
 export default function CropPageClient({ crop }: CropPageClientProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof traitSchema>>({
     resolver: zodResolver(traitSchema),
     defaultValues: {
@@ -65,9 +88,30 @@ export default function CropPageClient({ crop }: CropPageClientProps) {
     },
   });
 
-  function onSubmit(values: z.infer<typeof traitSchema>) {
-    console.log(values);
-    // In a real scenario, you would likely send this data to the server
+  async function onSubmit(values: z.infer<typeof traitSchema>) {
+    setIsLoading(true);
+    const { variable, name, entity, description, unit, minimum, maximum } =
+      values;
+    const cropTraitData = {
+      traitName: name,
+      traitVariable: variable,
+      entity,
+      methodDescription: description,
+      unit,
+      minimumAllowed: minimum,
+      maximumAllowed: maximum,
+      cropId: crop.id,
+    };
+    const result = await addCropTrait(cropTraitData, crop.id);
+
+    if (result.error) {
+      toast.error(result.message);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(false);
+    setIsOpen(false);
+    toast.success(result.message);
   }
 
   if (!crop) {
@@ -136,7 +180,7 @@ export default function CropPageClient({ crop }: CropPageClientProps) {
       </div>
       <div className="flex flex-col gap-2 px-2">
         <div className="flex items-center justify-end">
-          <Dialog>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <PlusIcon className="h-4 w-4" />
@@ -277,7 +321,16 @@ export default function CropPageClient({ crop }: CropPageClientProps) {
                     )}
                   />
                   <div className="flex items-center justify-end">
-                    <Button type="submit">Add Trait</Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin" />
+                          Adding trait...
+                        </>
+                      ) : (
+                        "Add Trait"
+                      )}
+                    </Button>
                   </div>
                 </form>
               </Form>

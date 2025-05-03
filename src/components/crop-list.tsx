@@ -11,7 +11,6 @@ interface CropListProps {
 }
 
 export default function CropList({ crops }: CropListProps) {
-  console.log("Crops: ", crops);
   return (
     <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {crops.map((crop) => (

@@ -2,11 +2,8 @@
 
 import { ChangeEvent, useState } from "react";
 
-import { Label } from "@radix-ui/react-label";
-
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
 
 interface FileUploadProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onFileChange?: (files: FileList | null) => void;

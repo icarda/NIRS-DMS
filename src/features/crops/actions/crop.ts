@@ -1,5 +1,9 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+
+import { db } from "@/drizzle/db";
+import { CropTable } from "@/drizzle/schema";
 import {
   deleteCrop as deleteCropDb,
   insertCrop,
@@ -8,14 +12,29 @@ import {
 import { CropSchema, cropSchema } from "../schemas/crop";
 
 export async function createCrop(unsafeData: CropSchema) {
-  const { success, data } = cropSchema.safeParse(unsafeData);
+  const { success, data, error } = cropSchema.safeParse(unsafeData);
 
   if (!success) {
     return { error: true, message: "There was an error creating the crop" };
   }
 
   const { commonNames, ...cropData } = data;
+
+  // Check if the crop name already exists as it has unique constraint
+
+  const existingCrop = await db.query.CropTable.findFirst({
+    where: eq(CropTable.name, cropData.name),
+  });
+
+  if (existingCrop) {
+    return { error: true, message: "Crop name already exists" };
+  }
+
   await insertCrop(cropData, commonNames);
+  return {
+    error: false,
+    message: "Successfully created the crop",
+  };
 }
 
 export async function updateCrop(id: number, unsafeData: CropSchema) {

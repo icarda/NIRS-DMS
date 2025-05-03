@@ -11,7 +11,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="max-w-full">
