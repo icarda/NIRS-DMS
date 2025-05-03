@@ -12,15 +12,13 @@ import {
 import { CropSchema, cropSchema } from "../schemas/crop";
 
 export async function createCrop(unsafeData: CropSchema) {
-  const { success, data, error } = cropSchema.safeParse(unsafeData);
+  const { success, data } = cropSchema.safeParse(unsafeData);
 
   if (!success) {
     return { error: true, message: "There was an error creating the crop" };
   }
 
   const { commonNames, ...cropData } = data;
-
-  // Check if the crop name already exists as it has unique constraint
 
   const existingCrop = await db.query.CropTable.findFirst({
     where: eq(CropTable.name, cropData.name),
