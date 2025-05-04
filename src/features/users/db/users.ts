@@ -27,13 +27,16 @@ export async function getUser(id: number) {
   return user;
 }
 
-export async function getUsers({ limit }: { limit?: number }) {
+export async function getUsers({ limit }: { limit?: number } = {}) {
   "use cache";
   cacheTag(getUserGlobalTag());
 
   const users = await db.query.UserTable.findMany({
     columns: {
       password: false,
+    },
+    with: {
+      center: true,
     },
     limit,
   });

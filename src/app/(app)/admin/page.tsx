@@ -6,7 +6,8 @@ import { physiologicalStages } from "@/data/physiological-stages";
 import { productTypes } from "@/data/product-types";
 import { studyMetadatas } from "@/data/study-metadata";
 import { trialMetadatas } from "@/data/trials-metadata";
-import { users } from "@/data/users";
+// import { users } from "@/data/users";
+import { getUsers } from "@/features/users/db/users";
 import {
   NIRModelColumns,
   physiologicalStageColumns,
@@ -20,7 +21,8 @@ import { NirModelAddDialog } from "./components/nir-model-add-dialog";
 import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
-export default function Admin() {
+export default async function Admin() {
+  const [users] = await Promise.all([getUsers()]);
   return (
     <div>
       <Tabs defaultValue="users" className="w-full">
@@ -71,7 +73,15 @@ export default function Admin() {
           <TabsContent value="users">
             <DataTable
               columns={userColumns}
-              data={users}
+              data={users.map((user) => ({
+                id: user.id,
+                fullName: `${user.firstName} ${user.lastName}`,
+                role: user.role,
+                email: user.email,
+                center: user.center.acronym,
+                status: user.emailVerified ? "Approved" : "Pending",
+              }))}
+              // data={users}
               filterColumn="fullName"
             />
           </TabsContent>

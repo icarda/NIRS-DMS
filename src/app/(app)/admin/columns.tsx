@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { QUALITY_LABS } from "@/app/(app)/explore/table/constants";
 import { DataTableColumnHeader } from "@/app/(app)/explore/table/data-table-column-header";
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deleteUser, updateUser } from "@/features/users/actions/user";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
@@ -26,11 +28,11 @@ import { UserEditDialog } from "./components/user-edit-dialog";
 export type User = {
   id: number;
   fullName: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "ADMIN" | "SUPERADMIN";
   email: string;
-  qualityLab: (typeof QUALITY_LABS)[number];
-  studyAccess: string[];
-  status: "Pending" | "Approved";
+  center: string;
+  // studyAccess: string[];
+  status: string;
 };
 
 export type ProductType = {
@@ -99,9 +101,9 @@ export const userColumns: ColumnDef<User>[] = [
     ),
   },
   {
-    accessorKey: "qualityLab",
+    accessorKey: "center",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Quality Lab" />
+      <DataTableColumnHeader column={column} title="Center" />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
@@ -134,11 +136,29 @@ export const userColumns: ColumnDef<User>[] = [
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-      const handleEdit = (data: any) => {
-        setEditDialogOpen(false);
+      const handleEdit = async (data: any) => {
+        const formData = new FormData();
+        formData.append("firstName", data.firstName);
+        formData.append("lastName", data.lastName);
+        formData.append("email", data.email);
+        formData.append("center", data.center);
+        formData.append("role", data.role);
+        formData.append("studyAccess", JSON.stringify(data.studyAccess));
+        formData.append("status", data.approved ? "Approved" : "Pending");
+
+        try {
+          await updateUser({ id: user.id }, formData);
+          toast.success("User updated successfully");
+        } catch (error) {
+          console.error("Error updating user:", error);
+          toast.error("Error updating user");
+        } finally {
+          setEditDialogOpen(false);
+        }
       };
 
-      const handleDelete = () => {
+      const handleDelete = async () => {
+        await deleteUser(user.id);
         setDeleteDialogOpen(false);
       };
 
