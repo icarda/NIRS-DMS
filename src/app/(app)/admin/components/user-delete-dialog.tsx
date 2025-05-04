@@ -1,3 +1,7 @@
+import { useState } from "react";
+
+import { Loader2 } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +27,7 @@ export function UserDeleteDialog({
   onOpenChange,
   onConfirm,
 }: UserDeleteDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -36,7 +41,23 @@ export function UserDeleteDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Delete</AlertDialogAction>
+          <AlertDialogAction
+            disabled={isLoading}
+            onClick={() => {
+              setIsLoading(true);
+              onConfirm();
+              setIsLoading(false);
+            }}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Deleting user...
+              </>
+            ) : (
+              "Delete user"
+            )}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

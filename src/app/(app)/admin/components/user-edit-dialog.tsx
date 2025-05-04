@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -36,9 +39,9 @@ const formSchema = z.object({
   firstName: z.string().min(3, "First name must be at least 3 characters"),
   lastName: z.string().min(3, "Last name must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
-  qualityLab: z.string().min(1, "Please select a quality lab"),
-  role: z.enum(["USER", "ADMIN"]),
-  studyAccess: z.array(z.string()).min(1, "Please select at least one study"),
+  center: z.string().min(1, "Please select a center"),
+  role: z.enum(["USER", "ADMIN", "SUPERADMIN"]),
+  studyAccess: z.array(z.string()),
   approved: z.boolean(),
 });
 
@@ -59,15 +62,19 @@ export function UserEditDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: user.fullName.split(" ")[0],
-      lastName: user.fullName.split(" ")[1],
+      lastName: user.fullName.split(" ").slice(1).join(" "),
       email: user.email,
-      qualityLab: user.qualityLab,
+      center: user.center,
       role: user.role,
-      studyAccess: user.studyAccess,
+      studyAccess: [],
 
       approved: user.status === "Approved",
     },
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  console.log("form", form.getValues());
+  console.log(isLoading);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,7 +83,14 @@ export function UserEditDialog({
           <DialogTitle>Edit User Data</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSave)} className="space-y-2">
+          <form
+            onSubmit={form.handleSubmit((data) => {
+              setIsLoading(true);
+              onSave(data);
+              setIsLoading(false);
+            })}
+            className="space-y-2"
+          >
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -119,22 +133,21 @@ export function UserEditDialog({
 
             <FormField
               control={form.control}
-              name="qualityLab"
+              name="center"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Quality Lab</FormLabel>
+                  <FormLabel>Center</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select quality lab" />
+                        <SelectValue placeholder="Select center" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ICARDA-MAR">ICARDA-MAR</SelectItem>
-                      <SelectItem value="ICARDA-LEB">ICARDA-LEB</SelectItem>
+                      <SelectItem value="ICARDA">ICARDA</SelectItem>
                       <SelectItem value="CIMMYT">CIMMYT</SelectItem>
                     </SelectContent>
                   </Select>
@@ -160,12 +173,14 @@ export function UserEditDialog({
                     <SelectContent>
                       <SelectItem value="USER">USER</SelectItem>
                       <SelectItem value="ADMIN">ADMIN</SelectItem>
+                      <SelectItem value="SUPERADMIN">SUPERADMIN</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
 
+            {/* TODO: implement study accesses */}
             <FormField
               control={form.control}
               name="studyAccess"
@@ -208,7 +223,16 @@ export function UserEditDialog({
             />
 
             <DialogFooter>
-              <Button type="submit">Apply Changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Editing user...
+                  </>
+                ) : (
+                  "Edit user"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
