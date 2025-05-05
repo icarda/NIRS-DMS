@@ -8,8 +8,18 @@ import {
   revalidateProductTypeCache,
 } from "./cache/product-type";
 
-export async function getProductTypes(cropId: number) {
+export async function getProductTypes(cropId?: number) {
   "use cache";
+
+  if (cropId == null) {
+    cacheTag(getCropProductTypesTag());
+    return db.query.ProductTypeTable.findMany({
+      with: {
+        crop: true,
+      },
+      orderBy: (productTypes, { asc }) => [asc(productTypes.name)],
+    });
+  }
   cacheTag(getCropProductTypesTag(cropId));
   return db.query.ProductTypeTable.findMany({
     where: eq(ProductTypeTable.cropId, cropId),

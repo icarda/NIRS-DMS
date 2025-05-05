@@ -6,7 +6,8 @@ export function getProductTypeGlobalTag() {
   return getGlobalTag("productTypes");
 }
 
-export function getCropProductTypesTag(cropId: number) {
+export function getCropProductTypesTag(cropId?: number) {
+  if (cropId == null) return getProductTypeGlobalTag();
   return getCropTag("productTypes", cropId);
 }
 

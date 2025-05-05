@@ -3,10 +3,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nirModels } from "@/data/nir_models";
 import { physiologicalStages } from "@/data/physiological-stages";
-import { productTypes } from "@/data/product-types";
 import { studyMetadatas } from "@/data/study-metadata";
 import { trialMetadatas } from "@/data/trials-metadata";
-// import { users } from "@/data/users";
+import { getProductTypes } from "@/features/studies/db/product-type";
 import { getUsers } from "@/features/users/db/users";
 import {
   NIRModelColumns,
@@ -22,7 +21,10 @@ import { PhysiologicalStageAddDialog } from "./components/physiological-stage-ad
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
-  const [users] = await Promise.all([getUsers()]);
+  const [users, productTypes] = await Promise.all([
+    getUsers(),
+    getProductTypes(),
+  ]);
   return (
     <div>
       <Tabs defaultValue="users" className="w-full">
@@ -88,7 +90,11 @@ export default async function Admin() {
           <TabsContent value="product_types">
             <DataTable
               columns={productTypeColumns}
-              data={productTypes}
+              data={productTypes.map((productType) => ({
+                id: productType.id,
+                crop: productType.crop.name,
+                type: productType.name,
+              }))}
               filterColumn="type"
               selectCrop
             >
