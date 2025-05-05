@@ -2,30 +2,48 @@
 
 import { z } from "zod";
 
+import { getCropByName } from "@/features/crops/db/crop";
+import { productTypeAddSchema } from "@/lib/schemas";
 import {
   deleteProductType as deleteProductTypeDb,
   insertProductType,
 } from "../db/product-type";
-import { productTypeSchema } from "../schemas/product-type";
 
 export async function createProductType(
-  unsafeData: z.infer<typeof productTypeSchema>
+  unsafeData: z.infer<typeof productTypeAddSchema>
 ) {
-  const { success, data } = productTypeSchema.safeParse(unsafeData);
+  console.log("Creating product type", unsafeData);
+  const { success, data } = productTypeAddSchema.safeParse(unsafeData);
 
   if (!success) {
     return {
       error: true,
-      message: "There was an error creating the physiological stage",
+      message: "There was an error creating the product type - invalid data",
+    };
+  }
+
+  const { crop: cropName } = data;
+
+  const crop = await getCropByName(cropName);
+
+  if (!crop) {
+    return {
+      error: true,
+      message: "Crop not found",
     };
   }
 
   try {
-    await insertProductType(data);
+    await insertProductType({
+      name: data.type,
+      cropId: crop.id,
+    });
+    return { error: false, message: "Successfully created the product type" };
   } catch (error) {
+    console.error("Error creating product type", error);
     return {
       error: true,
-      message: "There was an error creating the physiological stage",
+      message: "There was an error creating the product type",
     };
   }
 }

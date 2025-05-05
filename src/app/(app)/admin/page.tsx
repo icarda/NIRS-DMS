@@ -5,6 +5,7 @@ import { nirModels } from "@/data/nir_models";
 import { physiologicalStages } from "@/data/physiological-stages";
 import { studyMetadatas } from "@/data/study-metadata";
 import { trialMetadatas } from "@/data/trials-metadata";
+import { getCrops } from "@/features/crops/db/crop";
 import { getProductTypes } from "@/features/studies/db/product-type";
 import { getUsers } from "@/features/users/db/users";
 import {
@@ -21,9 +22,10 @@ import { PhysiologicalStageAddDialog } from "./components/physiological-stage-ad
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
-  const [users, productTypes] = await Promise.all([
+  const [users, productTypes, crops] = await Promise.all([
     getUsers(),
     getProductTypes(),
+    getCrops(),
   ]);
   return (
     <div>
@@ -98,7 +100,7 @@ export default async function Admin() {
               filterColumn="type"
               selectCrop
             >
-              <ProductTypeAddDialog />
+              <ProductTypeAddDialog crops={crops} />
             </DataTable>
           </TabsContent>
           <TabsContent value="physiological_stages">

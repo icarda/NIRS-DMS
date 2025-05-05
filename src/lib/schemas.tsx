@@ -298,6 +298,17 @@ export const multiStepFormSchemaFinal = z.object({
   studyCode: z.string().min(1, "Study Code is required"),
 });
 
+export const productTypeAddSchema = z.object({
+  type: z
+    .string()
+    .nonempty("Product type is required")
+    .min(2, "Product type must be at least 2 characters"),
+  crop: z
+    .string()
+    .nonempty("Crop is required")
+    .min(2, "Crop must be at least 2 characters"),
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;

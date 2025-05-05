@@ -75,25 +75,33 @@ export const SpeciesTable = pgTable(
   ]
 );
 
-export const ProductTypeTable = pgTable("product_type", {
-  id,
-  name: text("name").notNull().unique(),
-  cropId: integer("crop_id")
-    .notNull()
-    .references(() => CropTable.id, { onDelete: "cascade" }),
-  createdAt,
-  updatedAt,
-});
+export const ProductTypeTable = pgTable(
+  "product_type",
+  {
+    id,
+    name: text("name").notNull(),
+    cropId: integer("crop_id")
+      .notNull()
+      .references(() => CropTable.id, { onDelete: "cascade" }),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [uniqueIndex("product_type_unique").on(t.name, t.cropId)]
+);
 
-export const PhysiologicalStageTable = pgTable("physiological_stage", {
-  id,
-  name: text("name").notNull().unique(),
-  cropId: integer("crop_id")
-    .notNull()
-    .references(() => CropTable.id, { onDelete: "cascade" }),
-  createdAt,
-  updatedAt,
-});
+export const PhysiologicalStageTable = pgTable(
+  "physiological_stage",
+  {
+    id,
+    name: text("name").notNull().unique(),
+    cropId: integer("crop_id")
+      .notNull()
+      .references(() => CropTable.id, { onDelete: "cascade" }),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [uniqueIndex("physiological_stage_unique").on(t.name, t.cropId)]
+);
 
 export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   trial: one(TrialTable, {

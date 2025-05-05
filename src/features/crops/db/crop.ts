@@ -26,6 +26,18 @@ export async function getCrop(id: number) {
   return crop;
 }
 
+export async function getCropByName(name: string) {
+  "use cache";
+  const crop = await db.query.CropTable.findFirst({
+    where: eq(CropTable.name, name),
+    with: {
+      productTypes: true,
+    },
+  });
+  cacheTag(getCropIdTag(crop?.id as number));
+  return crop;
+}
+
 export async function getCrops({ limit }: { limit?: number } = {}) {
   "use cache";
   cacheTag(getCropGlobalTag());
