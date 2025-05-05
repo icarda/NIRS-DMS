@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit, Trash2 } from "lucide-react";
+import { set } from "date-fns";
+import { Edit, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { QUALITY_LABS } from "@/app/(app)/explore/table/constants";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deleteProductType } from "@/features/studies/actions/product-type";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
@@ -223,9 +225,24 @@ export const productTypeColumns: ColumnDef<ProductType>[] = [
     cell: ({ row }) => {
       const productType = row.original;
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
 
-      const handleDelete = () => {
-        setDeleteDialogOpen(false);
+      const handleDelete = async () => {
+        try {
+          setIsLoading(true);
+          const result = await deleteProductType(productType.id);
+          if (result.error) {
+            toast.error(result.message);
+          } else {
+            toast.success("Product type deleted successfully");
+            setDeleteDialogOpen(false);
+          }
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error deleting product type:", error);
+          toast.error("Error deleting product type");
+          setIsLoading(false);
+        }
       };
 
       return (
@@ -249,14 +266,22 @@ export const productTypeColumns: ColumnDef<ProductType>[] = [
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently delete the product type{" "}
-                  <span className="font-medium">{productType.type}</span>. This
-                  action cannot be undone.
+                  <span className="font-medium">{productType.type}</span> for
+                  crop <span className="font-medium">{productType.crop}</span>.
+                  This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
