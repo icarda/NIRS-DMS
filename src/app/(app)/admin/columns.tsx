@@ -46,6 +46,7 @@ export type ProductType = {
 export type PhysiologicalStage = {
   id: number;
   stage: string;
+  crop: string;
 };
 
 export type NIRModel = {

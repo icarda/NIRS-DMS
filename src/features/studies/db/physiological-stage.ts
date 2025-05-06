@@ -8,8 +8,17 @@ import {
   revalidatePhysiologicalStageCache,
 } from "./cache/physiological-stage";
 
-export async function getPhysiologicalStages(cropId: number) {
+export async function getPhysiologicalStages(cropId?: number) {
   "use cache";
+  if (cropId == null) {
+    cacheTag(getCropPhysiologicalStageTag());
+    return db.query.PhysiologicalStageTable.findMany({
+      with: {
+        crop: true,
+      },
+      orderBy: (stages, { asc }) => [asc(stages.name)],
+    });
+  }
   cacheTag(getCropPhysiologicalStageTag(cropId));
   return db.query.PhysiologicalStageTable.findMany({
     where: eq(PhysiologicalStageTable.cropId, cropId),

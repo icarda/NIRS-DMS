@@ -2,10 +2,10 @@ import { DataTable } from "@/components/ui/data-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nirModels } from "@/data/nir_models";
-import { physiologicalStages } from "@/data/physiological-stages";
 import { studyMetadatas } from "@/data/study-metadata";
 import { trialMetadatas } from "@/data/trials-metadata";
 import { getCrops } from "@/features/crops/db/crop";
+import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
 import { getUsers } from "@/features/users/db/users";
 import {
@@ -22,10 +22,11 @@ import { PhysiologicalStageAddDialog } from "./components/physiological-stage-ad
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
-  const [users, productTypes, crops] = await Promise.all([
+  const [users, productTypes, crops, physiologicalStages] = await Promise.all([
     getUsers(),
     getProductTypes(),
     getCrops(),
+    getPhysiologicalStages(),
   ]);
   return (
     <div>
@@ -106,7 +107,11 @@ export default async function Admin() {
           <TabsContent value="physiological_stages">
             <DataTable
               columns={physiologicalStageColumns}
-              data={physiologicalStages}
+              data={physiologicalStages.map((stage) => ({
+                id: stage.id,
+                crop: stage.crop.name,
+                stage: stage.name,
+              }))}
               filterColumn="stage"
               selectCrop
             >

@@ -6,7 +6,8 @@ export function getPhysiologicalStageGlobalTag() {
   return getGlobalTag("productTypes");
 }
 
-export function getCropPhysiologicalStageTag(cropId: number) {
+export function getCropPhysiologicalStageTag(cropId?: number) {
+  if (cropId == null) return getPhysiologicalStageGlobalTag();
   return getCropTag("productTypes", cropId);
 }
 
