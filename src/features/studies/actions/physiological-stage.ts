@@ -2,16 +2,17 @@
 
 import { z } from "zod";
 
+import { getCropByName } from "@/features/crops/db/crop";
+import { physiologicalStageAddSchema } from "@/lib/schemas";
 import {
   deletePhysiologicalStage as deletePhysiologicalStageDb,
   insertPhysiologicalStage,
 } from "../db/physiological-stage";
-import { physiologicalStageSchema } from "../schemas/physiological-stage";
 
 export async function createPhysiologicalStage(
-  unsafeData: z.infer<typeof physiologicalStageSchema>
+  unsafeData: z.infer<typeof physiologicalStageAddSchema>
 ) {
-  const { success, data } = physiologicalStageSchema.safeParse(unsafeData);
+  const { success, data } = physiologicalStageAddSchema.safeParse(unsafeData);
 
   if (!success) {
     return {
@@ -20,8 +21,26 @@ export async function createPhysiologicalStage(
     };
   }
 
+  const { crop: cropName } = data;
+
+  const crop = await getCropByName(cropName);
+
+  if (!crop) {
+    return {
+      error: true,
+      message: "Crop not found",
+    };
+  }
+
   try {
-    await insertPhysiologicalStage(data);
+    await insertPhysiologicalStage({
+      name: data.stage,
+      cropId: crop.id,
+    });
+    return {
+      error: false,
+      message: "Successfully created the physiological stage",
+    };
   } catch (error) {
     return {
       error: true,

@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -31,38 +34,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { crops } from "@/data/crops";
+import { getCrops } from "@/features/crops/db/crop";
+import { createPhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const formSchema = z.object({
-  stage: z
-    .string()
-    .nonempty("Stage is required")
-    .min(2, "Physiological stage must be at least 2 characters"),
-  crop: z.string().nonempty("Crop is required"),
-});
+import { physiologicalStageAddSchema } from "@/lib/schemas";
 
 interface PhysiologicalStageDialogProps {
-  // onSave: (data: z.infer<typeof formSchema>) => void;
+  // onSave: (data: z.infer<typeof physiologicalStageAddSchema>) => void;
+  crops: Awaited<ReturnType<typeof getCrops>>;
 }
 
-export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
+export function PhysiologicalStageAddDialog({
+  crops,
+}: PhysiologicalStageDialogProps) {
   const isMobile = useIsMobile();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const form = useForm<z.infer<typeof physiologicalStageAddSchema>>({
+    resolver: zodResolver(physiologicalStageAddSchema),
     defaultValues: {
       stage: "",
       crop: "",
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    // onSave(data);
+  const handleSubmit = async (
+    data: z.infer<typeof physiologicalStageAddSchema>
+  ) => {
+    try {
+      setIsLoading(true);
+      const result = await createPhysiologicalStage(data);
+      if (result.error) {
+        toast.error(result.message);
+      } else {
+        toast.success("Product type created successfully");
+        setOpen(false);
+      }
+    } catch (e) {
+      toast.error(
+        "There was an error creating the product type. Please try again."
+      );
+    }
+    setIsLoading(false);
+
     form.reset();
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
@@ -108,8 +128,8 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
                       <SelectContent>
                         <SelectGroup>
                           {crops.map((crop) => (
-                            <SelectItem key={crop.id} value={crop.id}>
-                              {crop.title}
+                            <SelectItem key={crop.id} value={crop.name}>
+                              {crop.name}
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -121,7 +141,16 @@ export function PhysiologicalStageAddDialog({}: PhysiologicalStageDialogProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -309,6 +309,14 @@ export const productTypeAddSchema = z.object({
     .min(2, "Crop must be at least 2 characters"),
 });
 
+export const physiologicalStageAddSchema = z.object({
+  stage: z
+    .string()
+    .nonempty("Stage is required")
+    .min(2, "Physiological stage must be at least 2 characters"),
+  crop: z.string().nonempty("Crop is required"),
+});
+
 export type TrialFormData = z.infer<typeof trialFormSchema>;
 export type StudyFormData = z.infer<typeof studyFormSchema>;
 export type UploadFormData = z.infer<typeof uploadFormSchema>;

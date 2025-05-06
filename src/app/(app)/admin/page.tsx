@@ -115,7 +115,7 @@ export default async function Admin() {
               filterColumn="stage"
               selectCrop
             >
-              <PhysiologicalStageAddDialog />
+              <PhysiologicalStageAddDialog crops={crops} />
             </DataTable>
           </TabsContent>
           <TabsContent value="nir_models">

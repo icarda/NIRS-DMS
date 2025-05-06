@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
@@ -317,8 +318,24 @@ export const physiologicalStageColumns: ColumnDef<PhysiologicalStage>[] = [
       const physiologicalStage = row.original;
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-      const handleDelete = () => {
-        setDeleteDialogOpen(false);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const handleDelete = async () => {
+        try {
+          setIsLoading(true);
+          const result = await deletePhysiologicalStage(physiologicalStage.id);
+          if (result.error) {
+            toast.error(result.message);
+          } else {
+            toast.success("Physiological stage deleted successfully");
+            setDeleteDialogOpen(false);
+          }
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error deleting physiological stage:", error);
+          toast.error("Error deleting physiological stage");
+          setIsLoading(false);
+        }
       };
 
       return (
@@ -350,8 +367,15 @@ export const physiologicalStageColumns: ColumnDef<PhysiologicalStage>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
