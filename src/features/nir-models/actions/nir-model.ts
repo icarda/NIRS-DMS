@@ -22,6 +22,7 @@ export async function createNirModel(
 
   try {
     await insertNirModel(data);
+    return { error: false, message: "Successfully created the NIR model" };
   } catch (error) {
     return {
       error: true,

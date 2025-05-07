@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -30,24 +33,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createNirModel } from "@/features/nir-models/actions/nir-model";
+import { nirModelSchema } from "@/features/nir-models/schemas/nir-model";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Model name must be at least 2 characters"),
-  type: z.enum(["Benchtop", "Portable"]),
-  wavelengthRange: z.string().regex(/\d+-\d+/, "Must be a valid range"),
-  resolution: z.string().regex(/^\d*\.?\d+$/, "Must be a valid number"),
-  manufacturer: z.string().min(2, "Manufacturer must be at least 2 characters"),
-});
-
 interface NirModelAddDialogProps {
-  // onSave: (data: z.infer<typeof formSchema>) => void;
+  // onSave: (data: z.infer<typeof nirModelSchema>) => void;
 }
 
 export function NirModelAddDialog({}: NirModelAddDialogProps) {
   const isMobile = useIsMobile();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const form = useForm<z.infer<typeof nirModelSchema>>({
+    resolver: zodResolver(nirModelSchema),
     defaultValues: {
       name: "",
       type: "Benchtop",
@@ -57,12 +56,28 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: z.infer<typeof nirModelSchema>) => {
+    try {
+      setIsLoading(true);
+      const result = await createNirModel(data);
+      if (result.error) {
+        toast.error(result.message);
+      } else {
+        toast.success("Product type created successfully");
+        setOpen(false);
+      }
+    } catch (e) {
+      toast.error(
+        "There was an error creating the product type. Please try again."
+      );
+    }
+    setIsLoading(false);
+
     form.reset();
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
@@ -165,7 +180,16 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
             />
 
             <DialogFooter>
-              <Button type="submit">Add Model</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Adding Model...
+                  </>
+                ) : (
+                  "Add Model"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
