@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
@@ -428,8 +429,24 @@ export const NIRModelColumns: ColumnDef<NIRModel>[] = [
       const nirModel = row.original;
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-      const handleDelete = () => {
-        setDeleteDialogOpen(false);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const handleDelete = async () => {
+        try {
+          setIsLoading(true);
+          const result = await deleteNirModel(nirModel.id);
+          if (result.error) {
+            toast.error(result.message);
+          } else {
+            toast.success("NIR model deleted successfully");
+            setIsLoading(false);
+            setDeleteDialogOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting NIR model:", error);
+          toast.error("Error deleting NIR model");
+          setIsLoading(false);
+        }
       };
 
       return (
@@ -459,8 +476,15 @@ export const NIRModelColumns: ColumnDef<NIRModel>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
