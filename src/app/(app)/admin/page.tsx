@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { DataTable } from "@/components/ui/data-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +10,8 @@ import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
 import { getUsers } from "@/features/users/db/users";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 import {
   NIRModelColumns,
   physiologicalStageColumns,
@@ -22,6 +26,9 @@ import { PhysiologicalStageAddDialog } from "./components/physiological-stage-ad
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
+  if (!hasPermission((await getCurrentUser())?.role, "accessAdminPages")) {
+    redirect("/");
+  }
   const [users, productTypes, crops, physiologicalStages, nirModels] =
     await Promise.all([
       getUsers(),

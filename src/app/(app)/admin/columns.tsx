@@ -3,11 +3,9 @@
 import { useState } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { set } from "date-fns";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { QUALITY_LABS } from "@/app/(app)/explore/table/constants";
 import { DataTableColumnHeader } from "@/app/(app)/explore/table/data-table-column-header";
 import {
   AlertDialog,
@@ -21,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UserRole } from "@/drizzle/schema";
 import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
@@ -32,7 +31,7 @@ import { UserEditDialog } from "./components/user-edit-dialog";
 export type User = {
   id: number;
   fullName: string;
-  role: "USER" | "ADMIN" | "SUPERADMIN";
+  role: UserRole;
   email: string;
   center: string;
   // studyAccess: string[];

@@ -73,8 +73,6 @@ export function UserEditDialog({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  console.log("form", form.getValues());
-  console.log(isLoading);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

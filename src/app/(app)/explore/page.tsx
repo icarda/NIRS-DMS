@@ -10,6 +10,7 @@ async function getData(): Promise<ColumnSchema[]> {
 
 export default async function ExploreData() {
   const data = await getData();
+
   return (
     <div className="px-2 md:px-0">
       <div className="border-b">

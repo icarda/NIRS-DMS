@@ -14,48 +14,51 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-const publicLinks = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Crop Quality Ontology",
-    url: "/crop-ontology",
-    icon: Leaf,
-  },
-];
-
-const protectedLinks = [
-  {
-    title: "Explore Data",
-    url: "/explore",
-    icon: Database,
-  },
-  {
-    title: "Upload Data",
-    url: "/upload",
-    icon: FileUp,
-  },
-  {
-    title: "Admin",
-    url: "/admin",
-    icon: Users,
-  },
-];
+import { UserRole } from "@/drizzle/schema";
+import { hasPermission } from "@/permissions/general";
 
 export function ClientSidebar({
   isAuthenticated,
+  role,
 }: {
   isAuthenticated: boolean;
+  role: UserRole | undefined;
 }) {
   const path = usePathname();
 
-  const links = isAuthenticated
-    ? [...publicLinks, ...protectedLinks]
-    : publicLinks;
+  const links = [
+    {
+      title: "Dashboard",
+      url: "/",
+      icon: Home,
+      visible: true,
+    },
+    {
+      title: "Crop Quality Ontology",
+      url: "/crop-ontology",
+      icon: Leaf,
+      visible: true,
+    },
+    {
+      title: "Explore Data",
+      url: "/explore",
+      icon: Database,
+      visible: isAuthenticated,
+    },
+    {
+      title: "Upload Data",
+      url: "/upload",
+      icon: FileUp,
+      visible: hasPermission(role, "accessUploadPage"),
+    },
+    {
+      title: "Admin",
+      url: "/admin",
+      icon: Users,
+      visible: hasPermission(role, "accessAdminPages"),
+    },
+  ];
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 text-center font-bold">
@@ -65,23 +68,25 @@ export function ClientSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {links.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      item.url === "/"
-                        ? path === "/"
-                        : path.startsWith(item.url)
-                    }
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {links
+                .filter((item) => item.visible)
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        item.url === "/"
+                          ? path === "/"
+                          : path.startsWith(item.url)
+                      }
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

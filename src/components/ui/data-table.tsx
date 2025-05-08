@@ -36,7 +36,6 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   filterColumn: string;
-  // addResource?: boolean;
   selectCrop?: boolean;
   children?: React.ReactNode;
 }

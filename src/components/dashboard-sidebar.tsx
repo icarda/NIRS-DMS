@@ -5,5 +5,5 @@ export async function AppSidebar() {
   const user = await getCurrentUser();
   const isAuthenticated = !!user;
 
-  return <ClientSidebar isAuthenticated={isAuthenticated} />;
+  return <ClientSidebar isAuthenticated={isAuthenticated} role={user?.role} />;
 }
