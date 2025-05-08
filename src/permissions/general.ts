@@ -1,12 +1,21 @@
 import type { UserRole } from "@/drizzle/schema";
 
 // there are no courses in this project
-type Permission = "accessAdminPages" | "accessUploadPage";
+type Permission =
+  | "accessAdminPages"
+  | "accessUploadPage"
+  | "createCrop"
+  | "createCropTrait";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   USER: [],
-  ADMIN: ["accessUploadPage"],
-  SUPERADMIN: ["accessUploadPage", "accessAdminPages"],
+  ADMIN: ["accessUploadPage", "createCrop", "createCropTrait"],
+  SUPERADMIN: [
+    "accessUploadPage",
+    "accessAdminPages",
+    "createCrop",
+    "createCropTrait",
+  ],
 };
 
 export function hasPermission(

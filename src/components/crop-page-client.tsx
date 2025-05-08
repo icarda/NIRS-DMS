@@ -72,9 +72,13 @@ export type Crop = Exclude<Awaited<ReturnType<typeof getCrop>>, undefined>;
 
 interface CropPageClientProps {
   crop: Crop;
+  permission: boolean;
 }
 
-export default function CropPageClient({ crop }: CropPageClientProps) {
+export default function CropPageClient({
+  crop,
+  permission,
+}: CropPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof traitSchema>>({
@@ -179,164 +183,166 @@ export default function CropPageClient({ crop }: CropPageClientProps) {
         </div>
       </div>
       <div className="flex flex-col gap-2 px-2">
-        <div className="flex items-center justify-end">
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4" />
-                Add Trait
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Trait</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="variable"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Trait variable</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Fe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Trait name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+        {permission && (
+          <div className="flex items-center justify-end">
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <PlusIcon className="h-4 w-4" />
+                  Add Trait
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Trait</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="variable"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Trait variable</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Fe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Trait name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="entity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Entity</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select an entity" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Grain">Grain</SelectItem>
+                                <SelectItem value="Wort">Wort</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="unit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Unit</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select an entity" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="%">%</SelectItem>
+                                <SelectItem value="g">g</SelectItem>
+                                <SelectItem value="mg/kg">mg/kg</SelectItem>
+                                <SelectItem value="ppm">ppm</SelectItem>
+                                <SelectItem value="mPas">mPas</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="minimum"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Minimum allowed value</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 20" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="maximum"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximum allowed value</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. 350" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
-                      name="entity"
+                      name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Entity</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select an entity" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Grain">Grain</SelectItem>
-                              <SelectItem value="Wort">Wort</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="unit"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unit</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select an entity" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="%">%</SelectItem>
-                              <SelectItem value="g">g</SelectItem>
-                              <SelectItem value="mg/kg">mg/kg</SelectItem>
-                              <SelectItem value="ppm">ppm</SelectItem>
-                              <SelectItem value="mPas">mPas</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="minimum"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Minimum allowed value</FormLabel>
+                          <FormLabel>Method description</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. 20" {...field} />
+                            <Textarea
+                              placeholder="Type method description here..."
+                              className="resize-none"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="maximum"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Maximum allowed value</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. 350" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Method description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Type method description here..."
-                            className="resize-none"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex items-center justify-end">
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="animate-spin" />
-                          Adding trait...
-                        </>
-                      ) : (
-                        "Add Trait"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                    <div className="flex items-center justify-end">
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="animate-spin" />
+                            Adding trait...
+                          </>
+                        ) : (
+                          "Add Trait"
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
         <DataTable
           columns={traitColumns}
           data={crop.cropTraits}
