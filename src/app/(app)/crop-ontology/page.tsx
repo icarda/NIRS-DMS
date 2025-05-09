@@ -9,12 +9,13 @@ const itemsPerPage = 6;
 export default async function Page() {
   const crops = await getCrops();
   const user = await getCurrentUser();
+  const canCreateCrop = hasPermission(user?.role, "createCrop");
 
   const totalPages = Math.ceil(crops.length / itemsPerPage);
 
   return (
     <div className="flex flex-col gap-2">
-      {hasPermission(user?.role, "createCrop") && (
+      {canCreateCrop && (
         <div className="flex items-center justify-end">
           <AddCropForm />
         </div>

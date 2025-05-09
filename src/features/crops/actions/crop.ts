@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/drizzle/db";
 import { CropTable } from "@/drizzle/schema";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 import {
   deleteCrop as deleteCropDb,
   insertCrop,
@@ -13,8 +15,10 @@ import { CropSchema, cropSchema } from "../schemas/crop";
 
 export async function createCrop(unsafeData: CropSchema) {
   const { success, data } = cropSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canCreateCrop = hasPermission(user?.role, "createCrop");
 
-  if (!success) {
+  if (!success || !canCreateCrop) {
     return { error: true, message: "There was an error creating the crop" };
   }
 

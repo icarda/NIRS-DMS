@@ -15,11 +15,11 @@ export default async function CropPageServer({ params }: CropPageServerProps) {
   const { id: cropId } = await params;
   const crop = await getCrop(parseInt(cropId, 10));
   const user = await getCurrentUser();
-  const permission = hasPermission(user?.role, "createCropTrait");
+  const canCreateCropTrait = hasPermission(user?.role, "createCropTrait");
 
   if (!crop) {
     redirect("/crop-ontology");
   }
 
-  return <CropPageClient crop={crop} permission={permission} />;
+  return <CropPageClient crop={crop} permission={canCreateCropTrait} />;
 }

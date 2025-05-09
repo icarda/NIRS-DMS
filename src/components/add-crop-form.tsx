@@ -79,6 +79,7 @@ const AddCropForm = () => {
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>) => {
       setIsLoading(true);
+
       const formData = new FormData();
       formData.append("file", values.image);
 

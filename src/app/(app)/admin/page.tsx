@@ -26,7 +26,10 @@ import { PhysiologicalStageAddDialog } from "./components/physiological-stage-ad
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
-  if (!hasPermission((await getCurrentUser())?.role, "accessAdminPages")) {
+  const user = await getCurrentUser();
+  const canAccessAdminPage = hasPermission(user?.role, "accessAdminPages");
+
+  if (!canAccessAdminPage) {
     redirect("/");
   }
   const [users, productTypes, crops, physiologicalStages, nirModels] =

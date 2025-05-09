@@ -3,6 +3,8 @@
 import { z } from "zod";
 
 import { traitSchema } from "@/components/crop-page-client";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 import {
   deleteCropTrait as deleteCropTraitDb,
   insertCropTrait,
@@ -14,13 +16,14 @@ export async function addCropTrait(
   cropId: number
 ) {
   try {
-    const { success, data, error } = cropTraitSchema.safeParse({
+    const { success, data } = cropTraitSchema.safeParse({
       ...unsafeData,
       cropId,
     });
+    const user = await getCurrentUser();
+    const canCreateCropTrait = hasPermission(user?.role, "createCropTrait");
 
-    if (!success) {
-      console.log("Validation failed", error);
+    if (!success || !canCreateCropTrait) {
       return { error: true, message: "There was an error creating the trait" };
     }
 
