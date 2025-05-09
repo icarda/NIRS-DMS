@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 
-import { traitSchema } from "@/components/crop-page-client";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {

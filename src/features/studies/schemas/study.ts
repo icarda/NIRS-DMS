@@ -8,6 +8,7 @@ export const studySchema = z.object({
   requesterName: z.string({ required_error: "Requester name is required" }),
   requesterEmail: z.string().email(),
   sampleDate: z.string().date(),
+  program: z.string().min(1, "Program is required"),
   physiologicalStageId: z.number().min(1, "Physiological stage is required"),
   additionalMetadata: z.record(z.any()).optional(),
   qualityLabId: z.number().min(1, "Quality lab is required"),

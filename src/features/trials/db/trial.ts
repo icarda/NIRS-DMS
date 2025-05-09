@@ -28,7 +28,6 @@ export async function getTrial(id: number) {
     where: eq(TrialTable.id, id),
     with: {
       crop: true,
-      species: true,
       fertilizers: true,
     },
   });

@@ -8,10 +8,11 @@ import { cropCommonNameSchema } from "@/features/crops/schemas/crop";
 
 export async function GET(
   request: Request,
-  { params }: { params: { cropId: string } }
+  { params }: { params: Promise<{ cropId: string }> }
 ) {
+  let { cropId: id } = await params;
   try {
-    const cropId = Number(params.cropId);
+    const cropId = Number(id);
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
     const limit = limitParam ? Number(limitParam) : undefined;
@@ -27,10 +28,11 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { cropId: string } }
+  { params }: { params: Promise<{ cropId: string }> }
 ) {
+  let { cropId: id } = await params;
   try {
-    const cropId = Number(params.cropId);
+    const cropId = Number(id);
     const data = await request.json();
     const parsed = cropCommonNameSchema.safeParse(data);
     if (!parsed.success) {

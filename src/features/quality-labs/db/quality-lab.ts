@@ -4,10 +4,21 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { db } from "@/drizzle/db";
 import { CenterTable, QualityLabTable } from "@/drizzle/schema";
 import {
+  getQualityLabGlobalTag,
   getQualityLabIdTag,
   getQualityLabsByCenterTag,
   revalidateQualityLabCache,
 } from "./cache";
+
+export async function getQualityLabs({ limit }: { limit?: number } = {}) {
+  "use cache";
+  cacheTag(getQualityLabGlobalTag());
+  const qualityLabs = await db.query.QualityLabTable.findMany({
+    limit,
+  });
+
+  return qualityLabs;
+}
 
 export async function getQualityLab(id: number) {
   "use cache";

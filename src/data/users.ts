@@ -1,4 +1,4 @@
-import { User } from "@/app/admin/columns";
+import { User } from "@/app/(app)/admin/columns";
 
 export const users: User[] = [
   {
@@ -6,8 +6,8 @@ export const users: User[] = [
     fullName: "Jimmy Scott",
     role: "USER",
     email: "jimmy.scott@hotmail.com",
-    qualityLab: "CIMMYT",
-    studyAccess: ["trial3+barley+23/11/2025"],
+    center: "CIMMYT",
+    // studyAccess: ["trial3+barley+23/11/2025"],
     status: "Pending",
   },
   {
@@ -15,12 +15,12 @@ export const users: User[] = [
     fullName: "Alejandro Martin",
     role: "ADMIN",
     email: "alejandro.martin@hotmail.com",
-    qualityLab: "ICARDA-MAR",
-    studyAccess: [
-      "trial2+barley+15/04/2025",
-      "trial1+corn+13/02/2025",
-      "trial1+corn+04/05/2025",
-    ],
+    center: "ICARDA-MAR",
+    // studyAccess: [
+    //   "trial2+barley+15/04/2025",
+    //   "trial1+corn+13/02/2025",
+    //   "trial1+corn+04/05/2025",
+    // ],
     status: "Approved",
   },
   {
@@ -28,12 +28,12 @@ export const users: User[] = [
     fullName: "Kim Simon MD",
     role: "USER",
     email: "kim.md@gmail.com",
-    qualityLab: "CIMMYT",
-    studyAccess: [
-      "trial3+wheat+03/04/2025",
-      "trial3+wheat+19/08/2025",
-      "trial2+wheat+07/05/2025",
-    ],
+    center: "CIMMYT",
+    // studyAccess: [
+    //   "trial3+wheat+03/04/2025",
+    //   "trial3+wheat+19/08/2025",
+    //   "trial2+wheat+07/05/2025",
+    // ],
     status: "Approved",
   },
   {
@@ -41,12 +41,12 @@ export const users: User[] = [
     fullName: "Christopher Wood",
     role: "USER",
     email: "christopher.wood@hotmail.com",
-    qualityLab: "ICARDA-LEB",
-    studyAccess: [
-      "trial2+wheat+27/03/2025",
-      "trial1+barley+24/04/2025",
-      "trial1+corn+04/10/2025",
-    ],
+    center: "ICARDA-LEB",
+    // studyAccess: [
+    //   "trial2+wheat+27/03/2025",
+    //   "trial1+barley+24/04/2025",
+    //   "trial1+corn+04/10/2025",
+    // ],
     status: "Pending",
   },
   {
@@ -54,12 +54,12 @@ export const users: User[] = [
     fullName: "Kevin Roman",
     role: "ADMIN",
     email: "kevin.roman@hotmail.com",
-    qualityLab: "CIMMYT",
-    studyAccess: [
-      "trial2+wheat+04/03/2025",
-      "trial2+barley+09/09/2025",
-      "trial3+corn+04/07/2025",
-    ],
+    center: "CIMMYT",
+    // studyAccess: [
+    // "trial2+wheat+04/03/2025",
+    // "trial2+barley+09/09/2025",
+    // "trial3+corn+04/07/2025",
+    // ],
     status: "Approved",
   },
   {
@@ -67,8 +67,8 @@ export const users: User[] = [
     fullName: "Juan Hebert",
     role: "USER",
     email: "juan.hebert@gmail.com",
-    qualityLab: "ICARDA-LEB",
-    studyAccess: ["trial2+wheat+13/10/2025", "trial1+corn+09/12/2025"],
+    center: "ICARDA-LEB",
+    // studyAccess: ["trial2+wheat+13/10/2025", "trial1+corn+09/12/2025"],
     status: "Pending",
   },
   {
@@ -76,8 +76,8 @@ export const users: User[] = [
     fullName: "Robyn Moore",
     role: "USER",
     email: "robyn.moore@hotmail.com",
-    qualityLab: "ICARDA-LEB",
-    studyAccess: ["trial2+barley+15/04/2025"],
+    center: "ICARDA-LEB",
+    // studyAccess: ["trial2+barley+15/04/2025"],
     status: "Approved",
   },
   {
@@ -85,8 +85,8 @@ export const users: User[] = [
     fullName: "Mary Hobbs",
     role: "USER",
     email: "mary.hobbs@gmail.com",
-    qualityLab: "ICARDA-LEB",
-    studyAccess: ["trial1+corn+30/08/2025", "trial3+corn+27/11/2025"],
+    center: "ICARDA-LEB",
+    // studyAccess: ["trial1+corn+30/08/2025", "trial3+corn+27/11/2025"],
     status: "Approved",
   },
   {
@@ -94,8 +94,8 @@ export const users: User[] = [
     fullName: "Taylor Cooley",
     role: "USER",
     email: "taylor.cooley@gmail.com",
-    qualityLab: "ICARDA-MAR",
-    studyAccess: ["trial2+wheat+26/09/2025"],
+    center: "ICARDA-MAR",
+    // studyAccess: ["trial2+wheat+26/09/2025"],
     status: "Approved",
   },
   {
@@ -103,8 +103,8 @@ export const users: User[] = [
     fullName: "Tiffany Wood",
     role: "USER",
     email: "tiffany.wood@hotmail.com",
-    qualityLab: "CIMMYT",
-    studyAccess: ["trial3+corn+04/07/2025"],
+    center: "CIMMYT",
+    // studyAccess: ["trial3+corn+04/07/2025"],
     status: "Pending",
   },
 ];

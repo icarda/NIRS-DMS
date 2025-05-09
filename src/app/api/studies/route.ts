@@ -11,20 +11,19 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const studyCode = searchParams.get("studyCode");
-    const qualityLabIdParam = searchParams.get("qualityLabId");
+    // const qualityLabIdParam = searchParams.get("qualityLabId");
 
-    if (!studyCode || !qualityLabIdParam) {
+    if (!studyCode) {
       return NextResponse.json(
         {
           error: true,
-          message: "Missing studyCode or qualityLabId query parameter",
+          message: "Missing studyCode query parameter",
         },
         { status: 400 }
       );
     }
 
-    const qualityLabId = Number(qualityLabIdParam);
-    const study = await getStudyByCode(studyCode, qualityLabId);
+    const study = await getStudyByCode(studyCode);
 
     if (!study) {
       return NextResponse.json(

@@ -3,7 +3,7 @@ import { OtherIdsTable } from "@/drizzle/schema";
 
 type OtherIdInsertData = Pick<
   typeof OtherIdsTable.$inferInsert,
-  "sampleId" | "plotId" | "gid"
+  "sampleId" | "plotId" | "gid" | "studyId"
 >;
 
 export async function insertOtherIdsBatch(
