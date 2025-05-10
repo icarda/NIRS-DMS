@@ -19,7 +19,9 @@ type CACHE_TAG =
   | "productTypes"
   | "physiologicalStages"
   | "cropTraits"
-  | "trialFertilizers";
+  | "trialFertilizers"
+  | "trialMetadataConfig"
+  | "studyMetadataConfig";
 
 export function getGlobalTag(tag: CACHE_TAG) {
   return `global:${tag}` as const;

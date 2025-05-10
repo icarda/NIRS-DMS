@@ -1,13 +1,28 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { TrialFertilizerTable, TrialTable } from "@/drizzle/schema";
+import {
+  TrialFertilizerTable,
+  TrialMetadataConfig,
+  TrialTable,
+} from "@/drizzle/schema";
 import {
   getTrialGlobalTag,
   getTrialIdTag,
+  getTrialMetadataConfigGlobalTag,
+  getTrialMetadataConfigTag,
   revalidateTrialCache,
+  revalidateTrialMetadataConfigCache,
 } from "./cache";
+
+export async function getTrialConfigMetadatas() {
+  "use cache";
+  cacheTag(getTrialMetadataConfigGlobalTag());
+  const trials = await db.query.TrialMetadataConfig.findMany();
+  return trials;
+}
 
 export async function getTrialByName(name: string) {
   "use cache";
@@ -104,4 +119,36 @@ export async function deleteTrial({ id }: { id: number }) {
   revalidateTrialCache(deletedTrial.id);
 
   return deletedTrial;
+}
+
+export async function getTrialMetadataByName(name: string) {
+  "use cache";
+  cacheTag(getTrialMetadataConfigTag(name));
+  return db.query.TrialMetadataConfig.findFirst({
+    where: eq(TrialMetadataConfig.name, name),
+  });
+}
+
+export async function deleteTrialMetadataConfig(
+  name: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  await trx
+    .delete(TrialMetadataConfig)
+    .where(eq(TrialMetadataConfig.name, name));
+
+  revalidateTrialMetadataConfigCache(name);
+}
+
+export async function removeJsonKeyFromAllTrials(
+  key: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  await trx.execute(sql`
+    UPDATE ${TrialTable}
+    SET additional_metadata = additional_metadata - ${key}
+    WHERE additional_metadata ? ${key}
+  `);
+
+  revalidateTag(getTrialGlobalTag());
 }

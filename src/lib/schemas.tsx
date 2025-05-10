@@ -156,7 +156,7 @@ export const multiStepFormSchema = trialFormSchema
 export const metadataDialog = z.object({
   id: z.number(),
   name: z.string().min(2, "Metadata name must be at least 2 characters"),
-  type: z.enum(["String", "Number", "Boolean", "Date", "Array"]),
+  type: z.enum(["string", "number", "boolean", "date", "array"]),
   defaultValue: z.string(),
   required: z.boolean(),
   minValue: z.string(),

@@ -19,11 +19,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { UserRole } from "@/drizzle/schema";
+import { TrialMetadataType, UserRole } from "@/drizzle/schema";
 import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
+import { deleteTrialMetadata } from "@/features/trials/actions/trial";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
+import { capitalize } from "@/lib/utils";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
@@ -60,13 +62,14 @@ export type NIRModel = {
 };
 
 export type MetadataSchema = {
-  id: string;
+  id: number;
   name: string;
-  type: "String" | "Number" | "Boolean" | "Date" | "Array";
+  type: TrialMetadataType;
   defaultValue: string;
   required: boolean;
-  minValue: string;
-  maxValue: string;
+  minValue?: string;
+  maxValue?: string;
+  source: "sql" | "json";
 };
 
 export const userColumns: ColumnDef<User>[] = [
@@ -507,6 +510,16 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
     ),
   },
   {
+    accessorKey: "type",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("type") as string;
+      return capitalize(value);
+    },
+  },
+  {
     accessorKey: "defaultValue",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Default Value" />
@@ -558,7 +571,16 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
         setEditDialogOpen(false);
       };
 
-      const handleDelete = () => {
+      const handleDelete = async () => {
+        if (metadata.source === "sql") return;
+        const res = await deleteTrialMetadata(metadata.name);
+
+        if (res.error) {
+          toast.error(res.message);
+          return;
+        }
+
+        toast.success(res.message);
         setDeleteDialogOpen(false);
       };
 
@@ -575,7 +597,11 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
+              disabled={metadata.source === "sql"}
+              onClick={() => {
+                if (metadata.source === "sql") return;
+                setDeleteDialogOpen(true);
+              }}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

@@ -8,3 +8,4 @@ export * from "./schemas/trait";
 export * from "./schemas/trial";
 export * from "./schemas/user";
 export * from "./schemas/other_ids";
+export * from "./schemas/trial-metadata-config";
