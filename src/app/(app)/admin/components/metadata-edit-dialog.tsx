@@ -76,7 +76,11 @@ export function MetadataEditDialog({
                   <FormItem>
                     <FormLabel>Metadata name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Fertilizer amount" />
+                      <Input
+                        disabled={metadata.source === "sql"}
+                        {...field}
+                        placeholder="e.g. Fertilizer amount"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -93,12 +97,12 @@ export function MetadataEditDialog({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger disabled={metadata.source === "sql"}>
                             <SelectValue placeholder="Select metadata type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {["String", "Number", "Boolean", "Date", "Array"].map(
+                          {["string", "number", "date", "boolean", "array"].map(
                             (type) => (
                               <SelectItem key={type} value={type}>
                                 {type}

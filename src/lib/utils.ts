@@ -33,3 +33,7 @@ export function fileSize(size: number) {
     ["B", "kB", "MB", "GB", "TB"][i]
   );
 }
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

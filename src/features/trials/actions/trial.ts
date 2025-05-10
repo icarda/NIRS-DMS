@@ -2,9 +2,14 @@
 
 import { z } from "zod";
 
+import { db } from "@/drizzle/db";
+import { TrialMetadataConfig } from "@/drizzle/schema";
 import {
   deleteTrial as deleteTrialDb,
+  deleteTrialMetadataConfig,
+  getTrialMetadataByName,
   insertTrial,
+  removeJsonKeyFromAllTrials,
   updateTrial as updateTrialDb,
 } from "../db/trial";
 import { trialSchema } from "../schemas/trial";
@@ -40,5 +45,41 @@ export async function deleteTrial(id: number) {
     return { error: false, message: "Successfully deleted the trial" };
   } catch (error) {
     return { error: true, message: "Error deleting the trial" };
+  }
+}
+
+export async function deleteTrialMetadata(name: string) {
+  try {
+    const config = await getTrialMetadataByName(name);
+
+    if (!config) {
+      return {
+        error: true,
+        message: "Metadata field not found.",
+      };
+    }
+
+    if (config.source === "sql") {
+      return {
+        error: true,
+        message: "Cannot delete SQL-based metadata fields.",
+      };
+    }
+
+    await db.transaction(async (tx) => {
+      await deleteTrialMetadataConfig(name, tx);
+      await removeJsonKeyFromAllTrials(name, tx);
+    });
+
+    return {
+      error: false,
+      message: "Metadata deleted successfully.",
+    };
+  } catch (err) {
+    console.error("Delete metadata error:", err);
+    return {
+      error: true,
+      message: "An unexpected error occurred. Please try again.",
+    };
   }
 }

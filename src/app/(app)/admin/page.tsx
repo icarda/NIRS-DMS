@@ -9,6 +9,7 @@ import { getCrops } from "@/features/crops/db/crop";
 import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
+import { getTrialConfigMetadatas } from "@/features/trials/db/trial";
 import { getUsers } from "@/features/users/db/users";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
@@ -32,14 +33,21 @@ export default async function Admin() {
   if (!canAccessAdminPage) {
     redirect("/");
   }
-  const [users, productTypes, crops, physiologicalStages, nirModels] =
-    await Promise.all([
-      getUsers(),
-      getProductTypes(),
-      getCrops(),
-      getPhysiologicalStages(),
-      getNirModels(),
-    ]);
+  const [
+    users,
+    productTypes,
+    crops,
+    physiologicalStages,
+    nirModels,
+    trialConfigMetadatas,
+  ] = await Promise.all([
+    getUsers(),
+    getProductTypes(),
+    getCrops(),
+    getPhysiologicalStages(),
+    getNirModels(),
+    getTrialConfigMetadatas(),
+  ]);
   return (
     <div>
       <Tabs defaultValue="users" className="w-full">
@@ -98,7 +106,6 @@ export default async function Admin() {
                 center: user.center.acronym,
                 status: user.emailVerified ? "Approved" : "Pending",
               }))}
-              // data={users}
               filterColumn="fullName"
             />
           </TabsContent>
@@ -142,7 +149,7 @@ export default async function Admin() {
           <TabsContent value="trials_metadata">
             <DataTable
               columns={trialMetadataColumns}
-              data={trialMetadatas}
+              data={trialConfigMetadatas}
               filterColumn="name"
             >
               <MetadataAddDialog type="trial" />
