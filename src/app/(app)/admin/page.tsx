@@ -3,12 +3,11 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { studyMetadatas } from "@/data/study-metadata";
-import { trialMetadatas } from "@/data/trials-metadata";
 import { getCrops } from "@/features/crops/db/crop";
 import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
+import { getStudyConfigMetadatas } from "@/features/studies/db/study";
 import { getTrialConfigMetadatas } from "@/features/trials/db/trial";
 import { getUsers } from "@/features/users/db/users";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -40,6 +39,7 @@ export default async function Admin() {
     physiologicalStages,
     nirModels,
     trialConfigMetadatas,
+    studyConfigMetadatas,
   ] = await Promise.all([
     getUsers(),
     getProductTypes(),
@@ -47,6 +47,7 @@ export default async function Admin() {
     getPhysiologicalStages(),
     getNirModels(),
     getTrialConfigMetadatas(),
+    getStudyConfigMetadatas(),
   ]);
   return (
     <div>
@@ -158,7 +159,7 @@ export default async function Admin() {
           <TabsContent value="study_metadata">
             <DataTable
               columns={studyMetadataColumns}
-              data={studyMetadatas}
+              data={studyConfigMetadatas}
               filterColumn="name"
             >
               <MetadataAddDialog type="study" />
