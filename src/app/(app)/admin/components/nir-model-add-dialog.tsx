@@ -98,7 +98,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Model Name</FormLabel>
+                  <FormLabel required>Model Name</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter model name" />
                   </FormControl>
@@ -112,7 +112,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel required>Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -137,7 +137,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
               name="wavelengthRange"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wavelength Range (nm)</FormLabel>
+                  <FormLabel required>Wavelength Range (nm)</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="400-1000" />
                   </FormControl>
@@ -151,7 +151,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
               name="resolution"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Resolution (nm)</FormLabel>
+                  <FormLabel required>Resolution (nm)</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -170,7 +170,7 @@ export function NirModelAddDialog({}: NirModelAddDialogProps) {
               name="manufacturer"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Manufacturer</FormLabel>
+                  <FormLabel required>Manufacturer</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter manufacturer name" />
                   </FormControl>

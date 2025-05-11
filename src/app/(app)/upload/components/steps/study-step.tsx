@@ -67,7 +67,7 @@ const StudyStep = ({
               name="productType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Type</FormLabel>
+                  <FormLabel required>Product Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -99,7 +99,7 @@ const StudyStep = ({
               name="qualityLab"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Quality Lab</FormLabel>
+                  <FormLabel required>Quality Lab</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -127,7 +127,7 @@ const StudyStep = ({
               name="nirModel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>NIR Model</FormLabel>
+                  <FormLabel required>NIR Model</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -157,7 +157,7 @@ const StudyStep = ({
               name="physiologicalStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Physiological Stage</FormLabel>
+                  <FormLabel required>Physiological Stage</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -189,7 +189,7 @@ const StudyStep = ({
               name="sampleDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sample date</FormLabel>
+                  <FormLabel required>Sample date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -231,7 +231,7 @@ const StudyStep = ({
               name="program"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Program</FormLabel>
+                  <FormLabel required>Program</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter program name" {...field} />
                   </FormControl>

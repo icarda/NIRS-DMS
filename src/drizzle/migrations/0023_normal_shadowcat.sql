@@ -1,0 +1,1 @@
+ALTER TABLE "trial_metadata_config" ADD COLUMN "label" text NOT NULL;

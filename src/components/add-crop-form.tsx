@@ -31,11 +31,11 @@ import { createCrop } from "@/features/crops/actions/crop";
 import { uploadFile } from "@/lib/upload-asset";
 
 const formSchema = z.object({
-  cropName: z.string().min(2, {
-    message: "Crop name must be at least 2 characters.",
+  cropName: z.string().min(1, {
+    message: "Crop name is required.",
   }),
-  commonName: z.string().min(2, {
-    message: "Common name must be at least 2 characters.",
+  commonName: z.string().min(1, {
+    message: "Common name is required.",
   }),
   description: z.string().optional(),
   image: z
@@ -135,7 +135,7 @@ const AddCropForm = () => {
                 name="cropName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Crop name</FormLabel>
+                    <FormLabel required>Crop name</FormLabel>
                     <FormControl>
                       <Input placeholder="Barley" {...field} />
                     </FormControl>
@@ -148,7 +148,7 @@ const AddCropForm = () => {
                 name="commonName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Crop Common name</FormLabel>
+                    <FormLabel required>Crop Common name</FormLabel>
                     <FormControl>
                       <Input placeholder="Barley" {...field} />
                     </FormControl>
@@ -163,7 +163,7 @@ const AddCropForm = () => {
               name="image"
               render={({ field: { onChange, value, ...field }, formState }) => (
                 <FormItem>
-                  <FormLabel>Crop Image</FormLabel>
+                  <FormLabel required>Crop Image</FormLabel>
                   <FormControl>
                     <FileUpload
                       accept="image/png, image/jpeg, image/jpg, image/webp"

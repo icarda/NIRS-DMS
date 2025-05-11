@@ -14,6 +14,7 @@ export type TrialMetadataType = (typeof types)[number];
 
 export const TrialMetadataConfig = pgTable("trial_metadata_config", {
   id,
+  label: text("label").notNull(),
   name: text("name").notNull().unique(),
   type: trialMetadataTypes().notNull().default("string"),
   defaultValue: text("default_value").notNull(),

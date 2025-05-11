@@ -504,7 +504,7 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
     cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "name",
+    accessorKey: "label",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),

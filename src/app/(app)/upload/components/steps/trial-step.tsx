@@ -154,7 +154,7 @@ const TrialStep = ({
                 name="trial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trial</FormLabel>
+                    <FormLabel required>Trial</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -213,7 +213,7 @@ const TrialStep = ({
                 name="trial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trial Name</FormLabel>
+                    <FormLabel required>Trial Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter trial name.." {...field} />
                     </FormControl>
@@ -229,7 +229,7 @@ const TrialStep = ({
               name="trialPlantingDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Planting date</FormLabel>
+                  <FormLabel required>Planting date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -272,7 +272,7 @@ const TrialStep = ({
               name="crop"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Crop</FormLabel>
+                  <FormLabel required>Crop</FormLabel>
                   <Select
                     onValueChange={(val) => {
                       field.onChange(val);
@@ -307,7 +307,7 @@ const TrialStep = ({
               name="species"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Species</FormLabel>
+                  <FormLabel required>Species</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -355,7 +355,7 @@ const TrialStep = ({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel required>Location</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter location"

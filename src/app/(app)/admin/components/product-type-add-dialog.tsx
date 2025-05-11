@@ -99,7 +99,7 @@ export function ProductTypeAddDialog({ crops }: ProductTypeDialogProps) {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Type</FormLabel>
+                  <FormLabel required>Product Type</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter product type" />
                   </FormControl>
@@ -112,7 +112,7 @@ export function ProductTypeAddDialog({ crops }: ProductTypeDialogProps) {
               name="crop"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Crop</FormLabel>
+                  <FormLabel required>Crop</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}

@@ -207,7 +207,7 @@ export default function CropPageClient({
                         name="variable"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Trait variable</FormLabel>
+                            <FormLabel required>Trait variable</FormLabel>
                             <FormControl>
                               <Input placeholder="Fe" {...field} />
                             </FormControl>
@@ -220,7 +220,7 @@ export default function CropPageClient({
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Trait name</FormLabel>
+                            <FormLabel required>Trait name</FormLabel>
                             <FormControl>
                               <Input placeholder="Name" {...field} />
                             </FormControl>
@@ -234,7 +234,7 @@ export default function CropPageClient({
                         name="entity"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Entity</FormLabel>
+                            <FormLabel required>Entity</FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
@@ -258,7 +258,7 @@ export default function CropPageClient({
                         name="unit"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Unit</FormLabel>
+                            <FormLabel required>Unit</FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
@@ -313,7 +313,7 @@ export default function CropPageClient({
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Method description</FormLabel>
+                          <FormLabel required>Method description</FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Type method description here..."

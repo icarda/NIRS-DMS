@@ -85,7 +85,7 @@ export function RegisterForm({
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel required>First Name</FormLabel>
                       <FormControl>
                         <Input
                           disabled={isPending}
@@ -102,7 +102,7 @@ export function RegisterForm({
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel required>Last Name</FormLabel>
                       <FormControl>
                         <Input
                           disabled={isPending}
@@ -119,7 +119,7 @@ export function RegisterForm({
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel required>Country</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -147,7 +147,7 @@ export function RegisterForm({
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location</FormLabel>
+                      <FormLabel required>Location</FormLabel>
                       <FormControl>
                         <Input
                           disabled={isPending}
@@ -165,7 +165,7 @@ export function RegisterForm({
                 name="center"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Center</FormLabel>
+                    <FormLabel required>Center</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -193,7 +193,7 @@ export function RegisterForm({
                 name="position"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Position</FormLabel>
+                    <FormLabel required>Position</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -221,7 +221,7 @@ export function RegisterForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel required>Email</FormLabel>
                     <FormControl>
                       <Input
                         disabled={isPending}
@@ -239,7 +239,7 @@ export function RegisterForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel required>Password</FormLabel>
                     <FormControl>
                       <Input disabled={isPending} type="password" {...field} />
                     </FormControl>

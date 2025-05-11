@@ -162,6 +162,13 @@
       "when": 1747393564824,
       "tag": "0022_happy_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1747394748582,
+      "tag": "0023_normal_shadowcat",
+      "breakpoints": true
     }
   ]
 }

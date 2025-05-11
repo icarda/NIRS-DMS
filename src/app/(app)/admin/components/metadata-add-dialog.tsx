@@ -45,7 +45,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
     resolver: zodResolver(metadataDialog),
     defaultValues: {
       name: "",
-      type: "String",
+      type: "string",
       defaultValue: "",
       required: false,
       minValue: "",
@@ -84,7 +84,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Metadata name</FormLabel>
+                    <FormLabel required>Metadata name</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="e.g. Fertilizer amount" />
                     </FormControl>
@@ -96,7 +96,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type</FormLabel>
+                    <FormLabel required>Type</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
@@ -108,7 +108,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {["String", "Number", "Boolean", "Date", "Array"].map(
+                          {["string", "number", "boolean", "date", "array"].map(
                             (type) => (
                               <SelectItem key={type} value={type}>
                                 {type}
@@ -128,7 +128,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
               name="defaultValue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Default Value</FormLabel>
+                  <FormLabel required>Default Value</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="e.g. false" />
                   </FormControl>
@@ -141,7 +141,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
               name="required"
               render={({ field }) => (
                 <FormItem className="flex items-center gap-3">
-                  <FormLabel>Required</FormLabel>
+                  <FormLabel required>Required</FormLabel>
                   <FormControl>
                     <Switch
                       checked={field.value}

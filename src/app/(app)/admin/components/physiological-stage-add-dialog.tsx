@@ -103,7 +103,7 @@ export function PhysiologicalStageAddDialog({
               name="stage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Physiological Stage</FormLabel>
+                  <FormLabel required>Physiological Stage</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter physiological Stage" />
                   </FormControl>
@@ -116,7 +116,7 @@ export function PhysiologicalStageAddDialog({
               name="crop"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Crop</FormLabel>
+                  <FormLabel required>Crop</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
