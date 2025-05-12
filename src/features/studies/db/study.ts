@@ -1,12 +1,17 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { StudyTable } from "@/drizzle/schema";
+import { StudyMetadataConfig } from "@/drizzle/schemas/study-metadata-config";
 import {
   getStudyGlobalTag,
   getStudyIdTag,
+  getStudyMetadataConfigGlobalTag,
+  getStudyMetadataConfigTag,
   revalidateStudyCache,
+  revalidateStudyMetadataConfigCache,
 } from "./cache/study";
 
 export async function getStudies() {
@@ -70,4 +75,43 @@ export async function deleteStudy({ id }: { id: number }) {
   revalidateStudyCache(deletedStudy.id);
 
   return deletedStudy;
+}
+
+export async function getStudyMetadataByName(name: string) {
+  "use cache";
+  cacheTag(getStudyMetadataConfigTag(name));
+  return db.query.StudyMetadataConfig.findFirst({
+    where: eq(StudyMetadataConfig.name, name),
+  });
+}
+
+export async function getStudyConfigMetadatas() {
+  "use cache";
+  cacheTag(getStudyMetadataConfigGlobalTag());
+  const studies = await db.query.StudyMetadataConfig.findMany();
+  return studies;
+}
+
+export async function deleteStudyMetadataConfig(
+  name: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  await trx
+    .delete(StudyMetadataConfig)
+    .where(eq(StudyMetadataConfig.name, name));
+
+  revalidateStudyMetadataConfigCache(name);
+}
+
+export async function removeJsonKeyFromAllStudies(
+  key: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  await trx.execute(sql`
+    UPDATE ${StudyTable}
+    SET additional_metadata = additional_metadata - ${key}
+    WHERE additional_metadata ? ${key}
+  `);
+
+  revalidateTag(getStudyGlobalTag());
 }

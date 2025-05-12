@@ -9,3 +9,4 @@ export * from "./schemas/trial";
 export * from "./schemas/user";
 export * from "./schemas/other_ids";
 export * from "./schemas/trial-metadata-config";
+export * from "./schemas/study-metadata-config";
