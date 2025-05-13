@@ -19,6 +19,11 @@ export async function insertOtherIdsBatch(
     .values(data)
 
     .onConflictDoNothing({
-      target: [OtherIdsTable.sampleId, OtherIdsTable.plotId, OtherIdsTable.gid],
+      target: [
+        OtherIdsTable.sampleId,
+        OtherIdsTable.plotId,
+        OtherIdsTable.gid,
+        OtherIdsTable.studyId,
+      ],
     });
 }
