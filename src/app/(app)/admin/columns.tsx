@@ -23,6 +23,7 @@ import { TrialMetadataType, UserRole } from "@/drizzle/schema";
 import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
+import { deleteStudyMetadata } from "@/features/studies/actions/study";
 import { deleteTrialMetadata } from "@/features/trials/actions/trial";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
 import { capitalize } from "@/lib/utils";
@@ -566,6 +567,7 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
       const metadata = row.original;
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
 
       const handleEdit = (data: any) => {
         setEditDialogOpen(false);
@@ -573,14 +575,17 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
 
       const handleDelete = async () => {
         if (metadata.source === "sql") return;
+        setIsLoading(true);
         const res = await deleteTrialMetadata(metadata.name);
 
         if (res.error) {
           toast.error(res.message);
+          setIsLoading(false);
           return;
         }
 
         toast.success(res.message);
+        setIsLoading(false);
         setDeleteDialogOpen(false);
       };
 
@@ -630,8 +635,15 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -701,15 +713,27 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
       const metadata = row.original;
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
 
       const handleEdit = (data: any) => {
         setEditDialogOpen(false);
       };
 
-      const handleDelete = () => {
+      const handleDelete = async () => {
+        if (metadata.source === "sql") return;
+        setIsLoading(true);
+        const res = await deleteStudyMetadata(metadata.name);
+
+        if (res.error) {
+          toast.error(res.message);
+          setIsLoading(false);
+          return;
+        }
+
+        toast.success(res.message);
+        setIsLoading(false);
         setDeleteDialogOpen(false);
       };
-
       return (
         <>
           <div className="flex items-center gap-2">
@@ -723,7 +747,11 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
+              disabled={metadata.source === "sql"}
+              onClick={() => {
+                if (metadata.source === "sql") return;
+                setDeleteDialogOpen(true);
+              }}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -752,8 +780,15 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
