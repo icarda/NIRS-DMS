@@ -10,6 +10,7 @@ import {
 } from "@/features/studies/db/species";
 import { getStudyByCode, insertStudy } from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
+import { getCurrentUser } from "@/lib/currentUser";
 import {
   NIRSData,
   parseNirsFile,
@@ -19,6 +20,7 @@ import {
   multiStepFormSchemaFinal,
   MultiStepFormSchemaFinal,
 } from "@/lib/schemas";
+import { hasPermission } from "@/permissions/general";
 import { insertNirsDataBatch } from "../db/nirs-data";
 
 function parseWavelengthRange(
@@ -42,6 +44,16 @@ export interface OtherIdInsertData {
 }
 
 export async function uploadNirsData(formData: FormData) {
+  const user = await getCurrentUser();
+  const canUploadNirsData = hasPermission(user?.role, "uploadNirsData");
+
+  if (!canUploadNirsData) {
+    return {
+      error: true,
+      message: "You do not have permission to upload NIRS data.",
+    };
+  }
+
   const rawData: Record<string, any> = {};
   for (const [key, value] of formData.entries()) {
     rawData[key] = value;
@@ -214,6 +226,7 @@ export async function uploadNirsData(formData: FormData) {
           // additionalMetadata: {}
         };
         newStudy = await insertStudy(studyData, tx);
+        console.log("New study created:", newStudy);
         if (!newStudy?.id) throw new Error("Failed to create study.");
         studyId = newStudy.id;
       }
