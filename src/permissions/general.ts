@@ -1,20 +1,54 @@
 import type { UserRole } from "@/drizzle/schema";
 
-// there are no courses in this project
 type Permission =
   | "accessAdminPages"
   | "accessUploadPage"
   | "createCrop"
-  | "createCropTrait";
+  | "createCropTrait"
+  | "uploadNirsData"
+  | "updateUser"
+  | "deleteUser"
+  | "createPhysiologicalStage"
+  | "deletePhysiologicalStage"
+  | "createNirModel"
+  | "deleteNirModel"
+  | "createProductType"
+  | "deleteProductType"
+  | "createTrialConfigMetadata"
+  | "updateTrialConfigMetadata"
+  | "deleteTrialConfigMetadata"
+  | "createStudyConfigMetadata"
+  | "updateStudyConfigMetadata"
+  | "deleteStudyConfigMetadata";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   USER: [],
-  ADMIN: ["accessUploadPage", "createCrop", "createCropTrait"],
+  ADMIN: [
+    "accessUploadPage",
+    "createCrop",
+    "createCropTrait",
+    "uploadNirsData",
+  ],
   SUPERADMIN: [
     "accessUploadPage",
     "accessAdminPages",
     "createCrop",
     "createCropTrait",
+    "uploadNirsData",
+    "updateUser",
+    "deleteUser",
+    "createPhysiologicalStage",
+    "deletePhysiologicalStage",
+    "createNirModel",
+    "deleteNirModel",
+    "createProductType",
+    "deleteProductType",
+    "createTrialConfigMetadata",
+    "updateTrialConfigMetadata",
+    "deleteTrialConfigMetadata",
+    "createStudyConfigMetadata",
+    "updateStudyConfigMetadata",
+    "deleteStudyConfigMetadata",
   ],
 };
 
