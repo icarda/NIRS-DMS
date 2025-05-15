@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { db } from "@/drizzle/db";
 import { TrialMetadataConfig } from "@/drizzle/schema";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 import {
   deleteTrial as deleteTrialDb,
   deleteTrialMetadataConfig,
@@ -17,7 +19,10 @@ import { trialSchema } from "../schemas/trial";
 export async function createTrial(unsafeData: z.infer<typeof trialSchema>) {
   const { success, data } = trialSchema.safeParse(unsafeData);
 
-  if (!success) {
+  const user = await getCurrentUser();
+  const canCreateTrial = hasPermission(user?.role, "createTrialConfigMetadata");
+
+  if (!success || !canCreateTrial) {
     return { error: true, message: "There was an error creating the trial" };
   }
 
@@ -31,7 +36,10 @@ export async function updateTrial(
 ) {
   const { success, data } = trialSchema.safeParse(unsafeData);
 
-  if (!success) {
+  const user = await getCurrentUser();
+  const canUpdateTrial = hasPermission(user?.role, "updateTrialConfigMetadata");
+
+  if (!success || !canUpdateTrial) {
     return { error: true, message: "There was an error updating the trial" };
   }
 
@@ -50,6 +58,17 @@ export async function deleteTrial(id: number) {
 
 export async function deleteTrialMetadata(name: string) {
   try {
+    const user = await getCurrentUser();
+    const canDeleteTrialMetadata = hasPermission(
+      user?.role,
+      "deleteTrialConfigMetadata"
+    );
+    if (!canDeleteTrialMetadata) {
+      return {
+        error: true,
+        message: "You do not have permission to delete metadata fields.",
+      };
+    }
     const config = await getTrialMetadataByName(name);
 
     if (!config) {
