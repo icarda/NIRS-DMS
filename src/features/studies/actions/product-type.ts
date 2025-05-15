@@ -3,7 +3,9 @@
 import { z } from "zod";
 
 import { getCropByName } from "@/features/crops/db/crop";
+import { getCurrentUser } from "@/lib/currentUser";
 import { productTypeAddSchema } from "@/lib/schemas";
+import { hasPermission } from "@/permissions/general";
 import {
   deleteProductType as deleteProductTypeDb,
   insertProductType,
@@ -12,13 +14,14 @@ import {
 export async function createProductType(
   unsafeData: z.infer<typeof productTypeAddSchema>
 ) {
-  console.log("Creating product type", unsafeData);
   const { success, data } = productTypeAddSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canCreateProductType = hasPermission(user?.role, "createProductType");
 
-  if (!success) {
+  if (!success || !canCreateProductType) {
     return {
       error: true,
-      message: "There was an error creating the product type - invalid data",
+      message: "There was an error creating the product type",
     };
   }
 
@@ -50,6 +53,14 @@ export async function createProductType(
 
 export async function deleteProductType(id: number) {
   try {
+    const user = await getCurrentUser();
+    const canDeleteProductType = hasPermission(user?.role, "deleteProductType");
+    if (!canDeleteProductType) {
+      return {
+        error: true,
+        message: "You do not have permission to delete product types.",
+      };
+    }
     await deleteProductTypeDb({ id });
     return { error: false, message: "Successfully deleted the study" };
   } catch (error) {

@@ -3,7 +3,9 @@
 import { z } from "zod";
 
 import { getCropByName } from "@/features/crops/db/crop";
+import { getCurrentUser } from "@/lib/currentUser";
 import { physiologicalStageAddSchema } from "@/lib/schemas";
+import { hasPermission } from "@/permissions/general";
 import {
   deletePhysiologicalStage as deletePhysiologicalStageDb,
   insertPhysiologicalStage,
@@ -13,8 +15,13 @@ export async function createPhysiologicalStage(
   unsafeData: z.infer<typeof physiologicalStageAddSchema>
 ) {
   const { success, data } = physiologicalStageAddSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canCreatePhysiologicalStage = hasPermission(
+    user?.role,
+    "createPhysiologicalStage"
+  );
 
-  if (!success) {
+  if (!success || !canCreatePhysiologicalStage) {
     return {
       error: true,
       message: "There was an error creating the physiological stage",
@@ -51,6 +58,18 @@ export async function createPhysiologicalStage(
 
 export async function deletePhysiologicalStage(id: number) {
   try {
+    const user = await getCurrentUser();
+    const canDeletePhysiologicalStage = hasPermission(
+      user?.role,
+      "deletePhysiologicalStage"
+    );
+
+    if (!canDeletePhysiologicalStage) {
+      return {
+        error: true,
+        message: "You do not have permission to delete physiological stages.",
+      };
+    }
     await deletePhysiologicalStageDb({ id });
     return { error: false, message: "Successfully deleted the study" };
   } catch (error) {
