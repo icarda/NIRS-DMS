@@ -37,3 +37,15 @@ export function fileSize(size: number) {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function labelToCamel(label: string): string {
+  return label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9 ]/g, "")
+    .split(" ")
+    .map((word, index) =>
+      index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join("");
+}

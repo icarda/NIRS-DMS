@@ -121,6 +121,77 @@ export async function deleteTrial({ id }: { id: number }) {
   return deletedTrial;
 }
 
+export async function insertTrialMetadataConfig(
+  data: typeof TrialMetadataConfig.$inferInsert
+) {
+  await db.transaction(async (tx) => {
+    // Insert metadata config
+    const [newTrialMetadata] = await tx
+      .insert(TrialMetadataConfig)
+      .values(data)
+      .returning();
+
+    if (!newTrialMetadata) {
+      throw new Error("Failed to create trial metadata config");
+    }
+
+    let typedValue: unknown = data.defaultValue;
+
+    try {
+      switch (data.type) {
+        case "number":
+          typedValue = Number(data.defaultValue);
+          break;
+        case "boolean":
+          typedValue = data.defaultValue === "true";
+          break;
+        case "date":
+          typedValue = new Date(data.defaultValue).toISOString();
+          break;
+        case "array":
+          typedValue = JSON.parse(data.defaultValue);
+          break;
+        case "string":
+        default:
+          typedValue = data.defaultValue;
+      }
+    } catch (err) {
+      console.error("Invalid defaultValue format:", err);
+      throw new Error("Invalid defaultValue for type: " + data.type);
+    }
+
+    await tx.execute(
+      sql`
+    UPDATE ${TrialTable}
+    SET additional_metadata = COALESCE(additional_metadata, '{}'::jsonb)
+    || ${sql`${sql.param(JSON.stringify({ [data.name]: typedValue }))}::jsonb`}
+    `
+    );
+
+    // Optional: revalidate cache
+    revalidateTrialMetadataConfigCache(newTrialMetadata.name);
+
+    return newTrialMetadata;
+  });
+}
+
+export async function updateTrialMetadataConfig(
+  { name }: { name: string },
+  data: Partial<typeof TrialMetadataConfig.$inferInsert>
+) {
+  const [updatedTrialMetadata] = await db
+    .update(TrialMetadataConfig)
+    .set(data)
+    .where(eq(TrialMetadataConfig.name, name))
+    .returning();
+
+  if (updatedTrialMetadata == null)
+    throw new Error("Failed to update trial metadata config");
+
+  revalidateTrialMetadataConfigCache(updatedTrialMetadata.name);
+  return updatedTrialMetadata;
+}
+
 export async function getTrialMetadataByName(name: string) {
   "use cache";
   cacheTag(getTrialMetadataConfigTag(name));

@@ -1,5 +1,6 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
@@ -11,10 +12,11 @@ import {
   deleteTrialMetadataConfig,
   getTrialMetadataByName,
   insertTrial,
+  insertTrialMetadataConfig,
   removeJsonKeyFromAllTrials,
   updateTrial as updateTrialDb,
 } from "../db/trial";
-import { trialSchema } from "../schemas/trial";
+import { metadataConfigSchema, trialSchema } from "../schemas/trial";
 
 export async function createTrial(unsafeData: z.infer<typeof trialSchema>) {
   const { success, data } = trialSchema.safeParse(unsafeData);
@@ -100,5 +102,62 @@ export async function deleteTrialMetadata(name: string) {
       error: true,
       message: "An unexpected error occurred. Please try again.",
     };
+  }
+}
+
+export async function createTrialMetadataConfig(
+  unsafeData: z.infer<typeof metadataConfigSchema>
+) {
+  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
+
+  try {
+    const user = await getCurrentUser();
+    const canCreateTrialMetadata = hasPermission(
+      user?.role,
+      "createTrialConfigMetadata"
+    );
+
+    if (!success || !canCreateTrialMetadata) {
+      return { error: true, message: "There was an error creating the trial" };
+    }
+
+    const { min, max, ...restData } = data;
+
+    await insertTrialMetadataConfig({
+      ...restData,
+      min: min ? parseFloat(min) : null,
+      max: max ? parseFloat(max) : null,
+    });
+
+    return { error: false, message: "Trial metadata created successfully" };
+  } catch (error) {
+    console.error("Error creating trial metadata config:", error);
+    return { error: true, message: "Error creating trial metadata" };
+  }
+}
+
+export async function updateTrialMetadataConfig(
+  name: string,
+  unsafeData: z.infer<typeof metadataConfigSchema>
+) {
+  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
+
+  try {
+    const user = await getCurrentUser();
+    const canUpdateTrialMetadata = hasPermission(
+      user?.role,
+      "updateTrialConfigMetadata"
+    );
+
+    if (!success || !canUpdateTrialMetadata) {
+      return { error: true, message: "There was an error updating the trial" };
+    }
+
+    await updateTrialMetadataConfig(name, data);
+
+    return { error: false, message: "Trial metadata updated successfully" };
+  } catch (error) {
+    console.error("Error updating trial metadata config:", error);
+    return { error: true, message: "Error updating trial metadata" };
   }
 }

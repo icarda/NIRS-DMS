@@ -20,3 +20,17 @@ export const trialSchema = z.object({
 });
 
 export type TrialSchema = z.infer<typeof trialSchema>;
+
+export const metadataConfigSchema = z.object({
+  label: z.string().min(1, "Label is required"),
+  name: z.string().min(1, "Name is required"),
+  type: z
+    .enum(["string", "number", "date", "boolean", "array"])
+    .default("string"),
+  defaultValue: z.string().default(""),
+  required: z.boolean().default(false),
+  min: z.string().optional(),
+  max: z.string().optional(),
+  source: z.enum(["sql", "json"]).default("json"),
+});
+export type MetadataConfigSchema = z.infer<typeof metadataConfigSchema>;
