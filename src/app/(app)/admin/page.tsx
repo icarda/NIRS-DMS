@@ -160,7 +160,7 @@ export default async function Admin() {
             <DataTable
               columns={studyMetadataColumns}
               data={studyConfigMetadatas}
-              filterColumn="name"
+              filterColumn="label"
             >
               <MetadataAddDialog type="study" />
             </DataTable>

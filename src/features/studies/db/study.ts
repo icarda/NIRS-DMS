@@ -115,3 +115,57 @@ export async function removeJsonKeyFromAllStudies(
 
   revalidateTag(getStudyGlobalTag());
 }
+
+export async function insertStudyMetadataConfig(
+  data: typeof StudyMetadataConfig.$inferInsert
+) {
+  await db.transaction(async (tx) => {
+    // Insert metadata config
+    const [newStudyMetadata] = await tx
+      .insert(StudyMetadataConfig)
+      .values(data)
+      .returning();
+
+    if (!newStudyMetadata) {
+      throw new Error("Failed to create study metadata config");
+    }
+
+    let typedValue: unknown = data.defaultValue;
+
+    try {
+      switch (data.type) {
+        case "number":
+          typedValue = Number(data.defaultValue);
+          break;
+        case "boolean":
+          typedValue = data.defaultValue === "true";
+          break;
+        case "date":
+          typedValue = new Date(data.defaultValue).toISOString();
+          break;
+        case "array":
+          typedValue = JSON.parse(data.defaultValue);
+          break;
+        case "string":
+        default:
+          typedValue = data.defaultValue;
+      }
+    } catch (err) {
+      console.error("Invalid defaultValue format:", err);
+      throw new Error("Invalid defaultValue for type: " + data.type);
+    }
+
+    await tx.execute(
+      sql`
+    UPDATE ${StudyTable}
+    SET additional_metadata = COALESCE(additional_metadata, '{}'::jsonb)
+    || ${sql`${sql.param(JSON.stringify({ [data.name]: typedValue }))}::jsonb`}
+    `
+    );
+
+    // Optional: revalidate cache
+    revalidateStudyMetadataConfigCache(newStudyMetadata.name);
+
+    return newStudyMetadata;
+  });
+}

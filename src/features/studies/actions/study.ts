@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
+import { metadataConfigSchema } from "@/features/trials/schemas/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
@@ -10,6 +11,7 @@ import {
   deleteStudyMetadataConfig,
   getStudyMetadataByName,
   insertStudy,
+  insertStudyMetadataConfig,
   removeJsonKeyFromAllStudies,
 } from "../db/study";
 import { studySchema } from "../schemas/study";
@@ -34,6 +36,37 @@ export async function deleteStudy(id: number) {
     return { error: false, message: "Successfully deleted the study" };
   } catch (error) {
     return { error: true, message: "Error deleting the study" };
+  }
+}
+
+export async function createStudyMetadataConfig(
+  unsafeData: z.infer<typeof metadataConfigSchema>
+) {
+  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
+
+  try {
+    const user = await getCurrentUser();
+    const canCreateStudyMetadata = hasPermission(
+      user?.role,
+      "createStudyConfigMetadata"
+    );
+
+    if (!success || !canCreateStudyMetadata) {
+      return { error: true, message: "There was an error creating the study" };
+    }
+
+    const { min, max, ...restData } = data;
+
+    await insertStudyMetadataConfig({
+      ...restData,
+      min: min ? parseFloat(min) : null,
+      max: max ? parseFloat(max) : null,
+    });
+
+    return { error: false, message: "Study metadata created successfully" };
+  } catch (error) {
+    console.error("Error creating Study metadata config:", error);
+    return { error: true, message: "Error creating Study metadata" };
   }
 }
 
