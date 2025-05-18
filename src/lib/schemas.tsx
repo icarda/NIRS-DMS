@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { id } from "@/drizzle/schemaHelpers";
+
 export const dashboardFilterSchema = z.object({
   crop: z.string().min(1, "Please select a crop"),
   qualityLab: z.string().min(1, "Please select a quality lab"),
@@ -154,13 +156,26 @@ export const multiStepFormSchema = trialFormSchema
   .merge(uploadFormSchema);
 
 export const metadataDialog = z.object({
-  id: z.number(),
-  name: z.string().min(2, "Metadata name must be at least 2 characters"),
-  type: z.enum(["string", "number", "boolean", "date", "array"]),
-  defaultValue: z.string(),
-  required: z.boolean(),
-  minValue: z.string(),
-  maxValue: z.string(),
+  id: z
+    .number({
+      required_error: "ID is required",
+      invalid_type_error: "ID must be a number",
+    })
+    .int()
+    .positive(),
+  label: z
+    .string()
+    .min(2, "Metadata name must be at least 2 characters")
+    .optional(),
+  name: z
+    .string()
+    .min(2, "Metadata name must be at least 2 characters")
+    .optional(),
+  type: z.enum(["string", "number", "boolean", "date", "array"]).optional(),
+  defaultValue: z.string().optional(),
+  required: z.boolean().optional(),
+  min: z.string().optional(),
+  max: z.string().optional(),
 });
 
 export const loginSchema = z.object({

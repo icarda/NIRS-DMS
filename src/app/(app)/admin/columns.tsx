@@ -26,7 +26,7 @@ import { deleteProductType } from "@/features/studies/actions/product-type";
 import { deleteStudyMetadata } from "@/features/studies/actions/study";
 import { deleteTrialMetadata } from "@/features/trials/actions/trial";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
-import { capitalize } from "@/lib/utils";
+import { capitalize, labelToCamel } from "@/lib/utils";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
@@ -65,11 +65,12 @@ export type NIRModel = {
 export type MetadataSchema = {
   id: number;
   name: string;
+  label: string;
   type: TrialMetadataType;
   defaultValue: string;
   required: boolean;
-  minValue?: string;
-  maxValue?: string;
+  min?: string;
+  max?: string;
   source: "sql" | "json";
 };
 
@@ -565,13 +566,10 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
     id: "actions",
     cell: ({ row }) => {
       const metadata = row.original;
+      console.log("metadata", metadata);
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
-
-      const handleEdit = (data: any) => {
-        setEditDialogOpen(false);
-      };
 
       const handleDelete = async () => {
         if (metadata.source === "sql") return;
@@ -616,7 +614,6 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
             metadata={metadata}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
-            onSave={handleEdit}
             type="trial"
           />
 
@@ -715,10 +712,6 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
 
-      const handleEdit = (data: any) => {
-        setEditDialogOpen(false);
-      };
-
       const handleDelete = async () => {
         if (metadata.source === "sql") return;
         setIsLoading(true);
@@ -761,7 +754,6 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
             metadata={metadata}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
-            onSave={handleEdit}
             type="study"
           />
 

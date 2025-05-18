@@ -1,7 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +22,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,14 +33,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { metadataDialog } from "@/lib/schemas";
+import { updateTrialMetadataConfig } from "@/features/trials/actions/trial";
+import {
+  MetadataConfigSchema,
+  metadataConfigSchema,
+} from "@/features/trials/schemas/trial";
+import { capitalize, labelToCamel } from "@/lib/utils";
 import { MetadataSchema } from "../columns";
 
 interface MetadataEditDialogProps {
   metadata: MetadataSchema;
   open: boolean;
   onOpenChange(open: boolean): void;
-  onSave(data: z.infer<typeof metadataDialog>): void;
   type: "study" | "trial";
 }
 
@@ -43,20 +52,82 @@ export function MetadataEditDialog({
   metadata,
   open,
   onOpenChange,
-  onSave,
   type,
 }: MetadataEditDialogProps) {
-  const form = useForm<z.infer<typeof metadataDialog>>({
-    resolver: zodResolver(metadataDialog),
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm<z.infer<typeof metadataConfigSchema>>({
+    resolver: zodResolver(metadataConfigSchema),
     defaultValues: {
+      label: metadata.label,
       name: metadata.name,
       type: metadata.type,
       defaultValue: metadata.defaultValue,
       required: metadata.required,
-      minValue: metadata.minValue,
-      maxValue: metadata.maxValue,
+      min: metadata.min || "",
+      max: metadata.max || "",
     },
   });
+
+  const id = metadata.id;
+  console.log(form.formState.errors);
+
+  // const labelValue = form.watch("label");
+
+  // useEffect(() => {
+  //   if (labelValue) {
+  //     const generatedName = labelToCamel(labelValue);
+  //     form.setValue("name", generatedName, { shouldValidate: true });
+  //   }
+  // }, [labelValue, form]);
+
+  const onSave = async (data: z.infer<typeof metadataConfigSchema>) => {
+    onOpenChange(false);
+    try {
+      setIsLoading(true);
+      console.log("data", data);
+      let result;
+      const name = labelToCamel(data.label!);
+      if (type === "study") {
+        // result = await updateStudyMetadataConfig({
+        //   ...data,
+        //   name,
+        // });
+        result = await updateTrialMetadataConfig(id, {
+          name,
+          source: "json",
+          label: data.label!,
+          type: data.type!,
+          defaultValue: data.defaultValue!,
+          required: data.required!,
+          min: data.min,
+          max: data.max,
+        });
+      } else {
+        // result = await updateStudyMetadataConfig(data);
+        result = await updateTrialMetadataConfig(id, {
+          name,
+          source: "json",
+          label: data.label!,
+          type: data.type!,
+          defaultValue: data.defaultValue!,
+          required: data.required!,
+          min: data.min,
+          max: data.max,
+        });
+      }
+      if (result.error) {
+        toast.error(result.message);
+      } else {
+        toast.success(`${capitalize(type)} metadata created successfully`);
+        onOpenChange(false);
+      }
+    } catch (e) {
+      toast.error(
+        `There was an error creating the ${type} metadata. Please try again.`
+      );
+    }
+    setIsLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,7 +142,7 @@ export function MetadataEditDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="label"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Metadata name</FormLabel>
@@ -148,7 +219,7 @@ export function MetadataEditDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="minValue"
+                name="min"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Minimum Value</FormLabel>
@@ -160,7 +231,7 @@ export function MetadataEditDialog({
               />
               <FormField
                 control={form.control}
-                name="maxValue"
+                name="max"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Maximum Value</FormLabel>
@@ -170,10 +241,32 @@ export function MetadataEditDialog({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input type="hidden" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <DialogFooter>
-              <Button type="submit">Apply Changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Applying Changes..
+                  </>
+                ) : (
+                  "Apply Changes"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

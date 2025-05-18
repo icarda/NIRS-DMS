@@ -1,10 +1,8 @@
 "use server";
 
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
-import { TrialMetadataConfig } from "@/drizzle/schema";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
@@ -15,6 +13,7 @@ import {
   insertTrialMetadataConfig,
   removeJsonKeyFromAllTrials,
   updateTrial as updateTrialDb,
+  updateTrialMetadataConfig as updateTrialMetadataConfigDb,
 } from "../db/trial";
 import { metadataConfigSchema, trialSchema } from "../schemas/trial";
 
@@ -137,10 +136,11 @@ export async function createTrialMetadataConfig(
 }
 
 export async function updateTrialMetadataConfig(
-  name: string,
+  id: number,
   unsafeData: z.infer<typeof metadataConfigSchema>
 ) {
-  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
+  console.log("updateTrialMetadataConfig", unsafeData);
+  const { success, data, error } = metadataConfigSchema.safeParse(unsafeData);
 
   try {
     const user = await getCurrentUser();
@@ -149,11 +149,26 @@ export async function updateTrialMetadataConfig(
       "updateTrialConfigMetadata"
     );
 
+    console.log("canUpdateTrialMetadata", canUpdateTrialMetadata);
+    console.log("error", error);
+
     if (!success || !canUpdateTrialMetadata) {
       return { error: true, message: "There was an error updating the trial" };
     }
 
-    await updateTrialMetadataConfig(name, data);
+    const { min, max, ...restData } = data;
+
+    console.log(id, {
+      ...restData,
+      min: min ? parseFloat(min) : null,
+      max: max ? parseFloat(max) : null,
+    });
+
+    await updateTrialMetadataConfigDb(id, {
+      ...restData,
+      min: min ? parseFloat(min) : null,
+      max: max ? parseFloat(max) : null,
+    });
 
     return { error: false, message: "Trial metadata updated successfully" };
   } catch (error) {

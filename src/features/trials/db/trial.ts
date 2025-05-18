@@ -176,27 +176,150 @@ export async function insertTrialMetadataConfig(
 }
 
 export async function updateTrialMetadataConfig(
-  { name }: { name: string },
+  id: number,
   data: Partial<typeof TrialMetadataConfig.$inferInsert>
 ) {
-  const [updatedTrialMetadata] = await db
-    .update(TrialMetadataConfig)
-    .set(data)
-    .where(eq(TrialMetadataConfig.name, name))
-    .returning();
+  return await db.transaction(async (tx) => {
+    const existing = await getTrialMetadataById(id);
+    if (!existing) throw new Error("Metadata config not found");
 
-  if (updatedTrialMetadata == null)
-    throw new Error("Failed to update trial metadata config");
+    const oldName = existing.name;
+    const oldType = existing.type;
+    const oldDefault = existing.defaultValue;
 
-  revalidateTrialMetadataConfigCache(updatedTrialMetadata.name);
-  return updatedTrialMetadata;
+    const newName = data.name ?? oldName;
+    const newType = data.type ?? oldType;
+    const newDefault = data.defaultValue ?? oldDefault;
+
+    const nameChanged = newName !== oldName;
+    const typeChanged = newType !== oldType;
+    const defaultChanged =
+      data.defaultValue !== undefined && data.defaultValue !== oldDefault;
+
+    if (nameChanged && typeChanged && defaultChanged) {
+      const valueToUse =
+        data.defaultValue !== undefined
+          ? data.defaultValue
+          : getDefaultValueForType(newType);
+
+      // Fix casting ambiguity for strings like date
+      const castedValue = castToJsonbSqlLiteral(valueToUse, newType);
+
+      await tx.execute(sql`
+        UPDATE ${TrialTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata" - ${oldName},
+          ${sql`'{${sql.raw(newName)}}'`},
+          ${castedValue}
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (nameChanged && typeChanged) {
+      const fallbackDefault = getDefaultValueForType(newType);
+      await tx.execute(sql`
+        UPDATE ${TrialTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata" - ${oldName},
+          ${sql`'{${sql.raw(newName)}}'`},
+          to_jsonb(${fallbackDefault})
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (!nameChanged && typeChanged) {
+      const valueToUse =
+        data.defaultValue !== undefined
+          ? data.defaultValue
+          : getDefaultValueForType(newType);
+
+      const castedValue = castToJsonbSqlLiteral(valueToUse, newType);
+
+      await tx.execute(sql`
+        UPDATE ${TrialTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata",
+          ${sql`'{${sql.raw(oldName)}}'`},
+          ${castedValue}
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (nameChanged && !typeChanged) {
+      await tx.execute(sql`
+      UPDATE ${TrialTable}
+      SET "additional_metadata" = jsonb_set(
+        "additional_metadata" - ${oldName},
+        ${sql`'{${sql.raw(newName)}}'`},
+        "additional_metadata"->${oldName}
+      )
+      WHERE "additional_metadata" ? ${oldName}
+      `);
+    }
+
+    const updateData = {
+      ...existing,
+      ...data,
+      name: newName,
+      type: newType,
+      defaultValue: typeChanged || defaultChanged ? newDefault : oldDefault,
+    };
+
+    const [updated] = await tx
+      .update(TrialMetadataConfig)
+      .set(updateData)
+      .where(eq(TrialMetadataConfig.id, id))
+      .returning();
+
+    if (!updated) throw new Error("Failed to update trial metadata config");
+
+    revalidateTrialMetadataConfigCache(updated.name);
+    return updated;
+  });
+}
+
+function castToJsonbSqlLiteral(value: any, type: string) {
+  if (value === null || value === undefined) return sql`'null'::jsonb`;
+
+  switch (type) {
+    case "number":
+      return sql`to_jsonb(${sql.raw(`${Number(value)}::int`)})`;
+    case "boolean":
+      return sql`to_jsonb(${sql.raw(`${value === true || value === "true" ? "true" : "false"}::boolean`)})`;
+    case "date":
+      return sql`to_jsonb(${sql.raw(`'${value}'::text`)})`; // Store as ISO string
+    case "string":
+    default:
+      return sql`to_jsonb(${sql.raw(`'${String(value)}'::text`)})`;
+  }
+}
+
+function getDefaultValueForType(type: string) {
+  switch (type) {
+    case "number":
+      return 0;
+    case "string":
+      return "";
+    case "boolean":
+      return false;
+    case "date":
+      return new Date().toISOString(); // Or null if you prefer
+    default:
+      return null;
+  }
 }
 
 export async function getTrialMetadataByName(name: string) {
   "use cache";
   cacheTag(getTrialMetadataConfigTag(name));
+  console.log("getTrialMetadataByName", name);
   return db.query.TrialMetadataConfig.findFirst({
     where: eq(TrialMetadataConfig.name, name),
+  });
+}
+
+export async function getTrialMetadataById(id: number) {
+  "use cache";
+  cacheTag(getTrialMetadataConfigTag(id));
+  return db.query.TrialMetadataConfig.findFirst({
+    where: eq(TrialMetadataConfig.id, id),
   });
 }
 

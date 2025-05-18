@@ -38,7 +38,6 @@ import { createStudyMetadataConfig } from "@/features/studies/actions/study";
 import { createTrialMetadataConfig } from "@/features/trials/actions/trial";
 import { metadataConfigSchema } from "@/features/trials/schemas/trial";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { metadataDialog } from "@/lib/schemas";
 import { capitalize, labelToCamel } from "@/lib/utils";
 
 interface MetadataAddDialogProps {

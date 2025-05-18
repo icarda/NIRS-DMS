@@ -14,7 +14,7 @@ export function getTrialMetadataConfigGlobalTag() {
   return getGlobalTag("trialMetadataConfig");
 }
 
-export function getTrialMetadataConfigTag(name: string) {
+export function getTrialMetadataConfigTag(name: string | number) {
   return getIdTag("trialMetadataConfig", name);
 }
 
