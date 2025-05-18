@@ -566,7 +566,6 @@ export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
     id: "actions",
     cell: ({ row }) => {
       const metadata = row.original;
-      console.log("metadata", metadata);
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
       const [isLoading, setIsLoading] = useState(false);

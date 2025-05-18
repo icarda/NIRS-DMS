@@ -280,7 +280,7 @@ function castToJsonbSqlLiteral(value: any, type: string) {
 
   switch (type) {
     case "number":
-      return sql`to_jsonb(${sql.raw(`${Number(value)}::int`)})`;
+      return sql`to_jsonb(${sql.raw(`${Number(value)}::numeric`)})`;
     case "boolean":
       return sql`to_jsonb(${sql.raw(`${value === true || value === "true" ? "true" : "false"}::boolean`)})`;
     case "date":

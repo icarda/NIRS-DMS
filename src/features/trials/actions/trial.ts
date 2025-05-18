@@ -139,7 +139,6 @@ export async function updateTrialMetadataConfig(
   id: number,
   unsafeData: z.infer<typeof metadataConfigSchema>
 ) {
-  console.log("updateTrialMetadataConfig", unsafeData);
   const { success, data, error } = metadataConfigSchema.safeParse(unsafeData);
 
   try {
@@ -149,20 +148,11 @@ export async function updateTrialMetadataConfig(
       "updateTrialConfigMetadata"
     );
 
-    console.log("canUpdateTrialMetadata", canUpdateTrialMetadata);
-    console.log("error", error);
-
     if (!success || !canUpdateTrialMetadata) {
       return { error: true, message: "There was an error updating the trial" };
     }
 
     const { min, max, ...restData } = data;
-
-    console.log(id, {
-      ...restData,
-      min: min ? parseFloat(min) : null,
-      max: max ? parseFloat(max) : null,
-    });
 
     await updateTrialMetadataConfigDb(id, {
       ...restData,

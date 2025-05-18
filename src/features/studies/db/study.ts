@@ -85,6 +85,14 @@ export async function getStudyMetadataByName(name: string) {
   });
 }
 
+export async function getStudyMetadataById(id: number) {
+  "use cache";
+  cacheTag(getStudyMetadataConfigTag(id));
+  return db.query.StudyMetadataConfig.findFirst({
+    where: eq(StudyMetadataConfig.id, id),
+  });
+}
+
 export async function getStudyConfigMetadatas() {
   "use cache";
   cacheTag(getStudyMetadataConfigGlobalTag());
@@ -168,4 +176,135 @@ export async function insertStudyMetadataConfig(
 
     return newStudyMetadata;
   });
+}
+
+export async function updateStudyMetadataConfig(
+  id: number,
+  data: Partial<typeof StudyMetadataConfig.$inferInsert>
+) {
+  return await db.transaction(async (tx) => {
+    const existing = await getStudyMetadataById(id);
+    if (!existing) throw new Error("Metadata config not found");
+
+    const oldName = existing.name;
+    const oldType = existing.type;
+    const oldDefault = existing.defaultValue;
+
+    const newName = data.name ?? oldName;
+    const newType = data.type ?? oldType;
+    const newDefault = data.defaultValue ?? oldDefault;
+
+    const nameChanged = newName !== oldName;
+    const typeChanged = newType !== oldType;
+    const defaultChanged =
+      data.defaultValue !== undefined && data.defaultValue !== oldDefault;
+
+    if (nameChanged && typeChanged && defaultChanged) {
+      const valueToUse =
+        data.defaultValue !== undefined
+          ? data.defaultValue
+          : getDefaultValueForType(newType);
+
+      // Fix casting ambiguity for strings like date
+      const castedValue = castToJsonbSqlLiteral(valueToUse, newType);
+
+      await tx.execute(sql`
+        UPDATE ${StudyTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata" - ${oldName},
+          ${sql`'{${sql.raw(newName)}}'`},
+          ${castedValue}
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (nameChanged && typeChanged) {
+      const fallbackDefault = getDefaultValueForType(newType);
+      await tx.execute(sql`
+        UPDATE ${StudyTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata" - ${oldName},
+          ${sql`'{${sql.raw(newName)}}'`},
+          to_jsonb(${fallbackDefault})
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (!nameChanged && typeChanged) {
+      const valueToUse =
+        data.defaultValue !== undefined
+          ? data.defaultValue
+          : getDefaultValueForType(newType);
+
+      const castedValue = castToJsonbSqlLiteral(valueToUse, newType);
+
+      await tx.execute(sql`
+        UPDATE ${StudyTable}
+        SET "additional_metadata" = jsonb_set(
+          "additional_metadata",
+          ${sql`'{${sql.raw(oldName)}}'`},
+          ${castedValue}
+        )
+        WHERE "additional_metadata" ? ${oldName}
+      `);
+    } else if (nameChanged && !typeChanged) {
+      await tx.execute(sql`
+      UPDATE ${StudyTable}
+      SET "additional_metadata" = jsonb_set(
+        "additional_metadata" - ${oldName},
+        ${sql`'{${sql.raw(newName)}}'`},
+        "additional_metadata"->${oldName}
+      )
+      WHERE "additional_metadata" ? ${oldName}
+      `);
+    }
+
+    const updateData = {
+      ...existing,
+      ...data,
+      name: newName,
+      type: newType,
+      defaultValue: typeChanged || defaultChanged ? newDefault : oldDefault,
+    };
+
+    const [updated] = await tx
+      .update(StudyMetadataConfig)
+      .set(updateData)
+      .where(eq(StudyMetadataConfig.id, id))
+      .returning();
+
+    if (!updated) throw new Error("Failed to update study metadata config");
+
+    revalidateStudyMetadataConfigCache(updated.name);
+    return updated;
+  });
+}
+
+function castToJsonbSqlLiteral(value: any, type: string) {
+  if (value === null || value === undefined) return sql`'null'::jsonb`;
+
+  switch (type) {
+    case "number":
+      return sql`to_jsonb(${sql.raw(`${Number(value)}::numeric`)})`;
+    case "boolean":
+      return sql`to_jsonb(${sql.raw(`${value === true || value === "true" ? "true" : "false"}::boolean`)})`;
+    case "date":
+      return sql`to_jsonb(${sql.raw(`'${value}'::text`)})`;
+    case "string":
+    default:
+      return sql`to_jsonb(${sql.raw(`'${String(value)}'::text`)})`;
+  }
+}
+
+function getDefaultValueForType(type: string) {
+  switch (type) {
+    case "number":
+      return 0;
+    case "string":
+      return "";
+    case "boolean":
+      return false;
+    case "date":
+      return new Date().toISOString();
+    default:
+      return null;
+  }
 }

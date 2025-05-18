@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -33,11 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { updateStudyMetadataConfig } from "@/features/studies/actions/study";
 import { updateTrialMetadataConfig } from "@/features/trials/actions/trial";
-import {
-  MetadataConfigSchema,
-  metadataConfigSchema,
-} from "@/features/trials/schemas/trial";
+import { metadataConfigSchema } from "@/features/trials/schemas/trial";
 import { capitalize, labelToCamel } from "@/lib/utils";
 import { MetadataSchema } from "../columns";
 
@@ -69,16 +67,6 @@ export function MetadataEditDialog({
   });
 
   const id = metadata.id;
-  console.log(form.formState.errors);
-
-  // const labelValue = form.watch("label");
-
-  // useEffect(() => {
-  //   if (labelValue) {
-  //     const generatedName = labelToCamel(labelValue);
-  //     form.setValue("name", generatedName, { shouldValidate: true });
-  //   }
-  // }, [labelValue, form]);
 
   const onSave = async (data: z.infer<typeof metadataConfigSchema>) => {
     onOpenChange(false);
@@ -88,11 +76,7 @@ export function MetadataEditDialog({
       let result;
       const name = labelToCamel(data.label!);
       if (type === "study") {
-        // result = await updateStudyMetadataConfig({
-        //   ...data,
-        //   name,
-        // });
-        result = await updateTrialMetadataConfig(id, {
+        result = await updateStudyMetadataConfig(id, {
           name,
           source: "json",
           label: data.label!,
@@ -103,7 +87,6 @@ export function MetadataEditDialog({
           max: data.max,
         });
       } else {
-        // result = await updateStudyMetadataConfig(data);
         result = await updateTrialMetadataConfig(id, {
           name,
           source: "json",

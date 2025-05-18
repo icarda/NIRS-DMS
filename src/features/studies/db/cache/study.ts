@@ -14,7 +14,7 @@ export function getStudyMetadataConfigGlobalTag() {
   return getGlobalTag("studyMetadataConfig");
 }
 
-export function getStudyMetadataConfigTag(name: string) {
+export function getStudyMetadataConfigTag(name: string | number) {
   return getIdTag("studyMetadataConfig", name);
 }
 

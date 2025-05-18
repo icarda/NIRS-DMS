@@ -13,6 +13,7 @@ import {
   insertStudy,
   insertStudyMetadataConfig,
   removeJsonKeyFromAllStudies,
+  updateStudyMetadataConfig as updateStudyMetadataConfigDb,
 } from "../db/study";
 import { studySchema } from "../schemas/study";
 
@@ -67,6 +68,38 @@ export async function createStudyMetadataConfig(
   } catch (error) {
     console.error("Error creating Study metadata config:", error);
     return { error: true, message: "Error creating Study metadata" };
+  }
+}
+
+export async function updateStudyMetadataConfig(
+  id: number,
+  unsafeData: z.infer<typeof metadataConfigSchema>
+) {
+  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
+
+  try {
+    const user = await getCurrentUser();
+    const canUpdateStudyMetadata = hasPermission(
+      user?.role,
+      "updateStudyConfigMetadata"
+    );
+
+    if (!success || !canUpdateStudyMetadata) {
+      return { error: true, message: "There was an error updating the study" };
+    }
+
+    const { min, max, ...restData } = data;
+
+    await updateStudyMetadataConfigDb(id, {
+      ...restData,
+      min: min ? parseFloat(min) : null,
+      max: max ? parseFloat(max) : null,
+    });
+
+    return { error: false, message: "Study metadata updated successfully" };
+  } catch (error) {
+    console.error("Error updating study metadata config:", error);
+    return { error: true, message: "Error updating study metadata" };
   }
 }
 
