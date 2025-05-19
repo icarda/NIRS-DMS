@@ -19,7 +19,9 @@ type Permission =
   | "deleteTrialConfigMetadata"
   | "createStudyConfigMetadata"
   | "updateStudyConfigMetadata"
-  | "deleteStudyConfigMetadata";
+  | "deleteStudyConfigMetadata"
+  | "accessNirsData"
+  | "accessTraitData";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   USER: [],
@@ -28,6 +30,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "createCrop",
     "createCropTrait",
     "uploadNirsData",
+    "accessNirsData",
+    "accessTraitData",
   ],
   SUPERADMIN: [
     "accessUploadPage",
@@ -49,6 +53,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "createStudyConfigMetadata",
     "updateStudyConfigMetadata",
     "deleteStudyConfigMetadata",
+    "accessNirsData",
+    "accessTraitData",
   ],
 };
 
