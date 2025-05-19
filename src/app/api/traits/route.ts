@@ -7,9 +7,20 @@ import {
   TraitFilters,
 } from "@/features/traits/db/trait";
 import { traitSchema } from "@/features/traits/schemas/trait";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
+  const user = await getCurrentUser();
+
+  const canAccessTraitData = hasPermission(user?.role, "accessTraitData");
+  if (!canAccessTraitData) {
+    return NextResponse.json(
+      { message: "You do not have permission to access this resource." },
+      { status: 403 }
+    );
+  }
 
   const filters: TraitFilters = {};
   try {
