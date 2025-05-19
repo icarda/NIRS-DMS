@@ -139,7 +139,7 @@ export async function updateTrialMetadataConfig(
   id: number,
   unsafeData: z.infer<typeof metadataConfigSchema>
 ) {
-  const { success, data, error } = metadataConfigSchema.safeParse(unsafeData);
+  const { success, data } = metadataConfigSchema.safeParse(unsafeData);
 
   try {
     const user = await getCurrentUser();
