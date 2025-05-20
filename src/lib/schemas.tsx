@@ -153,7 +153,17 @@ export const traitUploadSchemaFinal = z.object({
 
 export const multiStepFormSchema = trialFormSchema
   .merge(studyFormSchema)
-  .merge(uploadFormSchema);
+  .merge(uploadFormSchema)
+  .refine(
+    (data) => {
+      if (!data.sampleDate || !data.trialPlantingDate) return true;
+      return new Date(data.sampleDate) >= new Date(data.trialPlantingDate);
+    },
+    {
+      message: "Sampling date must be on or after planting date",
+      path: ["sampleDate"],
+    }
+  );
 
 export const metadataDialog = z.object({
   id: z

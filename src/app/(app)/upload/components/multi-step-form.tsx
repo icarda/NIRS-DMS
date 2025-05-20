@@ -126,6 +126,25 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
   const nextStep = async () => {
     const currentSchema = step === 1 ? trialFormSchema : studyFormSchema;
+    if (step === 2) {
+      const sampleDate = form.getValues("sampleDate");
+      const trialPlantingDate = form.getValues("trialPlantingDate");
+      if (sampleDate && trialPlantingDate) {
+        const sampleDateObj = new Date(sampleDate);
+        const trialPlantingDateObj = new Date(trialPlantingDate);
+        if (sampleDateObj < trialPlantingDateObj) {
+          form.setError(
+            "sampleDate",
+            {
+              type: "manual",
+              message: "Sample date must be after trial planting date",
+            },
+            { shouldFocus: true }
+          );
+          return;
+        }
+      }
+    }
     const isValid = await form.trigger(Object.keys(currentSchema.shape) as any);
     if (isValid) setStep((prev) => prev + 1);
   };

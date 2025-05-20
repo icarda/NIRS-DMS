@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-} from "react";
-
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
@@ -35,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { physiologicalStages } from "@/data/physiological-stages";
 import { cn } from "@/lib/utils";
 
 const StudyStep = ({
