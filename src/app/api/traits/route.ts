@@ -17,7 +17,10 @@ export async function GET(request: NextRequest) {
   const canAccessTraitData = hasPermission(user?.role, "accessTraitData");
   if (!canAccessTraitData) {
     return NextResponse.json(
-      { message: "You do not have permission to access this resource." },
+      {
+        error: true,
+        message: "You do not have permission to access this resource.",
+      },
       { status: 403 }
     );
   }

@@ -30,7 +30,10 @@ export default auth((req) => {
 
   if (isApiRoute) {
     if (!isLoggedin) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return Response.json(
+        { error: true, message: "Unauthorized access" },
+        { status: 401 }
+      );
     }
     return;
   }
