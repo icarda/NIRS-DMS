@@ -21,7 +21,7 @@ export async function createTrial(unsafeData: z.infer<typeof trialSchema>) {
   const { success, data } = trialSchema.safeParse(unsafeData);
 
   const user = await getCurrentUser();
-  const canCreateTrial = hasPermission(user?.role, "createTrialConfigMetadata");
+  const canCreateTrial = hasPermission(user?.role, "trial:create");
 
   if (!success || !canCreateTrial) {
     return { error: true, message: "There was an error creating the trial" };
@@ -38,7 +38,7 @@ export async function updateTrial(
   const { success, data } = trialSchema.safeParse(unsafeData);
 
   const user = await getCurrentUser();
-  const canUpdateTrial = hasPermission(user?.role, "updateTrialConfigMetadata");
+  const canUpdateTrial = hasPermission(user?.role, "trial:update");
 
   if (!success || !canUpdateTrial) {
     return { error: true, message: "There was an error updating the trial" };
@@ -50,6 +50,12 @@ export async function updateTrial(
 
 export async function deleteTrial(id: number) {
   try {
+    const user = await getCurrentUser();
+    const canDeleteTrial = hasPermission(user?.role, "trial:delete");
+
+    if (!canDeleteTrial) {
+      return { error: true, message: "There was an error updating the trial" };
+    }
     await deleteTrialDb({ id });
     return { error: false, message: "Successfully deleted the trial" };
   } catch (error) {
@@ -62,7 +68,7 @@ export async function deleteTrialMetadata(name: string) {
     const user = await getCurrentUser();
     const canDeleteTrialMetadata = hasPermission(
       user?.role,
-      "deleteTrialConfigMetadata"
+      "trialMetadata:delete"
     );
     if (!canDeleteTrialMetadata) {
       return {
@@ -113,7 +119,7 @@ export async function createTrialMetadataConfig(
     const user = await getCurrentUser();
     const canCreateTrialMetadata = hasPermission(
       user?.role,
-      "createTrialConfigMetadata"
+      "trialMetadata:create"
     );
 
     if (!success || !canCreateTrialMetadata) {
@@ -145,7 +151,7 @@ export async function updateTrialMetadataConfig(
     const user = await getCurrentUser();
     const canUpdateTrialMetadata = hasPermission(
       user?.role,
-      "updateTrialConfigMetadata"
+      "trialMetadata:update"
     );
 
     if (!success || !canUpdateTrialMetadata) {

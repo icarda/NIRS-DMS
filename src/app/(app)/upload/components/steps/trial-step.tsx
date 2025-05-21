@@ -53,42 +53,6 @@ const DEFAULT_SPECIES = [
     id: 3,
     name: "Species 3",
   },
-  {
-    id: 4,
-    name: "Species 4",
-  },
-  {
-    id: 5,
-    name: "Species 5",
-  },
-  {
-    id: 6,
-    name: "Species 6",
-  },
-  {
-    id: 7,
-    name: "Species 7",
-  },
-  {
-    id: 8,
-    name: "Species 8",
-  },
-  {
-    id: 9,
-    name: "Species 9",
-  },
-  {
-    id: 10,
-    name: "Species 10",
-  },
-  {
-    id: 11,
-    name: "Species 11",
-  },
-  {
-    id: 12,
-    name: "Species 12",
-  },
 ];
 
 const TrialStep = ({

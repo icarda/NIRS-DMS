@@ -49,7 +49,7 @@ export async function createStudyMetadataConfig(
     const user = await getCurrentUser();
     const canCreateStudyMetadata = hasPermission(
       user?.role,
-      "createStudyConfigMetadata"
+      "studyMetadata:create"
     );
 
     if (!success || !canCreateStudyMetadata) {
@@ -81,7 +81,7 @@ export async function updateStudyMetadataConfig(
     const user = await getCurrentUser();
     const canUpdateStudyMetadata = hasPermission(
       user?.role,
-      "updateStudyConfigMetadata"
+      "studyMetadata:update"
     );
 
     if (!success || !canUpdateStudyMetadata) {
@@ -108,7 +108,7 @@ export async function deleteStudyMetadata(name: string) {
     const user = await getCurrentUser();
     const canDeleteStudyMetadata = hasPermission(
       user?.role,
-      "deleteStudyConfigMetadata"
+      "studyMetadata:delete"
     );
     if (!canDeleteStudyMetadata) {
       return {

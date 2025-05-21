@@ -20,7 +20,7 @@ export async function addCropTrait(
       cropId,
     });
     const user = await getCurrentUser();
-    const canCreateCropTrait = hasPermission(user?.role, "createCropTrait");
+    const canCreateCropTrait = hasPermission(user?.role, "cropTrait:create");
 
     if (!success || !canCreateCropTrait) {
       return { error: true, message: "There was an error creating the trait" };

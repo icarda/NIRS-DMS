@@ -45,7 +45,7 @@ export interface OtherIdInsertData {
 
 export async function uploadNirsData(formData: FormData) {
   const user = await getCurrentUser();
-  const canUploadNirsData = hasPermission(user?.role, "uploadNirsData");
+  const canUploadNirsData = hasPermission(user?.role, "nirs:upload");
 
   if (!canUploadNirsData) {
     return {

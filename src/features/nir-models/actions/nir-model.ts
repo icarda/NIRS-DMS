@@ -16,7 +16,7 @@ export async function createNirModel(
   const { success, data } = nirModelSchema.safeParse(unsafeData);
 
   const user = await getCurrentUser();
-  const canCreateNirModel = hasPermission(user?.role, "createNirModel");
+  const canCreateNirModel = hasPermission(user?.role, "nirModel:create");
 
   if (!success || !canCreateNirModel) {
     return {
@@ -39,7 +39,7 @@ export async function createNirModel(
 export async function deleteNirModel(id: number) {
   try {
     const user = await getCurrentUser();
-    const canDeleteNirModel = hasPermission(user?.role, "deleteNirModel");
+    const canDeleteNirModel = hasPermission(user?.role, "nirModel:delete");
 
     if (!canDeleteNirModel) {
       return {

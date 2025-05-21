@@ -4,8 +4,10 @@ import { z } from "zod";
 
 import { db } from "@/drizzle/db";
 import { getDistinctSampleIdsForStudy } from "@/features/nirs-data/db/nirs-data";
+import { getCurrentUser } from "@/lib/currentUser";
 import { parseTraitFile, transformTraitDataForDb } from "@/lib/parsing";
 import { traitUploadSchemaFinal } from "@/lib/schemas";
+import { hasPermission } from "@/permissions/general";
 import {
   deleteTrait as deleteTraitDb,
   insertTrait,
@@ -23,6 +25,15 @@ export async function uploadTraitDataAction(formData: FormData) {
     file: formData.get("file"),
   };
   const validationResult = traitUploadSchemaFinal.safeParse(dataToValidate);
+
+  const user = await getCurrentUser();
+  const canUploadTrait = hasPermission(user?.role, "trait:upload");
+  if (!canUploadTrait) {
+    return {
+      error: true,
+      message: "You do not have permission to upload trait data.",
+    };
+  }
 
   if (!validationResult.success) {
     const errorMessages = validationResult.error.errors
@@ -102,8 +113,10 @@ export async function uploadTraitDataAction(formData: FormData) {
 
 export async function createTrait(unsafeData: z.infer<typeof traitSchema>) {
   const { success, data } = traitSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canCreateTrait = hasPermission(user?.role, "trait:create");
 
-  if (!success) {
+  if (!success || !canCreateTrait) {
     return { error: true, message: "There was an error creating the trait" };
   }
 

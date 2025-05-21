@@ -18,7 +18,7 @@ export async function createPhysiologicalStage(
   const user = await getCurrentUser();
   const canCreatePhysiologicalStage = hasPermission(
     user?.role,
-    "createPhysiologicalStage"
+    "physiologicalStage:create"
   );
 
   if (!success || !canCreatePhysiologicalStage) {
@@ -61,7 +61,7 @@ export async function deletePhysiologicalStage(id: number) {
     const user = await getCurrentUser();
     const canDeletePhysiologicalStage = hasPermission(
       user?.role,
-      "deletePhysiologicalStage"
+      "physiologicalStage:delete"
     );
 
     if (!canDeletePhysiologicalStage) {

@@ -10,7 +10,7 @@ import {
 export async function deleteUser(id: number) {
   try {
     const user = await getCurrentUser();
-    const canDeleteUser = hasPermission(user?.role, "deleteUser");
+    const canDeleteUser = hasPermission(user?.role, "user:delete");
     if (!canDeleteUser) {
       return {
         error: true,
@@ -26,7 +26,7 @@ export async function deleteUser(id: number) {
 
 export async function updateUser({ id }: { id: number }, data: FormData) {
   const user = await getCurrentUser();
-  const canUpdateUser = hasPermission(user?.role, "updateUser");
+  const canUpdateUser = hasPermission(user?.role, "user:update");
 
   if (!canUpdateUser) {
     return {

@@ -16,7 +16,7 @@ export async function createProductType(
 ) {
   const { success, data } = productTypeAddSchema.safeParse(unsafeData);
   const user = await getCurrentUser();
-  const canCreateProductType = hasPermission(user?.role, "createProductType");
+  const canCreateProductType = hasPermission(user?.role, "productType:create");
 
   if (!success || !canCreateProductType) {
     return {
@@ -54,7 +54,10 @@ export async function createProductType(
 export async function deleteProductType(id: number) {
   try {
     const user = await getCurrentUser();
-    const canDeleteProductType = hasPermission(user?.role, "deleteProductType");
+    const canDeleteProductType = hasPermission(
+      user?.role,
+      "productType:delete"
+    );
     if (!canDeleteProductType) {
       return {
         error: true,

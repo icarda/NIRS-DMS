@@ -1,60 +1,65 @@
 import type { UserRole } from "@/drizzle/schema";
 
 type Permission =
-  | "accessAdminPages"
-  | "accessUploadPage"
-  | "createCrop"
-  | "createCropTrait"
-  | "uploadNirsData"
-  | "updateUser"
-  | "deleteUser"
-  | "createPhysiologicalStage"
-  | "deletePhysiologicalStage"
-  | "createNirModel"
-  | "deleteNirModel"
-  | "createProductType"
-  | "deleteProductType"
-  | "createTrialConfigMetadata"
-  | "updateTrialConfigMetadata"
-  | "deleteTrialConfigMetadata"
-  | "createStudyConfigMetadata"
-  | "updateStudyConfigMetadata"
-  | "deleteStudyConfigMetadata"
-  | "accessNirsData"
-  | "accessTraitData";
+  | "admin:access"
+  | "upload:access"
+  | "nirs:upload"
+  | "nirs:access"
+  | "trait:access"
+  | "trait:create"
+  | "trait:upload"
+  | "crop:create"
+  | "cropTrait:create"
+  | "productType:create"
+  | "productType:delete"
+  | "nirModel:create"
+  | "nirModel:delete"
+  | "physiologicalStage:create"
+  | "physiologicalStage:delete"
+  | "user:update"
+  | "user:delete"
+  | "trialMetadata:create"
+  | "trialMetadata:update"
+  | "trialMetadata:delete"
+  | "trial:create"
+  | "trial:update"
+  | "trial:delete"
+  | "studyMetadata:create"
+  | "studyMetadata:update"
+  | "studyMetadata:delete";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   USER: [],
   ADMIN: [
-    "accessUploadPage",
-    "createCrop",
-    "createCropTrait",
-    "uploadNirsData",
-    "accessNirsData",
-    "accessTraitData",
+    "upload:access",
+    "nirs:upload",
+    "nirs:access",
+    "trait:access",
+    "crop:create",
+    "cropTrait:create",
   ],
   SUPERADMIN: [
-    "accessUploadPage",
-    "accessAdminPages",
-    "createCrop",
-    "createCropTrait",
-    "uploadNirsData",
-    "updateUser",
-    "deleteUser",
-    "createPhysiologicalStage",
-    "deletePhysiologicalStage",
-    "createNirModel",
-    "deleteNirModel",
-    "createProductType",
-    "deleteProductType",
-    "createTrialConfigMetadata",
-    "updateTrialConfigMetadata",
-    "deleteTrialConfigMetadata",
-    "createStudyConfigMetadata",
-    "updateStudyConfigMetadata",
-    "deleteStudyConfigMetadata",
-    "accessNirsData",
-    "accessTraitData",
+    "upload:access",
+    "admin:access",
+    "nirs:upload",
+    "nirs:access",
+    "trait:access",
+    "crop:create",
+    "cropTrait:create",
+    "user:update",
+    "user:delete",
+    "physiologicalStage:create",
+    "physiologicalStage:delete",
+    "nirModel:create",
+    "nirModel:delete",
+    "productType:create",
+    "productType:delete",
+    "trialMetadata:create",
+    "trialMetadata:update",
+    "trialMetadata:delete",
+    "studyMetadata:create",
+    "studyMetadata:update",
+    "studyMetadata:delete",
   ],
 };
 
