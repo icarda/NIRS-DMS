@@ -4,10 +4,12 @@ import { z } from "zod";
 
 import { db } from "@/drizzle/db";
 import { getCurrentUser } from "@/lib/currentUser";
+import { logMetadataAction } from "@/lib/log-metadata-action";
 import { hasPermission } from "@/permissions/general";
 import {
   deleteTrial as deleteTrialDb,
   deleteTrialMetadataConfig,
+  getTrialMetadataById,
   getTrialMetadataByName,
   insertTrial,
   insertTrialMetadataConfig,
@@ -70,12 +72,13 @@ export async function deleteTrialMetadata(name: string) {
       user?.role,
       "trialMetadata:delete"
     );
-    if (!canDeleteTrialMetadata) {
+    if (!canDeleteTrialMetadata || !user?.id) {
       return {
         error: true,
         message: "You do not have permission to delete metadata fields.",
       };
     }
+
     const config = await getTrialMetadataByName(name);
 
     if (!config) {
@@ -95,6 +98,14 @@ export async function deleteTrialMetadata(name: string) {
     await db.transaction(async (tx) => {
       await deleteTrialMetadataConfig(name, tx);
       await removeJsonKeyFromAllTrials(name, tx);
+    });
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "delete",
+      scope: "trial",
+      target: name,
+      before: config,
     });
 
     return {
@@ -122,16 +133,26 @@ export async function createTrialMetadataConfig(
       "trialMetadata:create"
     );
 
-    if (!success || !canCreateTrialMetadata) {
+    if (!success || !canCreateTrialMetadata || !user?.id) {
       return { error: true, message: "There was an error creating the trial" };
     }
 
     const { min, max, ...restData } = data;
 
-    await insertTrialMetadataConfig({
+    const inserted = {
       ...restData,
-      min: min ? parseFloat(min) : null,
-      max: max ? parseFloat(max) : null,
+      min: min ? min : null,
+      max: max ? max : null,
+    };
+
+    await insertTrialMetadataConfig(inserted);
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "add",
+      scope: "trial",
+      target: data.name,
+      after: inserted,
     });
 
     return { error: false, message: "Trial metadata created successfully" };
@@ -154,16 +175,32 @@ export async function updateTrialMetadataConfig(
       "trialMetadata:update"
     );
 
-    if (!success || !canUpdateTrialMetadata) {
+    if (!success || !canUpdateTrialMetadata || !user?.id) {
       return { error: true, message: "There was an error updating the trial" };
+    }
+
+    const oldConfig = await getTrialMetadataById(id);
+    if (!oldConfig) {
+      return { error: true, message: "Metadata field not found" };
     }
 
     const { min, max, ...restData } = data;
 
-    await updateTrialMetadataConfigDb(id, {
+    const updated = {
       ...restData,
-      min: min ? parseFloat(min) : null,
-      max: max ? parseFloat(max) : null,
+      min: min ? min : null,
+      max: max ? max : null,
+    };
+
+    await updateTrialMetadataConfigDb(id, updated);
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "edit",
+      scope: "trial",
+      target: data.name,
+      before: oldConfig,
+      after: updated,
     });
 
     return { error: false, message: "Trial metadata updated successfully" };

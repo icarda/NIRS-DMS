@@ -19,7 +19,7 @@ export const StudyMetadataConfig = pgTable("study_metadata_config", {
   type: studyMetadataTypes().notNull().default("string"),
   defaultValue: text("default_value").notNull(),
   required: boolean("required").notNull().default(false),
-  min: doublePrecision("min"),
-  max: doublePrecision("max"),
+  min: text("min"),
+  max: text("max"),
   source: text("source").notNull().$type<"sql" | "json">(),
 });

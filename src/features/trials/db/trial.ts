@@ -125,7 +125,6 @@ export async function insertTrialMetadataConfig(
   data: typeof TrialMetadataConfig.$inferInsert
 ) {
   await db.transaction(async (tx) => {
-    // Insert metadata config
     const [newTrialMetadata] = await tx
       .insert(TrialMetadataConfig)
       .values(data)
@@ -168,7 +167,6 @@ export async function insertTrialMetadataConfig(
     `
     );
 
-    // Optional: revalidate cache
     revalidateTrialMetadataConfigCache(newTrialMetadata.name);
 
     return newTrialMetadata;

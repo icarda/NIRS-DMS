@@ -5,10 +5,12 @@ import { z } from "zod";
 import { db } from "@/drizzle/db";
 import { metadataConfigSchema } from "@/features/trials/schemas/trial";
 import { getCurrentUser } from "@/lib/currentUser";
+import { logMetadataAction } from "@/lib/log-metadata-action";
 import { hasPermission } from "@/permissions/general";
 import {
   deleteStudy as deleteStudyDb,
   deleteStudyMetadataConfig,
+  getStudyMetadataById,
   getStudyMetadataByName,
   insertStudy,
   insertStudyMetadataConfig,
@@ -52,16 +54,26 @@ export async function createStudyMetadataConfig(
       "studyMetadata:create"
     );
 
-    if (!success || !canCreateStudyMetadata) {
+    if (!success || !canCreateStudyMetadata || !user?.id) {
       return { error: true, message: "There was an error creating the study" };
     }
 
     const { min, max, ...restData } = data;
 
-    await insertStudyMetadataConfig({
+    const inserted = {
       ...restData,
-      min: min ? parseFloat(min) : null,
-      max: max ? parseFloat(max) : null,
+      min: min ? min : null,
+      max: max ? max : null,
+    };
+
+    await insertStudyMetadataConfig(inserted);
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "add",
+      scope: "study",
+      target: data.name,
+      after: inserted,
     });
 
     return { error: false, message: "Study metadata created successfully" };
@@ -84,16 +96,32 @@ export async function updateStudyMetadataConfig(
       "studyMetadata:update"
     );
 
-    if (!success || !canUpdateStudyMetadata) {
+    if (!success || !canUpdateStudyMetadata || !user?.id) {
       return { error: true, message: "There was an error updating the study" };
+    }
+
+    const oldConfig = await getStudyMetadataById(id);
+    if (!oldConfig) {
+      return { error: true, message: "Metadata field not found" };
     }
 
     const { min, max, ...restData } = data;
 
-    await updateStudyMetadataConfigDb(id, {
+    const updated = {
       ...restData,
-      min: min ? parseFloat(min) : null,
-      max: max ? parseFloat(max) : null,
+      min: min ? min : null,
+      max: max ? max : null,
+    };
+
+    await updateStudyMetadataConfigDb(id, updated);
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "edit",
+      scope: "trial",
+      target: data.name,
+      before: oldConfig,
+      after: updated,
     });
 
     return { error: false, message: "Study metadata updated successfully" };
@@ -110,7 +138,7 @@ export async function deleteStudyMetadata(name: string) {
       user?.role,
       "studyMetadata:delete"
     );
-    if (!canDeleteStudyMetadata) {
+    if (!canDeleteStudyMetadata || !user?.id) {
       return {
         error: true,
         message: "You do not have permission to delete metadata fields.",
@@ -135,6 +163,14 @@ export async function deleteStudyMetadata(name: string) {
     await db.transaction(async (tx) => {
       await deleteStudyMetadataConfig(name, tx);
       await removeJsonKeyFromAllStudies(name, tx);
+    });
+
+    await logMetadataAction({
+      userId: user.id,
+      action: "delete",
+      scope: "study",
+      target: name,
+      before: config,
     });
 
     return {

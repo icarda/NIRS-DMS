@@ -42,13 +42,13 @@ import { capitalize, labelToCamel } from "@/lib/utils";
 
 interface MetadataAddDialogProps {
   type: "study" | "trial";
-  // onSave: (data: z.infer<typeof metadataDialog>) => void;
 }
 
 export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   const form = useForm<z.infer<typeof metadataConfigSchema>>({
     resolver: zodResolver(metadataConfigSchema),
     defaultValues: {
@@ -59,16 +59,15 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
       required: false,
     },
   });
-  console.log(form.formState.errors);
 
   const labelValue = form.watch("label");
 
   useEffect(() => {
-    if (labelValue) {
+    if (isOpen && labelValue) {
       const generatedName = labelToCamel(labelValue);
       form.setValue("name", generatedName, { shouldValidate: true });
     }
-  }, [labelValue, form]);
+  }, [labelValue, isOpen, form]);
 
   const handleSubmit = async (data: z.infer<typeof metadataConfigSchema>) => {
     try {
@@ -81,7 +80,6 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
           name,
         });
       } else {
-        // result = await createStudyMetadataConfig(data);
         result = await createTrialMetadataConfig({
           ...data,
           name,
@@ -90,21 +88,31 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
       if (result.error) {
         toast.error(result.message);
       } else {
-        toast.success(`${capitalize(type)} metadata created successfully`);
-        setOpen(false);
+        form.reset({
+          name: "",
+          label: "",
+          type: "string",
+          defaultValue: "",
+          required: false,
+          min: "",
+          max: "",
+        });
+        setTimeout(() => {
+          toast.success(`${capitalize(type)} metadata created successfully`);
+        }, 200);
       }
     } catch (e) {
       toast.error(
         `There was an error creating the ${type} metadata. Please try again.`
       );
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
     }
-    setIsLoading(false);
-
-    form.reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="h-4 w-4" />
@@ -218,11 +226,15 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
               <FormField
                 control={form.control}
                 name="min"
-                render={({ field }) => (
+                render={({ field: { value, ...field } }) => (
                   <FormItem>
                     <FormLabel>Minimum Value</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" placeholder="e.g. 30" />
+                      <Input
+                        value={value == null ? "" : value}
+                        {...field}
+                        placeholder="e.g. 30"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -231,11 +243,15 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
               <FormField
                 control={form.control}
                 name="max"
-                render={({ field }) => (
+                render={({ field: { value, ...field } }) => (
                   <FormItem>
                     <FormLabel>Maximum Value</FormLabel>
                     <FormControl>
-                      <Input {...field} type="number" placeholder="e.g. 400" />
+                      <Input
+                        value={value == null ? "" : value}
+                        {...field}
+                        placeholder="e.g. 400"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

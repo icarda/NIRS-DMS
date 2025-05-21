@@ -69,8 +69,8 @@ export type MetadataSchema = {
   type: TrialMetadataType;
   defaultValue: string;
   required: boolean;
-  min?: string;
-  max?: string;
+  min: string | null;
+  max: string | null;
   source: "sql" | "json";
 };
 
