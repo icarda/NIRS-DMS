@@ -3,11 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 
 import { format } from "date-fns";
-import { CalendarIcon, Plus, X } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -30,7 +38,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TRIALS } from "@/data/trails";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SPECIES = [
@@ -45,6 +52,42 @@ const DEFAULT_SPECIES = [
   {
     id: 3,
     name: "Species 3",
+  },
+  {
+    id: 4,
+    name: "Species 4",
+  },
+  {
+    id: 5,
+    name: "Species 5",
+  },
+  {
+    id: 6,
+    name: "Species 6",
+  },
+  {
+    id: 7,
+    name: "Species 7",
+  },
+  {
+    id: 8,
+    name: "Species 8",
+  },
+  {
+    id: 9,
+    name: "Species 9",
+  },
+  {
+    id: 10,
+    name: "Species 10",
+  },
+  {
+    id: 11,
+    name: "Species 11",
+  },
+  {
+    id: 12,
+    name: "Species 12",
   },
 ];
 
@@ -69,6 +112,7 @@ const TrialStep = ({
   const previousUseExistingTrial = useRef<boolean | null>(null);
   const [species, setSpecies] =
     useState<{ name: string; id: number }[]>(DEFAULT_SPECIES);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const isFirstRender = previousUseExistingTrial.current === null;
@@ -308,20 +352,51 @@ const TrialStep = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel required>Species</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select species" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {species.map((sp) => (
-                        <SelectItem value={sp.name} key={sp.id}>
-                          {sp.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between"
+                      >
+                        {field.value
+                          ? species.find((sp) => sp.name === field.value)?.name
+                          : "Select species..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search species..." />
+                        <CommandList className="max-h-48 sm:w-52">
+                          <CommandEmpty>No species found.</CommandEmpty>
+                          <CommandGroup>
+                            {species.map((sp) => (
+                              <CommandItem
+                                key={sp.id}
+                                value={sp.name}
+                                onSelect={() => {
+                                  field.onChange(sp.name);
+                                  setOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    field.value === sp.name
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {sp.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
