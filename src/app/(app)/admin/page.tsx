@@ -27,7 +27,7 @@ import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
 
 export default async function Admin() {
   const user = await getCurrentUser();
-  const canAccessAdminPage = hasPermission(user?.role, "accessAdminPages");
+  const canAccessAdminPage = hasPermission(user?.role, "admin:access");
 
   if (!canAccessAdminPage) {
     redirect("/");

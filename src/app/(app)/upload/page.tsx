@@ -13,7 +13,7 @@ import TraitUpload from "./components/trait-upload";
 
 export default async function UploadData() {
   const user = await getCurrentUser();
-  const canAccessUploadPage = hasPermission(user?.role, "accessUploadPage");
+  const canAccessUploadPage = hasPermission(user?.role, "upload:access");
   if (!canAccessUploadPage) {
     redirect("/");
   }

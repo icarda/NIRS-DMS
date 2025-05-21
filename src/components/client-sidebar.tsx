@@ -49,13 +49,13 @@ export function ClientSidebar({
       title: "Upload Data",
       url: "/upload",
       icon: FileUp,
-      visible: hasPermission(role, "accessUploadPage"),
+      visible: hasPermission(role, "upload:access"),
     },
     {
       title: "Admin",
       url: "/admin",
       icon: Users,
-      visible: hasPermission(role, "accessAdminPages"),
+      visible: hasPermission(role, "admin:access"),
     },
   ];
 

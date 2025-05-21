@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const user = await getCurrentUser();
 
-  const canAccessTraitData = hasPermission(user?.role, "accessTraitData");
+  const canAccessTraitData = hasPermission(user?.role, "trait:access");
   if (!canAccessTraitData) {
     return NextResponse.json(
       {

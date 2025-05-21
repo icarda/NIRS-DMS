@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   const user = await getCurrentUser();
 
-  const canAccessNirsData = hasPermission(user?.role, "accessNirsData");
+  const canAccessNirsData = hasPermission(user?.role, "nirs:access");
   if (!canAccessNirsData) {
     return NextResponse.json(
       { message: "You do not have permission to access this resource." },
