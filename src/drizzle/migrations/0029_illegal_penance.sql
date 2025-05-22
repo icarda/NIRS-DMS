@@ -1,0 +1,1 @@
+ALTER TABLE "user_study_access" ADD COLUMN "createdAt" timestamp with time zone DEFAULT now() NOT NULL;

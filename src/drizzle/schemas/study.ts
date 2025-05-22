@@ -6,10 +6,12 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { studyAccesses } from "@/data/studies";
 import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { CenterTable } from "./center";
 import { CropTable } from "./crop";
@@ -19,6 +21,7 @@ import { OtherIdsTable } from "./other_ids";
 import { QualityLabTable } from "./quality-lab";
 import { TraitTable } from "./trait";
 import { TrialSpeciesTable, TrialTable } from "./trial";
+import { UserTable } from "./user";
 
 export const StudyTable = pgTable(
   "study",
@@ -103,6 +106,21 @@ export const PhysiologicalStageTable = pgTable(
   (t) => [uniqueIndex("physiological_stage_unique").on(t.name, t.cropId)]
 );
 
+export const UserStudyAccess = pgTable(
+  "user_study_access",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => UserTable.id, { onDelete: "cascade" }),
+    studyId: integer("study_id")
+      .notNull()
+      .references(() => StudyTable.id, { onDelete: "cascade" }),
+
+    createdAt,
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.studyId] })]
+);
+
 export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   trial: one(TrialTable, {
     fields: [StudyTable.trialId],
@@ -127,6 +145,7 @@ export const studyRelations = relations(StudyTable, ({ one, many }) => ({
   traits: many(TraitTable),
   nirsData: many(NirsDataTable),
   otherIds: many(OtherIdsTable),
+  studyAccesses: many(UserStudyAccess),
 }));
 
 export const speciesRelations = relations(SpeciesTable, ({ one, many }) => ({
@@ -156,5 +175,20 @@ export const physiologicalStageRelations = relations(
       references: [CropTable.id],
     }),
     studies: many(StudyTable),
+  })
+);
+
+export const userStudyAccessRelations = relations(
+  UserStudyAccess,
+  ({ one }) => ({
+    study: one(StudyTable, {
+      fields: [UserStudyAccess.studyId],
+      references: [StudyTable.id],
+    }),
+
+    user: one(UserTable, {
+      fields: [UserStudyAccess.userId],
+      references: [UserTable.id],
+    }),
   })
 );

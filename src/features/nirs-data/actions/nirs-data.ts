@@ -226,7 +226,6 @@ export async function uploadNirsData(formData: FormData) {
           // additionalMetadata: {}
         };
         newStudy = await insertStudy(studyData, tx);
-        console.log("New study created:", newStudy);
         if (!newStudy?.id) throw new Error("Failed to create study.");
         studyId = newStudy.id;
       }

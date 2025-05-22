@@ -307,7 +307,6 @@ function getDefaultValueForType(type: string) {
 export async function getTrialMetadataByName(name: string) {
   "use cache";
   cacheTag(getTrialMetadataConfigTag(name));
-  console.log("getTrialMetadataByName", name);
   return db.query.TrialMetadataConfig.findFirst({
     where: eq(TrialMetadataConfig.name, name),
   });

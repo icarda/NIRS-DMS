@@ -1,32 +1,23 @@
 import type { UserRole } from "@/drizzle/schema";
 
-type Permission =
-  | "admin:access"
-  | "upload:access"
-  | "nirs:upload"
-  | "nirs:access"
-  | "trait:access"
-  | "trait:create"
-  | "trait:upload"
-  | "crop:create"
-  | "cropTrait:create"
-  | "productType:create"
-  | "productType:delete"
-  | "nirModel:create"
-  | "nirModel:delete"
-  | "physiologicalStage:create"
-  | "physiologicalStage:delete"
-  | "user:update"
-  | "user:delete"
-  | "trialMetadata:create"
-  | "trialMetadata:update"
-  | "trialMetadata:delete"
-  | "trial:create"
-  | "trial:update"
-  | "trial:delete"
-  | "studyMetadata:create"
-  | "studyMetadata:update"
-  | "studyMetadata:delete";
+type Resource =
+  | "admin"
+  | "upload"
+  | "nirs"
+  | "trait"
+  | "crop"
+  | "cropTrait"
+  | "productType"
+  | "nirModel"
+  | "physiologicalStage"
+  | "user"
+  | "trialMetadata"
+  | "trial"
+  | "studyMetadata"
+  | "studyAccess";
+type Action = "access" | "create" | "update" | "delete" | "upload";
+
+type Permission = `${Resource}:${Action}`;
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   USER: [],
@@ -60,6 +51,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "studyMetadata:create",
     "studyMetadata:update",
     "studyMetadata:delete",
+    "studyAccess:update",
   ],
 };
 

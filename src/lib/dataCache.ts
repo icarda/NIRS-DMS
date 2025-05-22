@@ -21,7 +21,8 @@ type CACHE_TAG =
   | "cropTraits"
   | "trialFertilizers"
   | "trialMetadataConfig"
-  | "studyMetadataConfig";
+  | "studyMetadataConfig"
+  | "studyAccess";
 
 export function getGlobalTag(tag: CACHE_TAG) {
   return `global:${tag}` as const;

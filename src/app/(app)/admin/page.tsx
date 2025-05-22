@@ -106,6 +106,9 @@ export default async function Admin() {
                 email: user.email,
                 center: user.center.acronym,
                 status: user.emailVerified ? "Approved" : "Pending",
+                studyAccesses: user.studyAccesses.map(
+                  (studyAccess) => studyAccess.study.studyCode
+                ),
               }))}
               filterColumn="fullName"
             />

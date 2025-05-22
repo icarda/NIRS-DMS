@@ -9,8 +9,10 @@ import {
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
+import { studyAccesses } from "@/data/studies";
 import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { CenterTable } from "./center";
+import { StudyTable, UserStudyAccess } from "./study";
 
 const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
 export const userRoles = pgEnum("role", roles);
@@ -60,11 +62,16 @@ export const accounts = pgTable(
   ]
 );
 
-export const userRelations = relations(UserTable, ({ one }) => ({
+export const userRelations = relations(UserTable, ({ one, many }) => ({
   center: one(CenterTable, {
     fields: [UserTable.centerId],
     references: [CenterTable.id],
   }),
+  accounts: one(accounts, {
+    fields: [UserTable.id],
+    references: [accounts.userId],
+  }),
+  studyAccesses: many(UserStudyAccess),
 }));
 
 export const accountRelations = relations(accounts, ({ one }) => ({

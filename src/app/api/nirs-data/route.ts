@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log("Filters:", filters);
     const nirsData = await getNirsDataFiltered(filters);
 
     return NextResponse.json(nirsData, { status: 200 });

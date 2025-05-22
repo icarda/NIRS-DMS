@@ -37,7 +37,7 @@ export type User = {
   role: UserRole;
   email: string;
   center: string;
-  // studyAccess: string[];
+  studyAccesses: string[];
   status: string;
 };
 
@@ -144,8 +144,10 @@ export const userColumns: ColumnDef<User>[] = [
       const user = row.original;
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
 
       const handleEdit = async (data: any) => {
+        setIsLoading(true);
         const formData = new FormData();
         formData.append("firstName", data.firstName);
         formData.append("lastName", data.lastName);
@@ -163,6 +165,7 @@ export const userColumns: ColumnDef<User>[] = [
           toast.error("Error updating user");
         } finally {
           setEditDialogOpen(false);
+          setIsLoading(false);
         }
       };
 
@@ -195,6 +198,8 @@ export const userColumns: ColumnDef<User>[] = [
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             onSave={handleEdit}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
           />
 
           <UserDeleteDialog

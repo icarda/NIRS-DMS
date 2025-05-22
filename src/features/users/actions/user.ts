@@ -1,7 +1,10 @@
 "use server";
 
+import { revalidateStudyAccessCache } from "@/features/studies/db/cache/study-access";
+import { updateUserStudyAccessByCode } from "@/features/studies/db/studyAccesses";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
+import { revalidateUserCache } from "../db/cache";
 import {
   deleteUser as deleteUserDb,
   updateUser as updateUserDb,
@@ -35,17 +38,24 @@ export async function updateUser({ id }: { id: number }, data: FormData) {
     };
   }
 
+  const studyAccess = JSON.parse((data.get("studyAccess") as string) ?? "[]");
+
   const userData = {
     firstName: data.get("firstName") as string,
     lastName: data.get("lastName") as string,
     email: data.get("email") as string,
     center: data.get("center") as string,
     role: data.get("role") as "USER" | "ADMIN" | "SUPERADMIN",
-    studyAccess: JSON.parse((data.get("studyAccess") as string) ?? ""),
-    // this is a timestamp
     emailVerified:
       data.get("status") === "Approved" ? new Date(Date.now()) : null,
   };
   const updatedUser = await updateUserDb({ id }, userData);
   if (updatedUser == null) throw new Error("Failed to update user");
+
+  await updateUserStudyAccessByCode(id, studyAccess);
+
+  revalidateUserCache(id);
+  revalidateStudyAccessCache(id);
+
+  return updatedUser;
 }

@@ -72,7 +72,6 @@ export function MetadataEditDialog({
     onOpenChange(false);
     try {
       setIsLoading(true);
-      console.log("data", data);
       let result;
       const name = labelToCamel(data.label!);
       if (type === "study") {

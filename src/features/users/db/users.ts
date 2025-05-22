@@ -37,6 +37,11 @@ export async function getUsers({ limit }: { limit?: number } = {}) {
     },
     with: {
       center: true,
+      studyAccesses: {
+        with: {
+          study: true,
+        },
+      },
     },
     limit,
   });

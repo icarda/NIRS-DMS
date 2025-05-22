@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
+import { getStudies as getStudiesDb } from "@/features/studies/db/study";
 import { metadataConfigSchema } from "@/features/trials/schemas/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import { logMetadataAction } from "@/lib/log-metadata-action";
@@ -18,6 +19,11 @@ import {
   updateStudyMetadataConfig as updateStudyMetadataConfigDb,
 } from "../db/study";
 import { studySchema } from "../schemas/study";
+
+export async function getStudies() {
+  const studies = await getStudiesDb();
+  return studies ?? [];
+}
 
 export async function createStudy(unsafeData: z.infer<typeof studySchema>) {
   const { success, data } = studySchema.safeParse(unsafeData);

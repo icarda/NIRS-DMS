@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { on } from "events";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -33,6 +34,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { studyAccesses } from "@/data/studies";
+import { getStudies } from "@/features/studies/actions/study";
+import { getUserStudyAccessCodes } from "@/features/studies/actions/study-access";
 import { User } from "../columns";
 
 const formSchema = z.object({
@@ -50,6 +53,8 @@ interface UserEditDialogProps {
   open: boolean;
   onOpenChange(open: boolean): void;
   onSave(data: z.infer<typeof formSchema>): void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 export function UserEditDialog({
@@ -57,6 +62,8 @@ export function UserEditDialog({
   open,
   onOpenChange,
   onSave,
+  isLoading,
+  setIsLoading,
 }: UserEditDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,13 +73,26 @@ export function UserEditDialog({
       email: user.email,
       center: user.center,
       role: user.role,
-      studyAccess: [],
+      studyAccess: user.studyAccesses,
 
       approved: user.status === "Approved",
     },
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [studies, setStudies] = useState<
+    Awaited<ReturnType<typeof getStudies>>
+  >([]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    async function fetchData() {
+      const studiesResponse = await getStudies();
+      setStudies(studiesResponse);
+    }
+
+    fetchData();
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,14 +101,7 @@ export function UserEditDialog({
           <DialogTitle>Edit User Data</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit((data) => {
-              setIsLoading(true);
-              onSave(data);
-              setIsLoading(false);
-            })}
-            className="space-y-2"
-          >
+          <form onSubmit={form.handleSubmit(onSave)} className="space-y-2">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -189,9 +202,9 @@ export function UserEditDialog({
                     <MultiSelect
                       value={field.value}
                       onChange={field.onChange}
-                      data={studyAccesses.map((study) => ({
-                        value: study,
-                        label: study,
+                      data={studies.map((study) => ({
+                        value: study.studyCode,
+                        label: study.studyCode,
                       }))}
                       placeholder="Select study access"
                     />
