@@ -1,10 +1,7 @@
 import { db } from "@/drizzle/db";
 import { OtherIdsTable } from "@/drizzle/schema";
 
-type OtherIdInsertData = Pick<
-  typeof OtherIdsTable.$inferInsert,
-  "sampleId" | "plotId" | "gid" | "studyId"
->;
+type OtherIdInsertData = typeof OtherIdsTable.$inferInsert;
 
 export async function insertOtherIdsBatch(
   data: OtherIdInsertData[],
@@ -19,11 +16,6 @@ export async function insertOtherIdsBatch(
     .values(data)
 
     .onConflictDoNothing({
-      target: [
-        OtherIdsTable.sampleId,
-        OtherIdsTable.plotId,
-        OtherIdsTable.gid,
-        OtherIdsTable.studyId,
-      ],
+      target: [OtherIdsTable.sampleId, OtherIdsTable.plotId, OtherIdsTable.gid],
     });
 }
