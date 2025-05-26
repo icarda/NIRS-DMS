@@ -208,16 +208,14 @@ const passwordSchema = z
     message: "Password must include at least one special character",
   });
 
-const countries = ["Morocco", "Lebanon", "Mexico"] as const;
 const centers = ["ICARDA", "CIMMYT"] as const;
-const positions = ["Engineer", "Researcher", "Associate"] as const;
 export const registerSchema = z.object({
   firstName: z.string().min(1, { message: "First Name is required" }),
   lastName: z.string().min(1, { message: "Last Name is required" }),
-  country: z.enum(countries, { message: "Select a valid country" }),
+  country: z.string().min(1, { message: "Select a valid country" }),
   location: z.string().min(1, { message: "Location is required" }),
   center: z.enum(centers, { message: "Select a valid center" }),
-  position: z.enum(positions, { message: "Select a valid position" }),
+  position: z.string().min(1, { message: "Select a valid position" }),
   email: z.string().email({ message: "Invalid email address" }),
   password: passwordSchema,
 });

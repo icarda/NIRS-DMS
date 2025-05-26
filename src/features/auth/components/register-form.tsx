@@ -3,10 +3,12 @@
 import { useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { countries } from "country-data-list";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { LocationCommand } from "@/components/location-autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Country, CountryDropdown } from "@/components/ui/country-dropdown";
 import {
   Form,
   FormControl,
@@ -36,7 +39,6 @@ import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { FormError } from "../../../components/form-error";
 
-const countries = ["Morocco", "Lebanon", "Mexico"] as const;
 const centers = ["ICARDA", "CIMMYT"] as const;
 const positions = ["Engineer", "Researcher", "Associate"] as const;
 
@@ -45,6 +47,7 @@ export function RegisterForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | undefined>("");
+
   const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -53,8 +56,10 @@ export function RegisterForm({
       firstName: "",
       lastName: "",
       location: "",
+      position: "",
       email: "",
       password: "",
+      country: "",
     },
   });
 
@@ -66,6 +71,8 @@ export function RegisterForm({
       });
     });
   }
+
+  console.log(form.getValues("country"));
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -114,52 +121,55 @@ export function RegisterForm({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>Country</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={isPending}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {countries.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>Location</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isPending}
-                          placeholder="Location"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Country</FormLabel>
+                    <FormControl>
+                      <CountryDropdown
+                        placeholder="Country"
+                        defaultValue={field.value}
+                        onChange={(country) => {
+                          field.onChange(country.name);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Location</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <LocationCommand
+                          onSelect={(val) => {
+                            form.setValue("location", val.description, {
+                              shouldValidate: true,
+                              shouldTouch: true,
+                            });
+                          }}
+                          value={field.value}
+                          onChange={field.onChange}
+                          countryCode={
+                            countries.all.find(
+                              (c) => c.name === form.getValues("country")
+                            )?.alpha2 ?? undefined
+                          }
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="center"

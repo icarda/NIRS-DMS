@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 
+import { LocationCommand } from "@/components/location-autocomplete";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -15,6 +16,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Form,
@@ -396,11 +398,23 @@ const TrialStep = ({
                 <FormItem>
                   <FormLabel required>Location</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter location"
-                      {...field}
-                      disabled={useExistingTrial}
-                    />
+                    <div className="relative">
+                      <LocationCommand
+                        disabled={useExistingTrial}
+                        onSelect={(val) => {
+                          form.setValue("location", val.description, {
+                            shouldValidate: true,
+                            shouldTouch: true,
+                          });
+                          form.setValue(
+                            "coordinates",
+                            `${val.lat}, ${val.lng}`
+                          );
+                        }}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
