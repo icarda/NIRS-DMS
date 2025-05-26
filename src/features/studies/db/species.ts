@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { SpeciesTable, TrialSpeciesTable } from "@/drizzle/schema";
+import { TrialSpeciesTable } from "@/drizzle/schema";
 import { getSpeciesIdTag, revalidateSpeciesCache } from "./cache/species";
 
 export async function getSpeciesById(id: number) {

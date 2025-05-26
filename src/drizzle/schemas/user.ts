@@ -9,10 +9,9 @@ import {
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
-import { studyAccesses } from "@/data/studies";
 import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { CenterTable } from "./center";
-import { StudyTable, UserStudyAccess } from "./study";
+import { UserStudyAccess } from "./study";
 
 const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
 export const userRoles = pgEnum("role", roles);
