@@ -1,6 +1,7 @@
 import { integer, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { createdAt, id, updatedAt } from "../schemaHelpers";
+import { StudyTable } from "./study";
 
 export const OtherIdsTable = pgTable(
   "other_ids",
@@ -9,10 +10,20 @@ export const OtherIdsTable = pgTable(
     sampleId: integer("sample_id").notNull(),
     plotId: integer("plot_id").notNull(),
     gid: integer("gid").notNull(),
+    studyId: integer("study_id")
+      .references(() => StudyTable.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
     createdAt,
     updatedAt,
   },
   (table) => [
-    uniqueIndex("other_ids_unique").on(table.sampleId, table.plotId, table.gid),
+    uniqueIndex("other_ids_unique").on(
+      table.studyId,
+      table.sampleId,
+      table.plotId,
+      table.gid
+    ),
   ]
 );

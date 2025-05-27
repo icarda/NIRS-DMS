@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { set } from "nprogress";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
@@ -30,6 +41,8 @@ interface MultiStepFormProps {
 
 const MultiStepForm = ({ data }: MultiStepFormProps) => {
   const [step, setStep] = useState(1);
+  const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
+  const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
 
   const form = useForm<MultiFormData>({
     mode: "onTouched",
@@ -114,6 +127,12 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const result = await uploadNirsData(formData);
 
     if (result.error) {
+      if (result.existingSampleIds) {
+        setExistingSampleIds(result.existingSampleIds);
+        setOverwriteDialogOpen(true);
+
+        return;
+      }
       toast.error(result.message);
     } else {
       toast.success(result.message);
@@ -151,6 +170,74 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
   const prevStep = () => {
     setStep((prev) => prev - 1);
+  };
+
+  const handleOverwrite = async () => {
+    const multiFormData = form.getValues();
+    const selectedCrop = data.crops.find(
+      (crop) => crop.name === multiFormData.crop
+    )!;
+
+    const cropID = selectedCrop?.id as number;
+    const speciesID = selectedCrop.species.find(
+      (species: { name: string }) => species.name === multiFormData.species
+    )?.id as number;
+    const productTypeID = selectedCrop.productTypes.find(
+      (productType: { name: string }) =>
+        productType.name === multiFormData.productType
+    )?.id as number;
+    const physiologicalStageID = selectedCrop.physiologicalStages.find(
+      (physiologicalStage: { name: string }) =>
+        physiologicalStage.name === multiFormData.physiologicalStage
+    )?.id as number;
+    const qualityLabID = data.qualityLabs.find(
+      (qualityLab) => qualityLab.name === multiFormData.qualityLab
+    )?.id as number;
+    const nirModelID = data.nirModels.find(
+      (nirModel) => nirModel.name === multiFormData.nirModel
+    )?.id as number;
+
+    const multiFormDataWithIDs = {
+      ...multiFormData,
+
+      cropID,
+      speciesID,
+      productTypeID,
+      physiologicalStageID,
+      qualityLabID,
+      nirModelID,
+      studyCode: [
+        multiFormData.trial,
+        multiFormData.productType,
+        new Date(multiFormData.sampleDate).toLocaleDateString("fr-FR"),
+      ].join("+"),
+    };
+
+    const formData = new FormData();
+    Object.entries(multiFormDataWithIDs).forEach(([key, value]) => {
+      if (key === "file" && value instanceof File) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (value instanceof Date) {
+        formData.append(key, value.toISOString());
+      } else if (typeof value === "boolean") {
+        formData.append(key, String(value));
+      } else if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+
+    const result = await uploadNirsData(formData, true);
+    if (result.error) {
+      toast.error(result.message);
+    } else {
+      toast.success(result.message);
+      setTimeout(() => {
+        setStep(1);
+        form.reset();
+      }, 300);
+    }
   };
 
   return (
@@ -233,6 +320,29 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
               )}
             </Button>
           )}
+          <AlertDialog
+            open={overwriteDialogOpen}
+            onOpenChange={setOverwriteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Overwrite existing NIRS data?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  The following sample IDs already exist:{" "}
+                  {existingSampleIds.slice(0, 5).join(", ")}
+                  {existingSampleIds.length > 5 ? "..." : ""}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleOverwrite}>
+                  Overwrite
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </form>
     </div>

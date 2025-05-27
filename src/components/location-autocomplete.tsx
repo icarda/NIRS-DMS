@@ -95,7 +95,7 @@ export function LocationCommand({
           placeholder="Search for a city..."
           className="px-3 py-2 text-sm"
         />
-        {open && (
+        {open && !disabled && (
           <CommandList className="absolute top-11 z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
             {results.length === 0 && <CommandEmpty>No results.</CommandEmpty>}
             {results.map((result) => (

@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
+import { isUniqueConstraintError } from "@/drizzle/schemaHelpers";
 import { getDistinctSampleIdsForStudy } from "@/features/nirs-data/db/nirs-data";
 import { getCurrentUser } from "@/lib/currentUser";
 import { parseTraitFile, transformTraitDataForDb } from "@/lib/parsing";
@@ -102,6 +103,12 @@ export async function uploadTraitDataAction(formData: FormData) {
       message: `Trait data uploaded successfully. ${traitDataToInsert.length} trait records inserted for study ${studyCode}.`,
     };
   } catch (error: any) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        error: true,
+        message: "Some values already exist and cannot be duplicated.",
+      };
+    }
     return {
       error: true,
       message:

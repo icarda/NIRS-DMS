@@ -11,11 +11,5 @@ export async function insertOtherIdsBatch(
     return;
   }
 
-  await trx
-    .insert(OtherIdsTable)
-    .values(data)
-
-    .onConflictDoNothing({
-      target: [OtherIdsTable.sampleId, OtherIdsTable.plotId, OtherIdsTable.gid],
-    });
+  await trx.insert(OtherIdsTable).values(data);
 }
