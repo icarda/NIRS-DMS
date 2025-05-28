@@ -12,7 +12,11 @@ import {
   getTrialSpecies,
   insertTrialSpecies,
 } from "@/features/studies/db/species";
-import { getStudyByCode, insertStudy } from "@/features/studies/db/study";
+import {
+  getStudyByCode,
+  insertStudy,
+  updateStudyById,
+} from "@/features/studies/db/study";
 import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import {
@@ -69,6 +73,7 @@ export async function uploadNirsData(
   for (const [key, value] of formData.entries()) {
     rawData[key] = value;
   }
+  const overwriteStudy = rawData.overwriteStudy === "true";
 
   const dataToValidate: MultiStepFormSchemaFinal = {
     // Trial Fields
@@ -228,8 +233,47 @@ export async function uploadNirsData(
         const existingStudy = await getStudyByCode(validatedData.studyCode);
 
         if (existingStudy) {
-          // Use the ID from the existing study
-          studyId = existingStudy.id;
+          if (overwriteStudy) {
+            // Overwrite the study (update it)
+            const updatedStudy = await updateStudyById(
+              existingStudy.id,
+              {
+                productTypeId: validatedData.productTypeID,
+                nirModelId: validatedData.nirModelID,
+                requesterName: validatedData.requesterName,
+                requesterEmail: validatedData.requesterEmail,
+                sampleDate: validatedData.sampleDate.toISOString(),
+                physiologicalStageId: validatedData.physiologicalStageID,
+                qualityLabId: validatedData.qualityLabID,
+                program: validatedData.program,
+              },
+              tx
+            );
+
+            if (!updatedStudy) {
+              console.error("updatedStudy:", updatedStudy);
+              throw new Error("Failed to overwrite existing study.");
+            }
+
+            studyId = existingStudy.id;
+          } else {
+            const newStudyCode = `${validatedData.studyCode}+${Date.now()}`;
+            const studyData = {
+              trialId,
+              studyCode: newStudyCode,
+              productTypeId: validatedData.productTypeID,
+              nirModelId: validatedData.nirModelID,
+              requesterName: validatedData.requesterName,
+              requesterEmail: validatedData.requesterEmail,
+              sampleDate: validatedData.sampleDate.toISOString(),
+              physiologicalStageId: validatedData.physiologicalStageID,
+              qualityLabId: validatedData.qualityLabID,
+              program: validatedData.program,
+            };
+            newStudy = await insertStudy(studyData, tx);
+            if (!newStudy?.id) throw new Error("Failed to create new study.");
+            studyId = newStudy.id;
+          }
         } else {
           // Create new study if code doesn't exist
           const studyData = {
@@ -243,7 +287,6 @@ export async function uploadNirsData(
             physiologicalStageId: validatedData.physiologicalStageID,
             qualityLabId: validatedData.qualityLabID,
             program: validatedData.program,
-            // additionalMetadata: {}
           };
           newStudy = await insertStudy(studyData, tx);
           if (!newStudy?.id) throw new Error("Failed to create study.");

@@ -47,7 +47,9 @@ export default async function UploadData() {
           </div>
           <div>
             <TabsContent value="spectral_data">
-              <MultiStepForm data={{ trials, crops, qualityLabs, nirModels }} />
+              <MultiStepForm
+                data={{ trials, crops, qualityLabs, nirModels, studies }}
+              />
             </TabsContent>
             <TabsContent value="traits">
               <TraitUpload data={{ crops, studies }} />

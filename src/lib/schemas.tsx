@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { id } from "@/drizzle/schemaHelpers";
-
 export const dashboardFilterSchema = z.object({
   crop: z.string().min(1, "Please select a crop"),
   qualityLab: z.string().min(1, "Please select a quality lab"),
@@ -37,6 +35,9 @@ export const trialFormSchema = z.object({
 });
 
 export const studyFormSchema = z.object({
+  useExistingStudy: z.boolean(),
+  overwriteStudy: z.boolean().default(false), // ✅ ADD THIS LINE
+  study: z.string().optional(),
   productType: z.string().min(1, "Product type is required"),
   qualityLab: z.string().min(1, "Quality lab is required"),
   nirModel: z.string().min(1, "NIR model is required"),

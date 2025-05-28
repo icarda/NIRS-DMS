@@ -28,10 +28,18 @@ export async function getStudies() {
           },
         },
       },
+      productType: true,
+      qualityLab: true,
+      nirModel: true,
+      physiologicalStage: true,
     },
     columns: {
       id: true,
       studyCode: true,
+      requesterEmail: true,
+      requesterName: true,
+      program: true,
+      sampleDate: true,
     },
   });
   return studies;
@@ -63,6 +71,23 @@ export async function insertStudy(
   revalidateStudyCache(newStudy.id);
 
   return newStudy;
+}
+
+export async function updateStudyById(
+  studyId: number,
+  updateData: Partial<
+    Omit<typeof StudyTable.$inferInsert, "trialId" | "studyCode">
+  >,
+  tx: Omit<typeof db, "$client"> = db
+) {
+  const [updatedStudy] = await tx
+    .update(StudyTable)
+    .set(updateData)
+    .where(eq(StudyTable.id, studyId))
+    .returning();
+
+  revalidateStudyCache(studyId);
+  return updatedStudy;
 }
 
 export async function deleteStudy({ id }: { id: number }) {

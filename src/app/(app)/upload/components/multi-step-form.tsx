@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { set } from "nprogress";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -36,6 +35,7 @@ interface MultiStepFormProps {
     crops: Record<string, any>[];
     qualityLabs: Record<string, any>[];
     nirModels: Record<string, any>[];
+    studies: Record<string, any>[];
   };
 }
 
@@ -43,11 +43,14 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   const [step, setStep] = useState(1);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
   const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
+  const [openStudyOverwriteDialog, setOpenStudyOverwriteDialog] =
+    useState(false);
 
   const form = useForm<MultiFormData>({
     mode: "onTouched",
     resolver: zodResolver(multiStepFormSchema),
     defaultValues: {
+      useExistingStudy: false,
       useExistingTrial: false,
       trial: "",
       crop: "",
@@ -66,6 +69,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       trialPlantingDate: undefined,
       requesterName: "",
       requesterEmail: "",
+      overwriteStudy: false,
     },
   });
 
@@ -102,12 +106,20 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       physiologicalStageID,
       qualityLabID,
       nirModelID,
+      overwriteStudy: multiFormData.overwriteStudy ?? false,
       studyCode: [
         multiFormData.trial,
         multiFormData.productType,
         new Date(multiFormData.sampleDate).toLocaleDateString("fr-FR"),
       ].join("+"),
     };
+
+    if (
+      !multiFormDataWithIDs.overwriteStudy &&
+      multiFormDataWithIDs.useExistingStudy
+    ) {
+      multiFormDataWithIDs.studyCode += `+${Date.now()}`;
+    }
 
     const formData = new FormData();
     Object.entries(multiFormDataWithIDs).forEach(([key, value]) => {
@@ -145,6 +157,8 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
   const nextStep = async () => {
     const currentSchema = step === 1 ? trialFormSchema : studyFormSchema;
+
+    // validate sampleDate logic for step 2
     if (step === 2) {
       const sampleDate = form.getValues("sampleDate");
       const trialPlantingDate = form.getValues("trialPlantingDate");
@@ -164,8 +178,46 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
         }
       }
     }
+
     const isValid = await form.trigger(Object.keys(currentSchema.shape) as any);
-    if (isValid) setStep((prev) => prev + 1);
+    if (!isValid) return;
+
+    // 🧠 Extra check for study modifications at step 2
+    if (step === 2 && form.getValues("useExistingStudy")) {
+      const selectedStudy = data.studies.find(
+        (s) => s.studyCode === form.getValues("study")
+      );
+
+      const current = {
+        productType: form.getValues("productType"),
+        qualityLab: form.getValues("qualityLab"),
+        nirModel: form.getValues("nirModel"),
+        physiologicalStage: form.getValues("physiologicalStage"),
+        sampleDate: new Date(form.getValues("sampleDate")),
+        program: form.getValues("program"),
+        requesterName: form.getValues("requesterName") || "",
+        requesterEmail: form.getValues("requesterEmail") || "",
+      };
+
+      const original = {
+        productType: selectedStudy?.productType?.name,
+        qualityLab: selectedStudy?.qualityLab?.name,
+        nirModel: selectedStudy?.nirModel?.name,
+        physiologicalStage: selectedStudy?.physiologicalStage?.name,
+        sampleDate: new Date(selectedStudy?.sampleDate),
+        program: selectedStudy?.program,
+        requesterName: selectedStudy?.requesterName || "",
+        requesterEmail: selectedStudy?.requesterEmail || "",
+      };
+
+      const isModified = JSON.stringify(current) !== JSON.stringify(original);
+      if (isModified) {
+        setOpenStudyOverwriteDialog(true);
+        return;
+      }
+    }
+
+    setStep((prev) => prev + 1);
   };
 
   const prevStep = () => {
@@ -279,6 +331,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
             crops={data.crops}
             qualityLabs={data.qualityLabs}
             nirModels={data.nirModels}
+            studies={data.studies}
           />
         )}
         {step === 3 && <UploadStep form={form} />}
@@ -338,6 +391,55 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleOverwrite}>
+                  Overwrite
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <AlertDialog
+            open={openStudyOverwriteDialog}
+            onOpenChange={setOpenStudyOverwriteDialog}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Overwrite or create a new study?
+                </AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div>
+                    You have modified the metadata of an existing study. Would
+                    you like to:
+                    <ul className="mt-2 list-inside list-disc space-y-1">
+                      <li>
+                        <strong>Overwrite:</strong> Save changes to the
+                        currently selected study.
+                      </li>
+                      <li>
+                        <strong>Create new:</strong> Create a new study using
+                        the updated information.
+                      </li>
+                    </ul>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    form.setValue("overwriteStudy", false);
+                    setOpenStudyOverwriteDialog(false);
+                    setStep((prev) => prev + 1);
+                  }}
+                >
+                  Create New
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    form.setValue("overwriteStudy", true);
+                    setOpenStudyOverwriteDialog(false);
+                    setStep((prev) => prev + 1);
+                  }}
+                >
                   Overwrite
                 </AlertDialogAction>
               </AlertDialogFooter>

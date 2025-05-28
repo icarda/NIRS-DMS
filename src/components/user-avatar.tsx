@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { LogoutButton } from "../features/auth/components/logout-button";
+import { LogoutButton } from "@/features/auth/components/logout-button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   DropdownMenu,

@@ -37,7 +37,7 @@ import {
 import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { FormError } from "../../../components/form-error";
+import { FormError } from "../../../app/components/form-error";
 
 const centers = ["ICARDA", "CIMMYT"] as const;
 const positions = ["Engineer", "Researcher", "Associate"] as const;
