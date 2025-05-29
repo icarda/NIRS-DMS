@@ -14,8 +14,16 @@ export function getSpeciesTrialIdTag(trialId: number) {
   return getTrialTag("species", trialId);
 }
 
-export function revalidateSpeciesCache(id: number, trialId: number) {
+export function getSpeciesSampleIdTag(sampleId: number) {
+  return getTrialTag("species", sampleId);
+}
+
+export function revalidateSpeciesCache(
+  id: number,
+  { trialId, sampleId }: { trialId?: number; sampleId?: number } = {}
+) {
   revalidateTag(getSpeciesGlobalTag());
   revalidateTag(getSpeciesIdTag(id));
-  revalidateTag(getSpeciesTrialIdTag(trialId));
+  if (trialId != null) revalidateTag(getSpeciesTrialIdTag(trialId));
+  if (sampleId != null) revalidateTag(getSpeciesSampleIdTag(sampleId));
 }

@@ -2,7 +2,13 @@ import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { TrialSpeciesTable } from "@/drizzle/schema";
+import {
+  OtherIdsTable,
+  SpeciesTable,
+  StudyTable,
+  TrialSpeciesTable,
+  TrialTable,
+} from "@/drizzle/schema";
 import { getSpeciesIdTag, revalidateSpeciesCache } from "./cache/species";
 
 export async function getSpeciesById(id: number) {
@@ -46,7 +52,25 @@ export async function insertTrialSpecies(
 
   if (newTrialSpecies == null)
     throw new Error("Failed to create trial species");
-  revalidateSpeciesCache(newTrialSpecies.speciesId, data.trialId);
+  revalidateSpeciesCache(newTrialSpecies.speciesId, { trialId: data.trialId });
 
   return newTrialSpecies;
+}
+
+export async function getSpeciesForSample(sampleId: number) {
+  "use cache";
+  cacheTag(getSpeciesIdTag(sampleId));
+  const species = await db
+    .selectDistinct({
+      sampleId: SpeciesTable.id,
+      name: SpeciesTable.name,
+    })
+    .from(OtherIdsTable)
+    .innerJoin(StudyTable, eq(OtherIdsTable.studyId, StudyTable.id))
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(TrialSpeciesTable, eq(TrialTable.id, TrialSpeciesTable.trialId))
+    .innerJoin(SpeciesTable, eq(TrialSpeciesTable.speciesId, SpeciesTable.id))
+    .where(eq(OtherIdsTable.sampleId, sampleId));
+
+  return species;
 }

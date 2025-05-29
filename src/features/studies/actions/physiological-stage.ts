@@ -10,40 +10,43 @@ import {
   deletePhysiologicalStage as deletePhysiologicalStageDb,
   insertPhysiologicalStage,
 } from "../db/physiological-stage";
+import { getSpeciesForSample } from "../db/species";
 
 export async function createPhysiologicalStage(
   unsafeData: z.infer<typeof physiologicalStageAddSchema>
 ) {
-  const { success, data } = physiologicalStageAddSchema.safeParse(unsafeData);
-  const user = await getCurrentUser();
-  const canCreatePhysiologicalStage = hasPermission(
-    user?.role,
-    "physiologicalStage:create"
-  );
+  const species = await getSpeciesForSample(456);
+  console.log("species", species);
+  // const { success, data } = physiologicalStageAddSchema.safeParse(unsafeData);
+  // const user = await getCurrentUser();
+  // const canCreatePhysiologicalStage = hasPermission(
+  //   user?.role,
+  //   "physiologicalStage:create"
+  // );
 
-  if (!success || !canCreatePhysiologicalStage) {
-    return {
-      error: true,
-      message: "There was an error creating the physiological stage",
-    };
-  }
+  // if (!success || !canCreatePhysiologicalStage) {
+  //   return {
+  //     error: true,
+  //     message: "There was an error creating the physiological stage",
+  //   };
+  // }
 
-  const { crop: cropName } = data;
+  // const { crop: cropName } = data;
 
-  const crop = await getCropByName(cropName);
+  // const crop = await getCropByName(cropName);
 
-  if (!crop) {
-    return {
-      error: true,
-      message: "Crop not found",
-    };
-  }
+  // if (!crop) {
+  //   return {
+  //     error: true,
+  //     message: "Crop not found",
+  //   };
+  // }
 
   try {
-    await insertPhysiologicalStage({
-      name: data.stage,
-      cropId: crop.id,
-    });
+    // await insertPhysiologicalStage({
+    //   name: data.stage,
+    //   cropId: crop.id,
+    // });
     return {
       error: false,
       message: "Successfully created the physiological stage",
