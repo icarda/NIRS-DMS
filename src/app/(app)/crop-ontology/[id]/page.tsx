@@ -1,6 +1,4 @@
-import { use } from "react";
-
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import CropPageClient from "@/components/crop-page-client";
 import { getCrop } from "@/features/crops/db/crop";

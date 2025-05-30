@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { FormError } from "@/components/form-error";
 import { LocationCommand } from "@/components/location-autocomplete";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,6 @@ import {
 import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { FormError } from "../../../app/components/form-error";
 
 const centers = ["ICARDA", "CIMMYT"] as const;
 const positions = ["Engineer", "Researcher", "Associate"] as const;

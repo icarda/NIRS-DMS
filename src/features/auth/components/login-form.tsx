@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { FormError } from "@/components/form-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/actions/login";
 import { loginSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
-import { FormError } from "../../../app/components/form-error";
 
 export function LoginForm({
   className,
