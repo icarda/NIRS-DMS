@@ -3,8 +3,7 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 
-import Loader from "@/components/navigation-loader";
-import ProgressController from "@/components/progress-controller";
+import BProgressProvider from "@/components/bprogress-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
@@ -24,9 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <Loader />
-        <ProgressController />
-        {children}
+        <BProgressProvider>{children}</BProgressProvider>
         <Toaster richColors />
       </body>
     </html>
