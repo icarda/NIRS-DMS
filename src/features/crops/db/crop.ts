@@ -54,10 +54,7 @@ export async function getCrops({ limit }: { limit?: number } = {}) {
   return crops;
 }
 
-export async function insertCrop(
-  data: typeof CropTable.$inferInsert,
-  commonNames?: Omit<typeof CropCommonNameTable.$inferInsert, "cropId">[]
-) {
+export async function insertCrop(data: typeof CropTable.$inferInsert) {
   const [newCrop] = await db
     .insert(CropTable)
     .values(data)
@@ -68,15 +65,6 @@ export async function insertCrop(
     });
 
   if (newCrop == null) throw new Error("Failed to create crop");
-
-  if (commonNames?.length) {
-    await db.insert(CropCommonNameTable).values(
-      commonNames.map((name) => ({
-        ...name,
-        cropId: newCrop.id,
-      }))
-    );
-  }
 
   revalidateCropCache(newCrop.id);
   return newCrop;

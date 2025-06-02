@@ -22,7 +22,7 @@ export async function createCrop(unsafeData: CropSchema) {
     return { error: true, message: "There was an error creating the crop" };
   }
 
-  const { commonNames, ...cropData } = data;
+  const cropData = data;
 
   const existingCrop = await db.query.CropTable.findFirst({
     where: eq(CropTable.name, cropData.name),
@@ -32,7 +32,7 @@ export async function createCrop(unsafeData: CropSchema) {
     return { error: true, message: "Crop name already exists" };
   }
 
-  await insertCrop(cropData, commonNames);
+  await insertCrop(cropData);
   return {
     error: false,
     message: "Successfully created the crop",
@@ -46,7 +46,7 @@ export async function updateCrop(id: number, unsafeData: CropSchema) {
     return { error: true, message: "There was an error updating the crop" };
   }
 
-  const { commonNames, ...cropData } = data;
+  const cropData = data;
   await updateCropDb({ id }, cropData);
 }
 

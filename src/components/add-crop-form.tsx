@@ -34,9 +34,6 @@ const formSchema = z.object({
   cropName: z.string().min(1, {
     message: "Crop name is required.",
   }),
-  commonName: z.string().min(1, {
-    message: "Common name is required.",
-  }),
   description: z.string().optional(),
   image: z
     .instanceof(File, { message: "Image is required" })
@@ -60,7 +57,8 @@ const formSchema = z.object({
         return file.size <= MAX_SIZE_5MB;
       },
       { message: "Image size must be less than 5MB" }
-    ),
+    )
+    .optional(),
 });
 
 const AddCropForm = () => {
@@ -70,7 +68,6 @@ const AddCropForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       cropName: "",
-      commonName: "",
       description: "",
       image: undefined,
     },
@@ -81,7 +78,7 @@ const AddCropForm = () => {
       setIsLoading(true);
 
       const formData = new FormData();
-      formData.append("file", values.image);
+      formData.append("file", values.image!);
 
       const name = values.cropName;
       let url: string | undefined;
@@ -89,14 +86,13 @@ const AddCropForm = () => {
         url = await uploadFile(formData, name);
       } catch (error: any) {
         toast.error(`Failed to upload image: ${error.message}`);
-        return; // Stop submission if image upload fails
+        return;
       }
 
       const cropData = {
         name,
         cropImageUrl: url,
         description: values.description ?? "",
-        commonNames: [{ commonName: values.commonName }],
       };
 
       const { error, message } = await createCrop(cropData);
@@ -129,41 +125,26 @@ const AddCropForm = () => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="cropName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Crop name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Barley" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="commonName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Crop Common name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Barley" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="cropName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Crop name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Barley" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
               name="image"
               render={({ field: { onChange, value, ...field }, formState }) => (
                 <FormItem>
-                  <FormLabel required>Crop Image</FormLabel>
+                  <FormLabel>Crop image</FormLabel>
                   <FormControl>
                     <FileUpload
                       accept="image/png, image/jpeg, image/jpg, image/webp"
