@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileUp as FileUpload, X } from "lucide-react";
+import { FileUp as FileUpload, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -344,7 +344,14 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
               disabled={form.formState.isSubmitting}
               className="ml-auto"
             >
-              {form.formState.isSubmitting ? "Submitting..." : "Upload Data"}
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Upload Data"
+              )}
             </Button>
           </div>
         </form>

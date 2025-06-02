@@ -9,6 +9,7 @@ import { hasPermission } from "@/permissions/general";
 import {
   deleteCropTrait as deleteCropTraitDb,
   insertCropTrait,
+  updateCropTrait as updateCropTraitDb,
 } from "../db/crop-trait";
 import { cropTraitSchema } from "../schemas/crop-trait";
 
@@ -66,7 +67,11 @@ export async function deleteCropTrait(id: number) {
     await deleteCropTraitDb({ id });
     return { error: false, message: "Successfully deleted the trait" };
   } catch (error) {
-    return { error: true, message: "Error deleting the trait" };
+    return {
+      error: true,
+      message:
+        (error as unknown as Error).message ?? "Error deleting the trait",
+    };
   }
 }
 
@@ -86,7 +91,7 @@ export async function updateCropTrait(
     if (!success || !canUpdateTrialMetadata || !user?.id) {
       return {
         error: true,
-        message: "There was an error updating the crop triat",
+        message: "There was an error updating the crop trait",
       };
     }
 
@@ -101,7 +106,7 @@ export async function updateCropTrait(
       maximumAllowed: data.maximumAllowed,
     };
 
-    await updateCropTrait(id, cropTraitData);
+    await updateCropTraitDb(id, cropTraitData);
 
     return { error: false, message: "Crop trait updated successfully." };
   } catch (error: any) {

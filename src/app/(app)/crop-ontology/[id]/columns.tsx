@@ -69,9 +69,6 @@ export const traitColumns: ColumnDef<CropTrait>[] = [
         fetchUnits();
       }, []);
 
-      console.log("Crop trait units:", units);
-      console.log("Crop:", crop);
-
       const handleDelete = async () => {
         try {
           setIsLoading(true);
@@ -82,10 +79,9 @@ export const traitColumns: ColumnDef<CropTrait>[] = [
             toast.success("Crop trait deleted successfully");
             setDeleteDialogOpen(false);
           }
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error deleting crop trait:", error);
-          toast.error("Error deleting crop trait");
+        } catch (error: any) {
+          toast.error(error.message || "Error deleting crop trait");
+        } finally {
           setIsLoading(false);
         }
       };

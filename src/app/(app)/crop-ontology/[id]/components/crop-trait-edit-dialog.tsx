@@ -70,7 +70,6 @@ export function CropTraitEditDialog({
   const id = cropTrait.id;
 
   const onSave = async (data: z.infer<typeof cropTraitSchema>) => {
-    onOpenChange(false);
     try {
       setIsLoading(true);
       let result = await updateCropTrait(id, {
@@ -86,15 +85,17 @@ export function CropTraitEditDialog({
       if (result.error) {
         toast.error(result.message);
       } else {
-        toast.success(`Crop triat edited successfully`);
+        toast.success(`Crop trait edited successfully`);
         onOpenChange(false);
       }
     } catch (e) {
       toast.error(
         `There was an error editing this crop trait. Please try again.`
       );
+    } finally {
+      onOpenChange(false);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

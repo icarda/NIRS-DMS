@@ -29,6 +29,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "trait:upload",
     "crop:create",
     "cropTrait:create",
+    "cropTrait:update",
   ],
   SUPERADMIN: [
     "upload:access",
@@ -39,6 +40,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "trait:upload",
     "crop:create",
     "cropTrait:create",
+    "cropTrait:update",
     "user:update",
     "user:delete",
     "physiologicalStage:create",

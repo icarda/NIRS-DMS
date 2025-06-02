@@ -1,9 +1,9 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { CropTraitTable } from "@/drizzle/schema";
+import { CropTraitTable, TraitTable } from "@/drizzle/schema";
 import { revalidateCropCache } from "@/features/crops/db/cache/crop";
 import {
   getCropCropTraitsTag,
@@ -78,7 +78,34 @@ export async function insertCropTrait(
   return newCropTrait;
 }
 
+export async function updateCropTrait(
+  id: number,
+  data: Partial<typeof CropTraitTable.$inferInsert>
+) {
+  const [updatedCropTrait] = await db
+    .update(CropTraitTable)
+    .set(data)
+    .where(eq(CropTraitTable.id, id))
+    .returning();
+
+  if (updatedCropTrait == null) throw new Error("Failed to update trait");
+  revalidateCropTraitCache(updatedCropTrait.cropId);
+  revalidateCropCache(updatedCropTrait.cropId);
+
+  return updatedCropTrait;
+}
+
 export async function deleteCropTrait({ id }: { id: number }) {
+  const traitCount = await db
+    .select({ count: count() })
+    .from(TraitTable)
+    .where(eq(TraitTable.cropTraitId, id))
+    .limit(1);
+
+  if (traitCount.length > 0 && Number(traitCount[0].count) > 0) {
+    throw new Error("Cannot delete: related trait data exist.");
+  }
+
   const [deletedCropTrait] = await db
     .delete(CropTraitTable)
     .where(eq(CropTraitTable.id, id))
