@@ -4,6 +4,9 @@ import fs from "node:fs/promises";
 
 export async function uploadFile(formData: FormData, name: string) {
   const file = formData.get("file") as File;
+  if (!file) {
+    throw new Error("File is required");
+  }
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
 

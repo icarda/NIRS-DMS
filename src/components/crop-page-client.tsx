@@ -46,6 +46,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { getCrop } from "@/features/crops/db/crop";
 import { addCropTrait } from "@/features/traits/actions/crop-trait";
+import { UnitSelector } from "./unit-selector";
 
 export const traitSchema = z.object({
   variable: z.string().min(1, {
@@ -72,11 +73,13 @@ export type Crop = Exclude<Awaited<ReturnType<typeof getCrop>>, undefined>;
 interface CropPageClientProps {
   crop: Crop;
   permission: boolean;
+  units: string[];
 }
 
 export default function CropPageClient({
   crop,
   permission,
+  units,
 }: CropPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -221,7 +224,7 @@ export default function CropPageClient({
                           <FormItem>
                             <FormLabel required>Trait name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Name" {...field} />
+                              <Input placeholder="Iron" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -244,8 +247,14 @@ export default function CropPageClient({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="Grain">Grain</SelectItem>
-                                <SelectItem value="Wort">Wort</SelectItem>
+                                {crop.productTypes.map((productType) => (
+                                  <SelectItem
+                                    key={productType.id}
+                                    value={productType.name}
+                                  >
+                                    {productType.name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -258,27 +267,16 @@ export default function CropPageClient({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel required>Unit</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select an entity" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="%">%</SelectItem>
-                                <SelectItem value="g">g</SelectItem>
-                                <SelectItem value="mg/kg">mg/kg</SelectItem>
-                                <SelectItem value="ppm">ppm</SelectItem>
-                                <SelectItem value="mPas">mPas</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <UnitSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              units={units}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
                       <FormField
                         control={form.control}
                         name="minimum"
