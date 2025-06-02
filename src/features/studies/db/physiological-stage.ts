@@ -3,6 +3,7 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { PhysiologicalStageTable } from "@/drizzle/schema";
+import { revalidateCropCache } from "@/features/crops/db/cache/crop";
 import {
   getCropPhysiologicalStageTag,
   revalidatePhysiologicalStageCache,
@@ -44,6 +45,7 @@ export async function insertPhysiologicalStage(
   if (newPhysiologicalStage == null)
     throw new Error("Failed to create Physiological Stage");
   revalidatePhysiologicalStageCache(newPhysiologicalStage.id);
+  revalidateCropCache(newPhysiologicalStage.cropId);
 
   return newPhysiologicalStage;
 }

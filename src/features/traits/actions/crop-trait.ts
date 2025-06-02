@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 
+import { db } from "@/drizzle/db";
+import { CropTraitTable } from "@/drizzle/schema";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
@@ -9,6 +11,13 @@ import {
   insertCropTrait,
 } from "../db/crop-trait";
 import { cropTraitSchema } from "../schemas/crop-trait";
+
+export async function getAllCropTraitUnits() {
+  const units = await db
+    .selectDistinct({ unit: CropTraitTable.unit })
+    .from(CropTraitTable);
+  return units.map((item) => item.unit);
+}
 
 export async function addCropTrait(
   unsafeData: z.infer<typeof cropTraitSchema>,
@@ -27,7 +36,7 @@ export async function addCropTrait(
     }
 
     const cropTraitData = {
-      cropId: data.cropId,
+      cropId,
       traitName: data.traitName,
       traitVariable: data.traitVariable,
       entity: data.entity,
@@ -58,5 +67,47 @@ export async function deleteCropTrait(id: number) {
     return { error: false, message: "Successfully deleted the trait" };
   } catch (error) {
     return { error: true, message: "Error deleting the trait" };
+  }
+}
+
+export async function updateCropTrait(
+  id: number,
+  unsafeData: z.infer<typeof cropTraitSchema>
+) {
+  const { success, data } = cropTraitSchema.safeParse(unsafeData);
+
+  try {
+    const user = await getCurrentUser();
+    const canUpdateTrialMetadata = hasPermission(
+      user?.role,
+      "cropTrait:update"
+    );
+
+    if (!success || !canUpdateTrialMetadata || !user?.id) {
+      return {
+        error: true,
+        message: "There was an error updating the crop triat",
+      };
+    }
+
+    const cropTraitData = {
+      id,
+      traitVariable: data.traitVariable,
+      traitName: data.traitName,
+      entity: data.entity,
+      methodDescription: data.methodDescription,
+      unit: data.unit,
+      minimumAllowed: data.minimumAllowed,
+      maximumAllowed: data.maximumAllowed,
+    };
+
+    await updateCropTrait(id, cropTraitData);
+
+    return { error: false, message: "Crop trait updated successfully." };
+  } catch (error: any) {
+    return {
+      error: true,
+      message: "Failed to update crop trait: " + error.message,
+    };
   }
 }

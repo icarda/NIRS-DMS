@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TabsContent } from "@radix-ui/react-tabs";
 import {
   ArrowLeft,
   FlaskConical,
@@ -46,27 +47,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { getCrop } from "@/features/crops/db/crop";
 import { addCropTrait } from "@/features/traits/actions/crop-trait";
+import { cropTraitSchema } from "@/features/traits/schemas/crop-trait";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { UnitSelector } from "./unit-selector";
-
-export const traitSchema = z.object({
-  variable: z.string().min(1, {
-    message: "Trait variable is required",
-  }),
-  name: z.string().min(1, {
-    message: "Trait name is required",
-  }),
-  entity: z.string().min(1, {
-    message: "Entity is required",
-  }),
-  description: z.string().min(1, {
-    message: "Method description is required",
-  }),
-  unit: z.string().min(1, {
-    message: "Unit is required",
-  }),
-  minimum: z.number().optional(),
-  maximum: z.number().optional(),
-});
 
 export type Crop = Exclude<Awaited<ReturnType<typeof getCrop>>, undefined>;
 
@@ -83,29 +67,36 @@ export default function CropPageClient({
 }: CropPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<z.infer<typeof traitSchema>>({
-    resolver: zodResolver(traitSchema),
+  const form = useForm<z.infer<typeof cropTraitSchema>>({
+    resolver: zodResolver(cropTraitSchema),
     defaultValues: {
-      variable: "",
-      name: "",
+      traitVariable: "",
+      traitName: "",
       entity: "Grain",
-      description: "",
+      methodDescription: "",
       unit: "%",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof traitSchema>) {
+  async function onSubmit(values: z.infer<typeof cropTraitSchema>) {
     setIsLoading(true);
-    const { variable, name, entity, description, unit, minimum, maximum } =
-      values;
-    const cropTraitData = {
-      traitName: name,
-      traitVariable: variable,
+    const {
+      traitVariable,
+      traitName,
       entity,
-      methodDescription: description,
+      methodDescription,
       unit,
-      minimumAllowed: minimum,
-      maximumAllowed: maximum,
+      minimumAllowed,
+      maximumAllowed,
+    } = values;
+    const cropTraitData = {
+      traitName,
+      traitVariable,
+      entity,
+      methodDescription,
+      unit,
+      minimumAllowed,
+      maximumAllowed,
       cropId: crop.id,
     };
     const result = await addCropTrait(cropTraitData, crop.id);
@@ -184,168 +175,211 @@ export default function CropPageClient({
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-2 px-2">
-        {permission && (
-          <div className="flex items-center justify-end">
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <PlusIcon className="h-4 w-4" />
-                  Add Trait
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Trait</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
-                  >
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="variable"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Trait variable</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Fe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Trait name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Iron" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="entity"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Entity</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select an entity" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {crop.productTypes.map((productType) => (
-                                  <SelectItem
-                                    key={productType.id}
-                                    value={productType.name}
-                                  >
-                                    {productType.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="unit"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Unit</FormLabel>
-                            <UnitSelector
-                              value={field.value}
-                              onChange={field.onChange}
-                              units={units}
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="minimum"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Minimum allowed value</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. 20" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="maximum"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Maximum allowed value</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. 350" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Method description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Type method description here..."
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex items-center justify-end">
-                      <Button type="submit" disabled={isLoading}>
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="animate-spin" />
-                            Adding trait...
-                          </>
-                        ) : (
-                          "Add Trait"
-                        )}
+      <Tabs defaultValue="crop_traits" className="w-full">
+        <div className="mb-3 border-b">
+          <ScrollArea className="w-full">
+            <TabsList className="inline-flex h-12 w-full items-center justify-start">
+              <TabsTrigger
+                value="crop_traits"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Crop Traits
+              </TabsTrigger>
+              <TabsTrigger
+                value="common_names"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Common Names
+              </TabsTrigger>
+              <TabsTrigger
+                value="species"
+                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+              >
+                Species
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
+        <div className="px-2 md:px-0">
+          <TabsContent value="crop_traits">
+            <div className="flex flex-col gap-2 px-2">
+              {permission && (
+                <div className="flex items-center justify-end">
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add Trait
                       </Button>
-                    </div>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        )}
-        <DataTable
-          columns={traitColumns}
-          data={crop.cropTraits}
-          filterColumn="traitName"
-        />
-      </div>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Trait</DialogTitle>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <form
+                          onSubmit={form.handleSubmit(onSubmit)}
+                          className="space-y-6"
+                        >
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="traitVariable"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel required>Trait variable</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Fe" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="traitName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel required>Trait name</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Iron" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="entity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel required>Entity</FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select an entity" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {crop.productTypes.map((productType) => (
+                                        <SelectItem
+                                          key={productType.id}
+                                          value={productType.name}
+                                        >
+                                          {productType.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="unit"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel required>Unit</FormLabel>
+                                  <UnitSelector
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    units={units}
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="minimumAllowed"
+                              render={({ field: { value, ...field } }) => (
+                                <FormItem>
+                                  <FormLabel>Minimum allowed value</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      value={value ? value : ""}
+                                      placeholder="e.g. 20"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="maximumAllowed"
+                              render={({ field: { value, ...field } }) => (
+                                <FormItem>
+                                  <FormLabel>Maximum allowed value</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      value={value ? value : ""}
+                                      placeholder="e.g. 350"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={form.control}
+                            name="methodDescription"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel required>
+                                  Method description
+                                </FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Type method description here..."
+                                    className="resize-none"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div className="flex items-center justify-end">
+                            <Button type="submit" disabled={isLoading}>
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="animate-spin" />
+                                  Adding trait...
+                                </>
+                              ) : (
+                                "Add Trait"
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+              <DataTable
+                columns={traitColumns}
+                data={crop.cropTraits}
+                filterColumn="traitName"
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="common_names"></TabsContent>
+          <TabsContent value="species"></TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

@@ -86,6 +86,7 @@ export async function deleteCropTrait({ id }: { id: number }) {
 
   if (deletedCropTrait == null) throw new Error("Failed to delete trait");
   revalidateCropTraitCache(deletedCropTrait.cropId);
+  revalidateCropCache(deletedCropTrait.cropId);
 
   return deletedCropTrait;
 }

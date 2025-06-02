@@ -3,6 +3,7 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { ProductTypeTable } from "@/drizzle/schema";
+import { revalidateCropCache } from "@/features/crops/db/cache/crop";
 import {
   getCropProductTypesTag,
   revalidateProductTypeCache,
@@ -44,6 +45,7 @@ export async function insertProductType(
 
   if (newProductType == null) throw new Error("Failed to create Product Type");
   revalidateProductTypeCache(newProductType.id);
+  revalidateCropCache(newProductType.cropId);
 
   return newProductType;
 }

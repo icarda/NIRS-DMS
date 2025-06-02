@@ -50,7 +50,7 @@ export const CropTraitTable = pgTable(
     traitName: text("trait_name").notNull(),
     traitVariable: text("trait_variable").notNull(),
     entity: text("entity").notNull(),
-    methodDescription: text("method_description"),
+    methodDescription: text("method_description").notNull(),
     unit: text("unit").notNull(),
     minimumAllowed: integer("minimum_allowed"),
     maximumAllowed: integer("maximum_allowed"),
