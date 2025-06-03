@@ -19,11 +19,11 @@ export async function getCropCommonNames(cropId: number) {
 
 export async function insertCropCommonNames(
   cropId: number,
-  commonNames: string[]
+  commonName: string
 ) {
   const cropCommonNames = await db
     .insert(CropCommonNameTable)
-    .values(commonNames.map((commonName) => ({ cropId, commonName })))
+    .values({ cropId, commonName })
     .returning();
 
   if (cropCommonNames == null)
@@ -32,4 +32,36 @@ export async function insertCropCommonNames(
   revalidateCropCommonNamesCache({ cropId });
 
   return cropCommonNames;
+}
+
+export async function updateCropCommonName(
+  id: number,
+  data: Partial<typeof CropCommonNameTable.$inferInsert>
+) {
+  const updatedCommonName = await db
+    .update(CropCommonNameTable)
+    .set({ commonName: data.commonName })
+    .where(eq(CropCommonNameTable.id, id))
+    .returning();
+
+  if (updatedCommonName == null)
+    throw new Error("Failed to update crop common name");
+
+  revalidateCropCommonNamesCache({ cropId: updatedCommonName[0].cropId });
+
+  return updatedCommonName;
+}
+
+export async function deleteCropCommonName(id: number) {
+  const deletedCommonName = await db
+    .delete(CropCommonNameTable)
+    .where(eq(CropCommonNameTable.id, id))
+    .returning();
+
+  if (deletedCommonName == null)
+    throw new Error("Failed to delete crop common name");
+
+  revalidateCropCommonNamesCache({ cropId: deletedCommonName[0].cropId });
+
+  return deletedCommonName;
 }

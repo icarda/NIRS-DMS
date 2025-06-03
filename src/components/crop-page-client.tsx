@@ -17,7 +17,10 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { traitColumns } from "@/app/(app)/crop-ontology/[id]/columns";
+import {
+  cropCommonNamesColumns,
+  traitColumns,
+} from "@/app/(app)/crop-ontology/[id]/columns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -45,7 +48,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { createCropCommonName } from "@/features/crops/actions/crop-common-names";
 import { getCrop } from "@/features/crops/db/crop";
+import { cropCommonNameSchema } from "@/features/crops/schemas/crop";
 import { addCropTrait } from "@/features/traits/actions/crop-trait";
 import { cropTraitSchema } from "@/features/traits/schemas/crop-trait";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
@@ -56,18 +61,18 @@ export type Crop = Exclude<Awaited<ReturnType<typeof getCrop>>, undefined>;
 
 interface CropPageClientProps {
   crop: Crop;
-  permission: boolean;
+  permissions: Record<string, boolean>;
   units: string[];
 }
 
 export default function CropPageClient({
   crop,
-  permission,
+  permissions,
   units,
 }: CropPageClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<z.infer<typeof cropTraitSchema>>({
+  const cropTraitForm = useForm<z.infer<typeof cropTraitSchema>>({
     resolver: zodResolver(cropTraitSchema),
     defaultValues: {
       traitVariable: "",
@@ -77,8 +82,14 @@ export default function CropPageClient({
       unit: "%",
     },
   });
+  const commonNameForm = useForm<z.infer<typeof cropCommonNameSchema>>({
+    resolver: zodResolver(cropCommonNameSchema),
+    defaultValues: {
+      commonName: "",
+    },
+  });
 
-  async function onSubmit(values: z.infer<typeof cropTraitSchema>) {
+  async function onCropTraitSubmit(values: z.infer<typeof cropTraitSchema>) {
     setIsLoading(true);
     const {
       traitVariable,
@@ -111,8 +122,32 @@ export default function CropPageClient({
     toast.success(result.message);
   }
 
+  async function onCommonNameSubmit(
+    values: z.infer<typeof cropCommonNameSchema>
+  ) {
+    setIsLoading(true);
+    const { commonName } = values;
+    const cropTraitData = {
+      commonName,
+    };
+
+    const cropId = crop.id;
+    const result = await createCropCommonName(cropTraitData, cropId);
+
+    if (result.error) {
+      toast.error(result.message);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(false);
+    setIsOpen(false);
+    toast.success(result.message);
+  }
+
+  console.log(commonNameForm.formState.errors);
+
   if (!crop) {
-    return <div>Loading crop data...</div>; // Or a better loading state
+    return <div>Loading crop data...</div>;
   }
 
   return (
@@ -204,7 +239,7 @@ export default function CropPageClient({
         <div className="px-2 md:px-0">
           <TabsContent value="crop_traits">
             <div className="flex flex-col gap-2 px-2">
-              {permission && (
+              {permissions.canCreateCropTrait && (
                 <div className="flex items-center justify-end">
                   <Dialog open={isOpen} onOpenChange={setIsOpen}>
                     <DialogTrigger asChild>
@@ -217,14 +252,16 @@ export default function CropPageClient({
                       <DialogHeader>
                         <DialogTitle>Add Trait</DialogTitle>
                       </DialogHeader>
-                      <Form {...form}>
+                      <Form {...cropTraitForm}>
                         <form
-                          onSubmit={form.handleSubmit(onSubmit)}
+                          onSubmit={cropTraitForm.handleSubmit(
+                            onCropTraitSubmit
+                          )}
                           className="space-y-6"
                         >
                           <div className="grid grid-cols-2 gap-4">
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="traitVariable"
                               render={({ field }) => (
                                 <FormItem>
@@ -237,7 +274,7 @@ export default function CropPageClient({
                               )}
                             />
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="traitName"
                               render={({ field }) => (
                                 <FormItem>
@@ -251,7 +288,7 @@ export default function CropPageClient({
                             />
 
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="entity"
                               render={({ field }) => (
                                 <FormItem>
@@ -281,7 +318,7 @@ export default function CropPageClient({
                               )}
                             />
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="unit"
                               render={({ field }) => (
                                 <FormItem>
@@ -297,7 +334,7 @@ export default function CropPageClient({
                             />
 
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="minimumAllowed"
                               render={({ field: { value, ...field } }) => (
                                 <FormItem>
@@ -314,7 +351,7 @@ export default function CropPageClient({
                               )}
                             />
                             <FormField
-                              control={form.control}
+                              control={cropTraitForm.control}
                               name="maximumAllowed"
                               render={({ field: { value, ...field } }) => (
                                 <FormItem>
@@ -333,7 +370,7 @@ export default function CropPageClient({
                           </div>
 
                           <FormField
-                            control={form.control}
+                            control={cropTraitForm.control}
                             name="methodDescription"
                             render={({ field }) => (
                               <FormItem>
@@ -370,13 +407,87 @@ export default function CropPageClient({
                 </div>
               )}
               <DataTable
-                columns={traitColumns}
+                columns={
+                  permissions.canDeleteCropCommonName &&
+                  permissions.canEditCropCommonName
+                    ? traitColumns
+                    : traitColumns.filter((column) => column?.id !== "actions")
+                }
                 data={crop.cropTraits}
                 filterColumn="traitName"
               />
             </div>
           </TabsContent>
-          <TabsContent value="common_names"></TabsContent>
+          <TabsContent value="common_names">
+            <div className="flex flex-col gap-2 px-2">
+              {permissions.canCreateCropCommonName && (
+                <div className="flex items-center justify-end">
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add Common Name
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Common Name</DialogTitle>
+                      </DialogHeader>
+                      <Form {...commonNameForm}>
+                        <form
+                          onSubmit={commonNameForm.handleSubmit(
+                            onCommonNameSubmit
+                          )}
+                          className="space-y-6"
+                        >
+                          <FormField
+                            control={commonNameForm.control}
+                            name="commonName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel required>Common Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Grain Barley"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex items-center justify-end">
+                            <Button type="submit" disabled={isLoading}>
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="animate-spin" />
+                                  Adding common name...
+                                </>
+                              ) : (
+                                "Add Common Name"
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+              <DataTable
+                columns={
+                  permissions.canCreateCropCommonName
+                    ? cropCommonNamesColumns
+                    : cropCommonNamesColumns.filter(
+                        (column) => column?.id !== "actions"
+                      )
+                }
+                data={crop.commonNames}
+                filterColumn="commonName"
+              />
+            </div>
+          </TabsContent>
           <TabsContent value="species"></TabsContent>
         </div>
       </Tabs>
