@@ -73,6 +73,7 @@ export function CropTraitEditDialog({
     try {
       setIsLoading(true);
       let result = await updateCropTrait(id, {
+        cropId: crop?.id!,
         traitVariable: data.traitVariable,
         traitName: data.traitName,
         entity: data.entity,

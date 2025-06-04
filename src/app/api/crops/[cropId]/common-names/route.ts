@@ -47,7 +47,7 @@ export async function POST(
     }
     const newCommonName = await insertCropCommonNames(
       cropId,
-      parsed.data.map((commonName) => commonName.commonName)
+      parsed.data.commonName
     );
     return NextResponse.json(
       {

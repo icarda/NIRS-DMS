@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const cropTraitSchema = z.object({
+  cropId: z.number().int(),
   traitVariable: z.string().min(1, {
     message: "Trait variable is required",
   }),
