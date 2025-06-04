@@ -1,13 +1,14 @@
 import { revalidateTag } from "next/cache";
 
-import { getGlobalTag, getTrialTag } from "@/lib/dataCache";
+import { getCropIdTag } from "@/features/crops/db/cache/crop";
+import { getGlobalTag, getIdTag, getTrialTag } from "@/lib/dataCache";
 
 export function getSpeciesGlobalTag() {
   return getGlobalTag("species");
 }
 
 export function getSpeciesIdTag(id: number) {
-  return getTrialTag("species", id);
+  return getIdTag("species", id);
 }
 
 export function getSpeciesTrialIdTag(trialId: number) {
@@ -20,10 +21,15 @@ export function getSpeciesSampleIdTag(sampleId: number) {
 
 export function revalidateSpeciesCache(
   id: number,
-  { trialId, sampleId }: { trialId?: number; sampleId?: number } = {}
+  {
+    trialId,
+    sampleId,
+    cropId,
+  }: { trialId?: number; sampleId?: number; cropId?: number } = {}
 ) {
   revalidateTag(getSpeciesGlobalTag());
   revalidateTag(getSpeciesIdTag(id));
   if (trialId != null) revalidateTag(getSpeciesTrialIdTag(trialId));
   if (sampleId != null) revalidateTag(getSpeciesSampleIdTag(sampleId));
+  if (cropId != null) revalidateTag(getCropIdTag(cropId));
 }

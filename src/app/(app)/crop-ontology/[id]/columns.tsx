@@ -18,11 +18,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { getCrop } from "@/features/crops/actions/crop";
 import { deleteCropCommonName } from "@/features/crops/actions/crop-common-names";
+import { deleteSpecies } from "@/features/studies/actions/species";
 import {
   deleteCropTrait,
   getAllCropTraitUnits,
 } from "@/features/traits/actions/crop-trait";
 import { CropCommonNameEditDialog } from "./components/crop-common-name-edit-dialog";
+import { CropspeciesEditDialog } from "./components/crop-species-edit-dialog";
 import { CropTraitEditDialog } from "./components/crop-trait-edit-dialog";
 
 type CropTrait = Exclude<Crop, undefined>["cropTraits"][number];
@@ -30,6 +32,12 @@ type CommonName = Exclude<
   Exclude<Crop, undefined>["commonNames"][number],
   "createdAt" | "updatedAt"
 >;
+
+type Species = {
+  id: number;
+  name: string;
+  cropId: number;
+};
 
 export const traitColumns: ColumnDef<CropTrait>[] = [
   {
@@ -223,7 +231,6 @@ export const cropCommonNamesColumns: ColumnDef<CommonName>[] = [
             cropCommonName={commonName}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
-            cropId={commonName.cropId}
           />
 
           <AlertDialog
@@ -237,6 +244,110 @@ export const cropCommonNamesColumns: ColumnDef<CommonName>[] = [
                   This will permanently delete the common name{" "}
                   <span className="font-medium">{commonName.commonName}</span>.
                   This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      );
+    },
+  },
+];
+
+export const speciesColumns: ColumnDef<Species>[] = [
+  {
+    header: "ID",
+    accessorKey: "id",
+    cell: ({ row }) => {
+      const species = row.original;
+      return <span className="text-muted-foreground">{species.id}</span>;
+    },
+  },
+  {
+    header: "Species",
+    accessorKey: "name",
+    cell: ({ row }) => {
+      const species = row.original;
+      return <span className="capitalize">{species.name}</span>;
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const species = row.original;
+      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [editDialogOpen, setEditDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const handleDelete = async () => {
+        try {
+          setIsLoading(true);
+
+          const result = await deleteSpecies(species.id);
+          if (result.error) {
+            toast.error(result.message);
+          } else {
+            toast.success("Common name deleted successfully");
+            setDeleteDialogOpen(false);
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Error deleting species");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      return (
+        <>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditDialogOpen(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setDeleteDialogOpen(true);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <CropspeciesEditDialog
+            species={species}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+          />
+
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the species{" "}
+                  <span className="font-medium">{species.name}</span>. This
+                  action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

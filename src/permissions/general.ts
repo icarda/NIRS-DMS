@@ -11,6 +11,7 @@ type Resource =
   | "nirModel"
   | "physiologicalStage"
   | "user"
+  | "cropSpecies"
   | "trialMetadata"
   | "trial"
   | "studyMetadata"
@@ -34,6 +35,9 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "commonName:create",
     "commonName:delete",
     "commonName:update",
+    "cropSpecies:create",
+    "cropSpecies:update",
+    "cropSpecies:delete",
   ],
   SUPERADMIN: [
     "upload:access",
@@ -63,6 +67,9 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "commonName:create",
     "commonName:delete",
     "commonName:update",
+    "cropSpecies:create",
+    "cropSpecies:update",
+    "cropSpecies:delete",
   ],
 };
 

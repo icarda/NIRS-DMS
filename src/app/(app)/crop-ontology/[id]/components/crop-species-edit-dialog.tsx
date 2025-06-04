@@ -25,49 +25,46 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { updateCropCommonName } from "@/features/crops/actions/crop-common-names";
+import { updateSpecies } from "@/features/studies/actions/species";
+import { speciesSchema } from "@/features/studies/schemas/species";
 
-interface CropCommonNameEditDialogProps {
-  cropCommonName: { id: number; commonName: string };
+interface CropSpeciesEditDialogProps {
+  species: { id: number; name: string };
   open: boolean;
   onOpenChange(open: boolean): void;
 }
 
-const cropCommonNameSchema = z.object({
-  commonName: z.string().min(1, "Common name should not be empty"),
-});
-
-export function CropCommonNameEditDialog({
-  cropCommonName,
+export function CropspeciesEditDialog({
+  species,
   open,
   onOpenChange,
-}: CropCommonNameEditDialogProps) {
+}: CropSpeciesEditDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<z.infer<typeof cropCommonNameSchema>>({
-    resolver: zodResolver(cropCommonNameSchema),
+  const form = useForm<z.infer<typeof speciesSchema>>({
+    resolver: zodResolver(speciesSchema),
     defaultValues: {
-      commonName: cropCommonName.commonName,
+      name: species.name,
     },
   });
 
-  const id = cropCommonName.id;
+  const id = species.id;
 
-  const onSave = async (data: z.infer<typeof cropCommonNameSchema>) => {
+  const onSave = async (data: z.infer<typeof speciesSchema>) => {
     try {
       setIsLoading(true);
-      let result = await updateCropCommonName(id, {
-        commonName: data.commonName.trim(),
+      let result = await updateSpecies(id, {
+        name: data.name.trim(),
       });
 
       if (result.error) {
         toast.error(result.message);
       } else {
-        toast.success(`Crop common name edited successfully`);
+        toast.success(`Crop species edited successfully`);
         onOpenChange(false);
       }
     } catch (e) {
       toast.error(
-        `There was an error editing this crop common name. Please try again.`
+        `There was an error editing this crop species. Please try again.`
       );
     } finally {
       setIsLoading(false);
@@ -79,18 +76,17 @@ export function CropCommonNameEditDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            Edit <span className="capitalize">{cropCommonName.commonName}</span>{" "}
-            common name
+            Edit <span className="capitalize">{species.name}</span> species
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)} className="space-y-2">
             <FormField
               control={form.control}
-              name="commonName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Common name</FormLabel>
+                  <FormLabel required>Species name</FormLabel>
                   <FormControl>
                     <Input placeholder="Grain Barley" {...field} />
                   </FormControl>

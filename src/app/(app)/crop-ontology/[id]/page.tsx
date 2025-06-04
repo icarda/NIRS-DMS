@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import CropPageClient from "@/components/crop-page-client";
+import CropPageClient, { Crop } from "@/components/crop-page-client";
 import PageWrapper from "@/components/page-wrapper";
 import { db } from "@/drizzle/db";
 import { CropTraitTable } from "@/drizzle/schema";
@@ -27,6 +27,10 @@ export default async function CropPageServer({ params }: CropPageServerProps) {
     "commonName:delete"
   );
 
+  const canCreateCropSpecies = hasPermission(user?.role, "cropSpecies:create");
+  const canEditCropSpecies = hasPermission(user?.role, "cropSpecies:update");
+  const canDeleteCropSpecies = hasPermission(user?.role, "cropSpecies:delete");
+
   const crop = await getCrop(parseInt(cropId, 10));
   const units = (
     await db.selectDistinct({ unit: CropTraitTable.unit }).from(CropTraitTable)
@@ -46,6 +50,9 @@ export default async function CropPageServer({ params }: CropPageServerProps) {
           canCreateCropCommonName,
           canDeleteCropCommonName,
           canEditCropCommonName,
+          canCreateCropSpecies,
+          canEditCropSpecies,
+          canDeleteCropSpecies,
         }}
       />
     </PageWrapper>

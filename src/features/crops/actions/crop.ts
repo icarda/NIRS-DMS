@@ -1,13 +1,11 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { CropTable } from "@/drizzle/schema";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
-import { getCropIdTag } from "../db/cache/crop";
 import {
   deleteCrop as deleteCropDb,
   getCrop as getCropDb,
@@ -18,7 +16,6 @@ import { CropSchema, cropSchema } from "../schemas/crop";
 
 export async function getCrop({ cropId }: { cropId: number }) {
   "use cache";
-  cacheTag(getCropIdTag(cropId));
   const crop = await getCropDb(cropId);
   if (!crop) {
     return null;

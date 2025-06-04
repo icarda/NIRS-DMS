@@ -9,6 +9,7 @@ const itemsPerPage = 6;
 
 export default async function Page() {
   const crops = await getCrops();
+  console.log("crops", crops);
   const user = await getCurrentUser();
   const canCreateCrop = hasPermission(user?.role, "crop:create");
 

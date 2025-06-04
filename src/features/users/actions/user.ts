@@ -1,10 +1,8 @@
 "use server";
 
-import { revalidateStudyAccessCache } from "@/features/studies/db/cache/study-access";
 import { updateUserStudyAccessByCode } from "@/features/studies/db/studyAccesses";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
-import { revalidateUserCache } from "../db/cache";
 import {
   deleteUser as deleteUserDb,
   updateUser as updateUserDb,
@@ -53,9 +51,6 @@ export async function updateUser({ id }: { id: number }, data: FormData) {
   if (updatedUser == null) throw new Error("Failed to update user");
 
   await updateUserStudyAccessByCode(id, studyAccess);
-
-  revalidateUserCache(id);
-  revalidateStudyAccessCache(id);
 
   return updatedUser;
 }

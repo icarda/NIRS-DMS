@@ -19,6 +19,7 @@ import { z } from "zod";
 
 import {
   cropCommonNamesColumns,
+  speciesColumns,
   traitColumns,
 } from "@/app/(app)/crop-ontology/[id]/columns";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { createCropCommonName } from "@/features/crops/actions/crop-common-names";
 import { getCrop } from "@/features/crops/db/crop";
 import { cropCommonNameSchema } from "@/features/crops/schemas/crop";
+import { createSpecies } from "@/features/studies/actions/species";
+import { speciesSchema } from "@/features/studies/schemas/species";
 import { addCropTrait } from "@/features/traits/actions/crop-trait";
 import { cropTraitSchema } from "@/features/traits/schemas/crop-trait";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
@@ -86,6 +89,12 @@ export default function CropPageClient({
     resolver: zodResolver(cropCommonNameSchema),
     defaultValues: {
       commonName: "",
+    },
+  });
+  const speciesForm = useForm<z.infer<typeof speciesSchema>>({
+    resolver: zodResolver(speciesSchema),
+    defaultValues: {
+      name: "",
     },
   });
 
@@ -144,7 +153,25 @@ export default function CropPageClient({
     toast.success(result.message);
   }
 
-  console.log(commonNameForm.formState.errors);
+  async function onSpeciesSubmit(values: z.infer<typeof speciesSchema>) {
+    setIsLoading(true);
+    const { name } = values;
+    const speciesData = {
+      name,
+    };
+
+    const cropId = crop.id;
+    const result = await createSpecies(speciesData, cropId);
+
+    if (result.error) {
+      toast.error(result.message);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(false);
+    setIsOpen(false);
+    toast.success(result.message);
+  }
 
   if (!crop) {
     return <div>Loading crop data...</div>;
@@ -488,7 +515,74 @@ export default function CropPageClient({
               />
             </div>
           </TabsContent>
-          <TabsContent value="species"></TabsContent>
+          <TabsContent value="species">
+            <div className="flex flex-col gap-2 px-2">
+              {permissions.canCreateCropSpecies && (
+                <div className="flex items-center justify-end">
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add Species
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Species</DialogTitle>
+                      </DialogHeader>
+                      <Form {...speciesForm}>
+                        <form
+                          onSubmit={speciesForm.handleSubmit(onSpeciesSubmit)}
+                          className="space-y-6"
+                        >
+                          <FormField
+                            control={speciesForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel required>Species Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Grain Barley"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex items-center justify-end">
+                            <Button type="submit" disabled={isLoading}>
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="animate-spin" />
+                                  Adding species...
+                                </>
+                              ) : (
+                                "Add species"
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+              <DataTable
+                columns={
+                  permissions.canCreateCropSpecies
+                    ? speciesColumns
+                    : speciesColumns.filter(
+                        (column) => column?.id !== "actions"
+                      )
+                }
+                data={crop.species}
+                filterColumn="name"
+              />
+            </div>
+          </TabsContent>
         </div>
       </Tabs>
     </div>

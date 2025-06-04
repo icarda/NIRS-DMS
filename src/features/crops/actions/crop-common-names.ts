@@ -65,8 +65,6 @@ export async function updateCropCommonName(
     return { error: true, message: "Failed to update crop common name" };
   }
 
-  revalidateCropCommonNamesCache({ cropId: updatedCommonName[0].cropId });
-
   return {
     error: false,
     message: "Successfully updated the crop common name",
@@ -89,8 +87,6 @@ export async function deleteCropCommonName(id: number) {
   if (deletedCommonName == null) {
     return { error: true, message: "Failed to delete crop common name" };
   }
-
-  revalidateCropCommonNamesCache({ cropId: deletedCommonName[0].cropId });
 
   return {
     error: false,

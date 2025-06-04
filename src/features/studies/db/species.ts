@@ -41,6 +41,50 @@ export async function getTrialSpecies(trialId: number, speciesId: number) {
   return trialSpecies;
 }
 
+export async function insertSpecies(
+  data: typeof SpeciesTable.$inferInsert,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  const [newSpecies] = await trx.insert(SpeciesTable).values(data).returning();
+
+  if (newSpecies == null) throw new Error("Failed to create species");
+  revalidateSpeciesCache(newSpecies.id, { cropId: newSpecies.cropId });
+
+  return newSpecies;
+}
+
+export async function updateSpecies(
+  id: number,
+  name: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  const [updatedSpecies] = await trx
+    .update(SpeciesTable)
+    .set({ name })
+    .where(eq(SpeciesTable.id, id))
+    .returning();
+
+  if (updatedSpecies == null) throw new Error("Failed to update species");
+  revalidateSpeciesCache(updatedSpecies.id, { cropId: updatedSpecies.cropId });
+
+  return updatedSpecies;
+}
+
+export async function deleteSpecies(
+  id: number,
+  trx: Omit<typeof db, "$client"> = db
+) {
+  const [deletedSpecies] = await trx
+    .delete(SpeciesTable)
+    .where(eq(SpeciesTable.id, id))
+    .returning();
+
+  if (!deletedSpecies) throw new Error("Failed to delete species");
+  revalidateSpeciesCache(deletedSpecies.id, { cropId: deletedSpecies.cropId });
+
+  return deletedSpecies;
+}
+
 export async function insertTrialSpecies(
   data: typeof TrialSpeciesTable.$inferInsert,
   trx: Omit<typeof db, "$client"> = db

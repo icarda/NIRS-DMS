@@ -5,6 +5,7 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { StudyTable, UserStudyAccess } from "@/drizzle/schema";
+import { revalidateUserCache } from "@/features/users/db/cache";
 import {
   getUserStudyAccesssTag,
   revalidateStudyAccessCache,
@@ -48,5 +49,6 @@ export async function updateUserStudyAccessByCode(
     }
   });
 
+  revalidateUserCache(userId);
   revalidateStudyAccessCache(userId);
 }
