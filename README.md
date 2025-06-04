@@ -14,23 +14,13 @@ pnpm dev
 bun dev
 ```
 
-trial not required
+<!-- - add trial metadata -->
+<!-- - - add metadata to additionalMetadata jsonb column
+- edit trial metadata
+- add study metadata
+- edit study metadata -->
 
-- soil type
-- fertilizer
-- coordinates
-- irrigation
-
-study not require
-
-- requester
-
-add size to 50mb
-
-trial required
-country
-
-- species ? trial
+<!-- - add rbac to those api -->
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

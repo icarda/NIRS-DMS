@@ -110,12 +110,6 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
   const cropName = form.watch("crop");
   const year = form.watch("year");
 
-  console.log(
-    "cropTraits",
-    crops.find((crop) => crop.name === cropName)?.cropTraits
-  );
-  console.log("studies", studies);
-
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-6">
       <div className="space-y-2">

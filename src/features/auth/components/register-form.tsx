@@ -72,8 +72,6 @@ export function RegisterForm({
     });
   }
 
-  console.log(form.getValues("country"));
-
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>

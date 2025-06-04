@@ -135,7 +135,6 @@ const StudyStep = ({
                         const study = studies.find(
                           (s) => s.studyCode === value
                         )!;
-                        console.log(study);
                         form.setValue("study", study.studyCode);
                         form.setValue("productType", study.productType.name);
                         form.setValue("qualityLab", study.qualityLab.name);
