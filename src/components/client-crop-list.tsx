@@ -17,12 +17,16 @@ interface ClientCropListProps {
   crops: Awaited<ReturnType<typeof getCrops>>;
   itemsPerPage: number;
   totalPages: number;
+  canUpdateCrop: boolean;
+  canDeleteCrop: boolean;
 }
 
 export default function ClientCropList({
   crops,
   itemsPerPage,
   totalPages,
+  canUpdateCrop,
+  canDeleteCrop,
 }: ClientCropListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -35,7 +39,11 @@ export default function ClientCropList({
 
   return (
     <>
-      <CropList crops={currentItems} />
+      <CropList
+        crops={currentItems}
+        canUpdateCrop={canUpdateCrop}
+        canDeleteCrop={canDeleteCrop}
+      />
       <Pagination>
         <PaginationContent>
           <PaginationItem>

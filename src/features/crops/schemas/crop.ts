@@ -6,7 +6,7 @@ export const cropCommonNameSchema = z.object({
 
 export const cropSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  cropImageUrl: z.string(),
+  cropImageUrl: z.string().nullable(),
   description: z.string().optional(),
 });
 

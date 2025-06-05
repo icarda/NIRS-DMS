@@ -11,6 +11,8 @@ export default async function Page() {
   const crops = await getCrops();
   const user = await getCurrentUser();
   const canCreateCrop = hasPermission(user?.role, "crop:create");
+  const canUpdateCrop = hasPermission(user?.role, "crop:update");
+  const canDeleteCrop = hasPermission(user?.role, "crop:delete");
 
   const totalPages = Math.ceil(crops.length / itemsPerPage);
 
@@ -26,6 +28,8 @@ export default async function Page() {
           crops={crops}
           itemsPerPage={itemsPerPage}
           totalPages={totalPages}
+          canUpdateCrop={canUpdateCrop}
+          canDeleteCrop={canDeleteCrop}
         />
       </div>
     </PageWrapper>

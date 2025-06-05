@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createCrop } from "@/features/crops/actions/crop";
 import { uploadFile } from "@/lib/upload-asset";
 
-const formSchema = z.object({
+export const cropFormSchema = z.object({
   cropName: z.string().min(1, {
     message: "Crop name is required.",
   }),
@@ -64,8 +64,8 @@ const formSchema = z.object({
 const AddCropForm = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof cropFormSchema>>({
+    resolver: zodResolver(cropFormSchema),
     defaultValues: {
       cropName: "",
       description: "",
@@ -74,7 +74,7 @@ const AddCropForm = () => {
   });
 
   const onSubmit = useCallback(
-    async (values: z.infer<typeof formSchema>) => {
+    async (values: z.infer<typeof cropFormSchema>) => {
       setIsLoading(true);
 
       const formData = new FormData();
