@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea } from "radix-ui";
 import { Command as CommandPrimitive } from "cmdk";
 import { X } from "lucide-react";
 

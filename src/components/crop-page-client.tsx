@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TabsContent } from "@radix-ui/react-tabs";
 import {
   ArrowLeft,
   FlaskConical,
@@ -48,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { createCropCommonName } from "@/features/crops/actions/crop-common-names";
 import { getCrop } from "@/features/crops/db/crop";
