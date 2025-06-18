@@ -2,7 +2,6 @@
 
 import * as React from "react";
 
-import { ScrollArea } from "radix-ui";
 import { Command as CommandPrimitive } from "cmdk";
 import { X } from "lucide-react";
 
@@ -13,6 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type Selectable = Record<"value" | "label", string>;
