@@ -153,14 +153,15 @@ export function RegisterForm({
                               shouldValidate: true,
                               shouldTouch: true,
                             });
+                            console.log(val);
                           }}
                           value={field.value}
                           onChange={field.onChange}
-                          countryCode={
-                            countries.all.find(
-                              (c) => c.name === form.getValues("country")
-                            )?.alpha2 ?? undefined
-                          }
+                          // countryCode={
+                          //   countries.all.find(
+                          //     (c) => c.name === form.getValues("country")
+                          //   )?.alpha2 ?? undefined
+                          // }
                         />
                       </div>
                     </FormControl>

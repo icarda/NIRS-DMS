@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "cmdk": "0.2.0",
     "country-data-list": "^1.4.1",
+    "country-flag-icons": "^1.5.19",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.38.2",
     "lucide-react": "^0.469.0",
@@ -31,6 +32,7 @@
     "next-auth": "5.0.0-beta.25",
     "papaparse": "^5.5.2",
     "postgres": "^3.4.5",
+    "radix-ui": "latest",
     "react": "^19.0.0",
     "react-circle-flags": "^0.0.23",
     "react-day-picker": "8.10.1",
@@ -40,8 +42,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5",
-    "zod": "^3.24.1",
-    "radix-ui": "latest"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

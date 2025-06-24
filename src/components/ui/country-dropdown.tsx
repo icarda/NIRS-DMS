@@ -3,8 +3,9 @@
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
 
 import { countries } from "country-data-list";
+import { hasFlag } from "country-flag-icons";
+import * as FLAGS from "country-flag-icons/react/3x2";
 import { CheckIcon, ChevronDown, Globe } from "lucide-react";
-import { CircleFlag } from "react-circle-flags";
 
 import {
   Command,
@@ -46,7 +47,10 @@ const CountryDropdownComponent = (
   {
     options = countries.all.filter(
       (country: Country) =>
-        country.emoji && country.status !== "deleted" && country.ioc !== "PRK"
+        country.emoji &&
+        country.status !== "deleted" &&
+        country.ioc !== "PRK" &&
+        country.alpha2 !== "EH" // Exclude Western Sahara
     ),
     onChange,
     defaultValue,
@@ -92,6 +96,9 @@ const CountryDropdownComponent = (
     slim === true && "w-20"
   );
 
+  const SelectedCountryFlag =
+    FLAGS[(selectedCountry?.alpha2 as keyof typeof FLAGS) || "MA"];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -102,11 +109,8 @@ const CountryDropdownComponent = (
       >
         {selectedCountry ? (
           <div className="flex w-0 flex-grow items-center gap-2 overflow-hidden">
-            <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full">
-              <CircleFlag
-                countryCode={selectedCountry.alpha2.toLowerCase()}
-                height={20}
-              />
+            <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md">
+              <SelectedCountryFlag className="h-5 w-5" />
             </div>
             {slim === false && (
               <span className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -139,33 +143,36 @@ const CountryDropdownComponent = (
             <CommandGroup>
               {options
                 .filter((x) => x.name)
-                .map((option, key: number) => (
-                  <CommandItem
-                    className="flex w-full items-center gap-2"
-                    key={key}
-                    onSelect={() => handleSelect(option)}
-                  >
-                    <div className="flex w-0 flex-grow space-x-2 overflow-hidden">
-                      <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full">
-                        <CircleFlag
-                          countryCode={option.alpha2.toLowerCase()}
-                          height={20}
-                        />
+                .map((option, key: number) => {
+                  const Flag = hasFlag(option.alpha2)
+                    ? FLAGS[option.alpha2 as keyof typeof FLAGS]
+                    : FLAGS["MA"]; // Default to Morocco flag if not found
+
+                  return (
+                    <CommandItem
+                      className="flex w-full items-center gap-2"
+                      key={key}
+                      onSelect={() => handleSelect(option)}
+                    >
+                      <div className="flex w-0 flex-grow space-x-2 overflow-hidden">
+                        <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md">
+                          <Flag className="h-5 w-5" />
+                        </div>
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                          {option.name}
+                        </span>
                       </div>
-                      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                        {option.name}
-                      </span>
-                    </div>
-                    <CheckIcon
-                      className={cn(
-                        "ml-auto h-4 w-4 shrink-0",
-                        option.name === selectedCountry?.name
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                  </CommandItem>
-                ))}
+                      <CheckIcon
+                        className={cn(
+                          "ml-auto h-4 w-4 shrink-0",
+                          option.name === selectedCountry?.name
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  );
+                })}
             </CommandGroup>
           </CommandList>
         </Command>

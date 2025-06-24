@@ -44,6 +44,9 @@ importers:
       country-data-list:
         specifier: ^1.4.1
         version: 1.4.1
+      country-flag-icons:
+        specifier: ^1.5.19
+        version: 1.5.19
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1953,6 +1956,9 @@ packages:
 
   country-data-list@1.4.1:
     resolution: {integrity: sha512-TQoQNS0a5+7GuAgDNYKLOVG4JwVmjZ2entwcStNh/yN7YzO5SfqVwSyZPK7O9JksxM2OXDzRD3zVHp4CmLzrsg==}
+
+  country-flag-icons@1.5.19:
+    resolution: {integrity: sha512-D/ZkRyj+ywJC6b2IrAN3/tpbReMUqmuRLlcKFoY/o0+EPQN9Ev/e8tV+D3+9scvu/tarxwLErNwS73C3yzxs/g==}
 
   crc-32@1.2.2:
     resolution: {integrity: sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==}
@@ -5261,6 +5267,8 @@ snapshots:
   cookie@0.7.1: {}
 
   country-data-list@1.4.1: {}
+
+  country-flag-icons@1.5.19: {}
 
   crc-32@1.2.2: {}
 
