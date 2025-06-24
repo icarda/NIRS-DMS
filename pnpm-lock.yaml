@@ -74,9 +74,6 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.0.0
-      react-circle-flags:
-        specifier: ^0.0.23
-        version: 0.0.23(react@19.0.0)
       react-day-picker:
         specifier: 8.10.1
         version: 8.10.1(date-fns@4.1.0)(react@19.0.0)
@@ -3053,12 +3050,6 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
-
-  react-circle-flags@0.0.23:
-    resolution: {integrity: sha512-J35vkTnG4Iz7cgitq/UIw4/1i8aUWEkz2Z0MQTTWycWOHKezuey5+3BPAsXNr78gYMdjSBtZWmSzQc0oEeK4oQ==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: ^16.0.0 || 17.x || 18.x || 19.x
 
   react-day-picker@8.10.1:
     resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
@@ -6416,10 +6407,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.0.1
       '@types/react-dom': 19.0.2(@types/react@19.0.1)
-
-  react-circle-flags@0.0.23(react@19.0.0):
-    dependencies:
-      react: 19.0.0
 
   react-day-picker@8.10.1(date-fns@4.1.0)(react@19.0.0):
     dependencies:

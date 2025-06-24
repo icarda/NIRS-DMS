@@ -58,12 +58,7 @@ export const CropTraitTable = pgTable(
     updatedAt,
   },
   (table) => [
-    {
-      cropTraitUnique: uniqueIndex("crop_trait_unique").on(
-        table.cropId,
-        table.traitVariable
-      ),
-    },
+    uniqueIndex("crop_trait_unique").on(table.cropId, table.traitVariable),
   ]
 );
 

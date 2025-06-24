@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
   deleteCropTrait as deleteCropTraitDb,
+  getCropTraits,
   insertCropTrait,
   updateCropTrait as updateCropTraitDb,
 } from "../db/crop-trait";
@@ -34,6 +35,19 @@ export async function addCropTrait(
 
     if (!success || !canCreateCropTrait) {
       return { error: true, message: "There was an error creating the trait" };
+    }
+
+    // check if the trait already exists for the crop
+    const cropTraits = await getCropTraits({ cropId });
+
+    const traitExists = cropTraits.some(
+      (trait) => trait.traitVariable === data.traitVariable
+    );
+    if (traitExists) {
+      return {
+        error: true,
+        message: `Trait with variable "${data.traitVariable}" already exists for this crop.`,
+      };
     }
 
     const cropTraitData = {
