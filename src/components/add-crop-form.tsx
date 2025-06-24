@@ -76,22 +76,22 @@ const AddCropForm = () => {
   const onSubmit = useCallback(
     async (values: z.infer<typeof cropFormSchema>) => {
       setIsLoading(true);
-
-      const formData = new FormData();
-      formData.append("file", values.image!);
-
-      const name = values.cropName;
       let url: string | undefined;
-      try {
-        url = await uploadFile(formData, name);
-      } catch (error: any) {
-        toast.error(`Failed to upload image: ${error.message}`);
-        return;
-      }
+      const name = values.cropName;
+      if (values.image) {
+        const formData = new FormData();
+        formData.append("file", values.image);
 
+        try {
+          url = await uploadFile(formData, name);
+        } catch (error: any) {
+          toast.error(`Failed to upload image: ${error.message}`);
+          return;
+        }
+      }
       const cropData = {
         name,
-        cropImageUrl: url,
+        cropImageUrl: url ?? undefined,
         description: values.description ?? "",
       };
 
