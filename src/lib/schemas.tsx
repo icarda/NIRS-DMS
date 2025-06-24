@@ -229,7 +229,7 @@ export const multiStepFormSchemaFinal = z.object({
     required_error: "Trial planting date is required",
     invalid_type_error: "Valid Trial planting date is required",
   }),
-  soilType: z.string(),
+  soilType: z.string().nullable().optional(),
   location: z.string().min(1, "Location is required"),
   coordinates: z
     .string()
