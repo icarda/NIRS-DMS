@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import {
   studyFormSchema,
   trialFormSchema,
 } from "@/lib/schemas";
+import { cn, formatLocalDate } from "@/lib/utils";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
@@ -36,6 +38,7 @@ interface MultiStepFormProps {
     qualityLabs: Record<string, any>[];
     nirModels: Record<string, any>[];
     studies: Record<string, any>[];
+    trialMetadatas: Record<string, any>[];
   };
 }
 
@@ -43,8 +46,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   const [step, setStep] = useState(1);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
   const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
-  const [openStudyOverwriteDialog, setOpenStudyOverwriteDialog] =
-    useState(false);
 
   const form = useForm<MultiFormData>({
     mode: "onTouched",
@@ -69,11 +70,11 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       trialPlantingDate: undefined,
       requesterName: "",
       requesterEmail: "",
-      overwriteStudy: false,
     },
   });
 
   const onSubmit = async (multiFormData: MultiFormData) => {
+    console.log("soilType", multiFormData.soilType);
     const selectedCrop = data.crops.find(
       (crop) => crop.name === multiFormData.crop
     )!;
@@ -106,20 +107,12 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       physiologicalStageID,
       qualityLabID,
       nirModelID,
-      overwriteStudy: multiFormData.overwriteStudy ?? false,
       studyCode: [
         multiFormData.trial,
         multiFormData.productType,
-        new Date(multiFormData.sampleDate).toLocaleDateString("fr-FR"),
+        format(multiFormData.sampleDate, "P"),
       ].join("+"),
     };
-
-    if (
-      !multiFormDataWithIDs.overwriteStudy &&
-      multiFormDataWithIDs.useExistingStudy
-    ) {
-      multiFormDataWithIDs.studyCode += `+${Date.now()}`;
-    }
 
     const formData = new FormData();
     Object.entries(multiFormDataWithIDs).forEach(([key, value]) => {
@@ -128,7 +121,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       } else if (Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof Date) {
-        formData.append(key, value.toISOString());
+        formData.append(key, formatLocalDate(value));
       } else if (typeof value === "boolean") {
         formData.append(key, String(value));
       } else if (value !== null && value !== undefined && value !== "") {
@@ -182,41 +175,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     const isValid = await form.trigger(Object.keys(currentSchema.shape) as any);
     if (!isValid) return;
 
-    // 🧠 Extra check for study modifications at step 2
-    if (step === 2 && form.getValues("useExistingStudy")) {
-      const selectedStudy = data.studies.find(
-        (s) => s.studyCode === form.getValues("study")
-      );
-
-      const current = {
-        productType: form.getValues("productType"),
-        qualityLab: form.getValues("qualityLab"),
-        nirModel: form.getValues("nirModel"),
-        physiologicalStage: form.getValues("physiologicalStage"),
-        sampleDate: new Date(form.getValues("sampleDate")),
-        program: form.getValues("program"),
-        requesterName: form.getValues("requesterName") || "",
-        requesterEmail: form.getValues("requesterEmail") || "",
-      };
-
-      const original = {
-        productType: selectedStudy?.productType?.name,
-        qualityLab: selectedStudy?.qualityLab?.name,
-        nirModel: selectedStudy?.nirModel?.name,
-        physiologicalStage: selectedStudy?.physiologicalStage?.name,
-        sampleDate: new Date(selectedStudy?.sampleDate),
-        program: selectedStudy?.program,
-        requesterName: selectedStudy?.requesterName || "",
-        requesterEmail: selectedStudy?.requesterEmail || "",
-      };
-
-      const isModified = JSON.stringify(current) !== JSON.stringify(original);
-      if (isModified) {
-        setOpenStudyOverwriteDialog(true);
-        return;
-      }
-    }
-
     setStep((prev) => prev + 1);
   };
 
@@ -261,7 +219,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       studyCode: [
         multiFormData.trial,
         multiFormData.productType,
-        new Date(multiFormData.sampleDate).toLocaleDateString("fr-FR"),
+        format(multiFormData.sampleDate, "P"),
       ].join("+"),
     };
 
@@ -272,7 +230,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       } else if (Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof Date) {
-        formData.append(key, value.toISOString());
+        formData.append(key, formatLocalDate(value));
       } else if (typeof value === "boolean") {
         formData.append(key, String(value));
       } else if (value !== null && value !== undefined && value !== "") {
@@ -323,7 +281,12 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {step === 1 && (
-          <TrialStep form={form} trials={data.trials} crops={data.crops} />
+          <TrialStep
+            form={form}
+            trials={data.trials}
+            crops={data.crops}
+            trialMetadatas={data.trialMetadatas}
+          />
         )}
         {step === 2 && (
           <StudyStep
@@ -396,7 +359,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <AlertDialog
+          {/* <AlertDialog
             open={openStudyOverwriteDialog}
             onOpenChange={setOpenStudyOverwriteDialog}
           >
@@ -426,7 +389,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
               <AlertDialogFooter>
                 <AlertDialogCancel
                   onClick={() => {
-                    form.setValue("overwriteStudy", false);
                     setOpenStudyOverwriteDialog(false);
                     setStep((prev) => prev + 1);
                   }}
@@ -435,7 +397,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
-                    form.setValue("overwriteStudy", true);
                     setOpenStudyOverwriteDialog(false);
                     setStep((prev) => prev + 1);
                   }}
@@ -444,7 +405,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
         </div>
       </form>
     </div>

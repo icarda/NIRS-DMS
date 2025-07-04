@@ -6,7 +6,7 @@ import { getCrops } from "@/features/crops/db/crop";
 import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getQualityLabsByCenter } from "@/features/quality-labs/db/quality-lab";
 import { getStudies } from "@/features/studies/db/study";
-import { getTrials } from "@/features/trials/db/trial";
+import { getTrialConfigMetadatas, getTrials } from "@/features/trials/db/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import MultiStepForm from "./components/multi-step-form";
@@ -19,13 +19,15 @@ export default async function UploadData() {
     redirect("/");
   }
   const center = user?.center as string;
-  const [trials, crops, qualityLabs, nirModels, studies] = await Promise.all([
-    getTrials(),
-    getCrops(),
-    getQualityLabsByCenter({ center }),
-    getNirModels(),
-    getStudies(),
-  ]);
+  const [trials, crops, qualityLabs, nirModels, studies, trialMetadatas] =
+    await Promise.all([
+      getTrials(),
+      getCrops(),
+      getQualityLabsByCenter({ center }),
+      getNirModels(),
+      getStudies(),
+      getTrialConfigMetadatas(),
+    ]);
   return (
     <PageWrapper title="Upload Data">
       <div>
@@ -50,7 +52,14 @@ export default async function UploadData() {
             <div>
               <TabsContent value="spectral_data">
                 <MultiStepForm
-                  data={{ trials, crops, qualityLabs, nirModels, studies }}
+                  data={{
+                    trials,
+                    crops,
+                    qualityLabs,
+                    nirModels,
+                    studies,
+                    trialMetadatas,
+                  }}
                 />
               </TabsContent>
               <TabsContent value="traits">

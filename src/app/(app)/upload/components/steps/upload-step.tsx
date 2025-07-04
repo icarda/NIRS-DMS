@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { format } from "date-fns";
 import { FileUp as FileUpload, X } from "lucide-react";
 import Link from "next/link";
 import { UseFormReturn } from "react-hook-form";
@@ -47,7 +48,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
           {[
             form.getValues("trial"),
             form.getValues("productType"),
-            new Date(form.getValues("sampleDate")).toLocaleDateString("fr-FR"),
+            format(new Date(form.getValues("sampleDate")), "P"),
           ].join("+")}
         </h1>
         <p className="text-base text-muted-foreground">

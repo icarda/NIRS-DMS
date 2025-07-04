@@ -36,7 +36,6 @@ export const trialFormSchema = z.object({
 
 export const studyFormSchema = z.object({
   useExistingStudy: z.boolean(),
-  overwriteStudy: z.boolean().default(false), // ✅ ADD THIS LINE
   study: z.string().optional(),
   productType: z.string().min(1, "Product type is required"),
   qualityLab: z.string().min(1, "Quality lab is required"),

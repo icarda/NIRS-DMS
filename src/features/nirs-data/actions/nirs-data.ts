@@ -1,5 +1,6 @@
 "use server";
 
+import { format } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/drizzle/db";
@@ -73,7 +74,6 @@ export async function uploadNirsData(
   for (const [key, value] of formData.entries()) {
     rawData[key] = value;
   }
-  const overwriteStudy = rawData.overwriteStudy === "true";
 
   const dataToValidate: MultiStepFormSchemaFinal = {
     // Trial Fields
@@ -116,6 +116,7 @@ export async function uploadNirsData(
     const errorMessages = validationResult.error.errors
       .map((e) => `${e.path.join(".")}: ${e.message}`)
       .join("; ");
+    console.log("error here");
     return { error: true, message: `Invalid data: ${errorMessages}` };
   }
 
@@ -231,49 +232,15 @@ export async function uploadNirsData(
         let studyId;
         let newStudy;
         const existingStudy = await getStudyByCode(validatedData.studyCode);
+        console.log("studyCOde", validatedData.studyCode);
+        console.log("existingStudy:", existingStudy);
 
+        console.log(
+          validatedData.sampleDate,
+          format(validatedData.sampleDate, "P")
+        );
         if (existingStudy) {
-          if (overwriteStudy) {
-            // Overwrite the study (update it)
-            const updatedStudy = await updateStudyById(
-              existingStudy.id,
-              {
-                productTypeId: validatedData.productTypeID,
-                nirModelId: validatedData.nirModelID,
-                requesterName: validatedData.requesterName,
-                requesterEmail: validatedData.requesterEmail,
-                sampleDate: validatedData.sampleDate.toISOString(),
-                physiologicalStageId: validatedData.physiologicalStageID,
-                qualityLabId: validatedData.qualityLabID,
-                program: validatedData.program,
-              },
-              tx
-            );
-
-            if (!updatedStudy) {
-              console.error("updatedStudy:", updatedStudy);
-              throw new Error("Failed to overwrite existing study.");
-            }
-
-            studyId = existingStudy.id;
-          } else {
-            const newStudyCode = `${validatedData.studyCode}+${Date.now()}`;
-            const studyData = {
-              trialId,
-              studyCode: newStudyCode,
-              productTypeId: validatedData.productTypeID,
-              nirModelId: validatedData.nirModelID,
-              requesterName: validatedData.requesterName,
-              requesterEmail: validatedData.requesterEmail,
-              sampleDate: validatedData.sampleDate.toISOString(),
-              physiologicalStageId: validatedData.physiologicalStageID,
-              qualityLabId: validatedData.qualityLabID,
-              program: validatedData.program,
-            };
-            newStudy = await insertStudy(studyData, tx);
-            if (!newStudy?.id) throw new Error("Failed to create new study.");
-            studyId = newStudy.id;
-          }
+          studyId = existingStudy.id;
         } else {
           // Create new study if code doesn't exist
           const studyData = {
@@ -283,7 +250,7 @@ export async function uploadNirsData(
             nirModelId: validatedData.nirModelID,
             requesterName: validatedData.requesterName,
             requesterEmail: validatedData.requesterEmail,
-            sampleDate: validatedData.sampleDate.toISOString(),
+            sampleDate: format(validatedData.sampleDate, "P"),
             physiologicalStageId: validatedData.physiologicalStageID,
             qualityLabId: validatedData.qualityLabID,
             program: validatedData.program,
@@ -304,6 +271,7 @@ export async function uploadNirsData(
 
         // handle if a user uploads data having already registered sample_ids
         const sampleIds = parsedFileData.map((row) => row.sampleId);
+        console.log("sampleIds:", sampleIds);
         if (!force) {
           const existingSamples = await tx
             .selectDistinct({ sampleId: NirsDataTable.sampleId })
@@ -314,6 +282,8 @@ export async function uploadNirsData(
                 inArray(NirsDataTable.sampleId, sampleIds)
               )
             );
+
+          console.log("existingSamples:", existingSamples);
 
           if (existingSamples.length > 0) {
             throw {

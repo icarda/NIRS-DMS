@@ -60,7 +60,9 @@ const StudyStep = ({
         qualityLab: selectedStudy.qualityLab.name,
         nirModel: selectedStudy.nirModel.name,
         physiologicalStage: selectedStudy.physiologicalStage.name,
-        sampleDate: new Date(selectedStudy.sampleDate),
+        sampleDate: new Date(selectedStudy.sampleDate).toLocaleDateString(
+          "fr-FR"
+        ),
         program: selectedStudy.program,
         requesterName: selectedStudy.requesterName ?? "",
         requesterEmail: selectedStudy.requesterEmail ?? "",
@@ -143,7 +145,10 @@ const StudyStep = ({
                           "physiologicalStage",
                           study.physiologicalStage.name
                         );
-                        form.setValue("sampleDate", new Date(study.sampleDate));
+                        form.setValue(
+                          "sampleDate",
+                          new Date(format(study.sampleDate, "P"))
+                        );
                         form.setValue("program", study.program);
                         form.setValue(
                           "requesterName",
@@ -188,7 +193,7 @@ const StudyStep = ({
                   <FormLabel required>Product Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={useExistingStudy}>
                         <SelectValue placeholder="Select product type" />
                       </SelectTrigger>
                     </FormControl>
@@ -217,7 +222,7 @@ const StudyStep = ({
                   <FormLabel required>Quality Lab</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={useExistingStudy}>
                         <SelectValue placeholder="Select quality lab" />
                       </SelectTrigger>
                     </FormControl>
@@ -242,7 +247,7 @@ const StudyStep = ({
                   <FormLabel required>NIR Model</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={useExistingStudy}>
                         <SelectValue placeholder="Select NIR model" />
                       </SelectTrigger>
                     </FormControl>
@@ -269,7 +274,7 @@ const StudyStep = ({
                   <FormLabel required>Physiological Stage</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger disabled={useExistingStudy}>
                         <SelectValue placeholder="Select stage" />
                       </SelectTrigger>
                     </FormControl>
@@ -300,6 +305,7 @@ const StudyStep = ({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          disabled={useExistingStudy}
                           variant={"outline"}
                           className={cn(
                             "w-full pl-3 text-left font-normal",
@@ -339,7 +345,11 @@ const StudyStep = ({
                 <FormItem>
                   <FormLabel required>Program</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter program name" {...field} />
+                    <Input
+                      placeholder="Enter program name"
+                      disabled={useExistingStudy}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -355,7 +365,11 @@ const StudyStep = ({
                 <FormItem>
                   <FormLabel>Requester Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter requester name" {...field} />
+                    <Input
+                      placeholder="Enter requester name"
+                      disabled={useExistingStudy}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -369,7 +383,11 @@ const StudyStep = ({
                 <FormItem>
                   <FormLabel>Requester Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter requester email" {...field} />
+                    <Input
+                      placeholder="Enter requester email"
+                      disabled={useExistingStudy}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

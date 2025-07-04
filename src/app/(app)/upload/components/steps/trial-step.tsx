@@ -60,10 +60,12 @@ const TrialStep = ({
   form,
   trials,
   crops,
+  trialMetadatas,
 }: {
   form: UseFormReturn<any>;
   trials: Record<string, any>[];
   crops: Record<string, any>[];
+  trialMetadatas: Record<string, any>[];
 }) => {
   const {
     fields: fertilizers,
@@ -420,7 +422,7 @@ const TrialStep = ({
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             <FormField
               control={form.control}
               name="coordinates"
@@ -463,6 +465,158 @@ const TrialStep = ({
                 </FormItem>
               )}
             />
+            {/* {trialMetadatas
+              .filter((metadata) => metadata.source === "json")
+              .map((metadata) => {
+                switch (metadata.type) {
+                  case "string":
+                    return (
+                      <FormField
+                        key={metadata.name}
+                        control={form.control}
+                        name={`metadata.${metadata.name}`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required={metadata.required}>
+                              {metadata.label}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={`Enter ${metadata.label.toLowerCase()}`}
+                                {...field}
+                                disabled={useExistingTrial}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    );
+                  case "number":
+                    return (
+                      <FormField
+                        key={metadata.name}
+                        control={form.control}
+                        name={`metadata.${metadata.name}`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required={metadata.required}>
+                              {metadata.label}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={`Enter ${metadata.label.toLowerCase()}`}
+                                {...field}
+                                disabled={useExistingTrial}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    Number.parseFloat(e.target.value)
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    );
+                  case "date":
+                    return (
+                      <FormField
+                        key={metadata.name}
+                        control={form.control}
+                        name={`metadata.${metadata.name}`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required={metadata.required}>
+                              {metadata.label}
+                            </FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                    disabled={useExistingTrial}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) =>
+                                    date > new Date() ||
+                                    date < new Date("1900-01-01")
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    );
+                  case "boolean":
+                    return (
+                      <FormField
+                        key={metadata.name}
+                        control={form.control}
+                        name={`metadata.${metadata.name}`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required={metadata.required}>
+                              {metadata.label}
+                            </FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={(value) =>
+                                  field.onChange(value === "true")
+                                }
+                                defaultValue={field.value ? "true" : "false"}
+                                className="flex flex-col space-y-1"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="true" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Yes
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="false" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    No
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    );
+                }
+              })} */}
           </div>
           {fertilizers.map((fertilizer, index) => (
             <div key={fertilizer.id} className="grid grid-cols-2 gap-6">

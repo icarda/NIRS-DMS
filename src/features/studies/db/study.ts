@@ -68,7 +68,7 @@ export async function insertStudy(
   const [newStudy] = await trx.insert(StudyTable).values(data).returning();
 
   if (newStudy == null) throw new Error("Failed to create study");
-  revalidateStudyCache(newStudy.id);
+  revalidateStudyCache(newStudy.studyCode);
 
   return newStudy;
 }
@@ -86,7 +86,7 @@ export async function updateStudyById(
     .where(eq(StudyTable.id, studyId))
     .returning();
 
-  revalidateStudyCache(studyId);
+  revalidateStudyCache(updatedStudy.studyCode);
   return updatedStudy;
 }
 
@@ -97,7 +97,7 @@ export async function deleteStudy({ id }: { id: number }) {
     .returning();
 
   if (deletedStudy == null) throw new Error("Failed to delete study");
-  revalidateStudyCache(deletedStudy.id);
+  revalidateStudyCache(deletedStudy.studyCode);
 
   return deletedStudy;
 }
