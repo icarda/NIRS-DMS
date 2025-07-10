@@ -89,8 +89,6 @@ export function CropCard({
 
     let imageUrl = crop.cropImageUrl;
 
-    console.log(removeImage, data.image);
-
     if (removeImage) {
       imageUrl = null;
     } else if (data.image) {

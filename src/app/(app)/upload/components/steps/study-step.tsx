@@ -38,12 +38,14 @@ const StudyStep = ({
   qualityLabs,
   nirModels,
   studies,
+  studyMetadatas,
 }: {
   form: UseFormReturn<any>;
   crops: Record<string, any>[];
   qualityLabs: Record<string, any>[];
   nirModels: Record<string, any>[];
   studies: Record<string, any>[];
+  studyMetadatas: Record<string, any>[];
 }) => {
   const selectedCrop = form.getValues("crop");
   const useExistingStudy = form.watch("useExistingStudy");
@@ -158,6 +160,19 @@ const StudyStep = ({
                           "requesterEmail",
                           study.requesterEmail ?? ""
                         );
+                        console.log(
+                          "Selected study:",
+                          study.additionalMetadata
+                        );
+                        if (study.additionalMetadata) {
+                          Object.entries(study.additionalMetadata).forEach(
+                            ([key, value]) => {
+                              if (form.getFieldState(key)) {
+                                form.setValue(key, value);
+                              }
+                            }
+                          );
+                        }
                       }}
                       value={field.value || undefined}
                     >
@@ -355,6 +370,159 @@ const StudyStep = ({
                 </FormItem>
               )}
             />
+            {studyMetadatas.map((metadata) => {
+              switch (metadata.type) {
+                case "string":
+                  return (
+                    <FormField
+                      key={metadata.name}
+                      control={form.control}
+                      name={`${metadata.name}`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel required={metadata.required}>
+                            {metadata.label}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={`Enter ${metadata.label.toLowerCase()}`}
+                              {...field}
+                              disabled={useExistingStudy}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+                case "number":
+                  return (
+                    <FormField
+                      key={metadata.name}
+                      control={form.control}
+                      name={`${metadata.name}`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel required={metadata.required}>
+                            {metadata.label}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder={`Enter ${metadata.label.toLowerCase()}`}
+                              {...field}
+                              disabled={useExistingStudy}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === ""
+                                    ? undefined
+                                    : parseFloat(e.target.value)
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+                case "date":
+                  return (
+                    <FormField
+                      key={metadata.name}
+                      control={form.control}
+                      name={`${metadata.name}`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel required={metadata.required}>
+                            {metadata.label}
+                          </FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                  disabled={useExistingStudy}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() ||
+                                  date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+                case "boolean":
+                  return (
+                    <FormField
+                      key={metadata.name}
+                      control={form.control}
+                      name={`${metadata.name}`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel required={metadata.required}>
+                            {metadata.label}
+                          </FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              disabled={useExistingStudy}
+                              onValueChange={(value) =>
+                                field.onChange(value === "true")
+                              }
+                              defaultValue={field.value ? "true" : "false"}
+                              className="flex h-10 items-center gap-2"
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="true" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  Yes
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="false" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  No
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  );
+              }
+            })}
           </div>
 
           <div className="grid grid-cols-2 gap-6">

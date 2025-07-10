@@ -1,6 +1,6 @@
 "use server";
 
-import { format } from "date-fns";
+import { add, format } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/drizzle/db";
@@ -15,10 +15,15 @@ import {
 } from "@/features/studies/db/species";
 import {
   getStudyByCode,
+  getStudyConfigMetadatas,
   insertStudy,
   updateStudyById,
 } from "@/features/studies/db/study";
-import { getTrialByName, insertTrial } from "@/features/trials/db/trial";
+import {
+  getTrialByName,
+  getTrialConfigMetadatas,
+  insertTrial,
+} from "@/features/trials/db/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import {
   NIRSData,
@@ -51,6 +56,33 @@ export interface OtherIdInsertData {
   gid: number;
   studyId: number;
 }
+
+const STATIC_FIELDS = new Set([
+  "crop",
+  "file",
+  "program",
+  "trial",
+  "cropID",
+  "location",
+  "speciesID",
+  "irrigation",
+  "coordinates",
+  "fertilizers",
+  "useExistingTrial",
+  "trialPlantingDate",
+  "species",
+  "nirModel",
+  "studyCode",
+  "nirModelID",
+  "qualityLab",
+  "sampleDate",
+  "productType",
+  "qualityLabID",
+  "productTypeID",
+  "useExistingStudy",
+  "physiologicalStage",
+  "physiologicalStageID",
+]);
 
 export async function uploadNirsData(
   formData: FormData,
@@ -116,7 +148,6 @@ export async function uploadNirsData(
     const errorMessages = validationResult.error.errors
       .map((e) => `${e.path.join(".")}: ${e.message}`)
       .join("; ");
-    console.log("error here");
     return { error: true, message: `Invalid data: ${errorMessages}` };
   }
 
@@ -192,6 +223,16 @@ export async function uploadNirsData(
             longitude = coords[1];
           }
 
+          const trialMetadatas = await getTrialConfigMetadatas();
+
+          const trialDynamicKeys = new Set(
+            trialMetadatas.filter((m) => m.source === "json").map((m) => m.name)
+          );
+
+          const trialMetadata = Object.fromEntries(
+            Object.entries(rawData).filter(([key]) => trialDynamicKeys.has(key))
+          );
+
           const newTrialData = {
             name: validatedData.trial,
             plantingDate: validatedData.trialPlantingDate.toISOString(),
@@ -201,7 +242,9 @@ export async function uploadNirsData(
             latitude: latitude,
             longitude: longitude,
             cropId: validatedData.cropID,
-            // additionalMetadata: {}
+            additionalMetadata: Object.keys(trialMetadata).length
+              ? trialMetadata
+              : {},
           };
 
           const newTrial = await insertTrial(
@@ -232,17 +275,19 @@ export async function uploadNirsData(
         let studyId;
         let newStudy;
         const existingStudy = await getStudyByCode(validatedData.studyCode);
-        console.log("studyCOde", validatedData.studyCode);
-        console.log("existingStudy:", existingStudy);
 
-        console.log(
-          validatedData.sampleDate,
-          format(validatedData.sampleDate, "P")
-        );
         if (existingStudy) {
           studyId = existingStudy.id;
         } else {
+          const studyMetadatas = await getStudyConfigMetadatas();
+
+          const studyDynamicKeys = new Set(
+            studyMetadatas.filter((m) => m.source === "json").map((m) => m.name)
+          );
           // Create new study if code doesn't exist
+          const studyMetadata = Object.fromEntries(
+            Object.entries(rawData).filter(([key]) => studyDynamicKeys.has(key))
+          );
           const studyData = {
             trialId,
             studyCode: validatedData.studyCode,
@@ -254,6 +299,7 @@ export async function uploadNirsData(
             physiologicalStageId: validatedData.physiologicalStageID,
             qualityLabId: validatedData.qualityLabID,
             program: validatedData.program,
+            additionalMetadata: studyMetadata,
           };
           newStudy = await insertStudy(studyData, tx);
           if (!newStudy?.id) throw new Error("Failed to create study.");
@@ -271,7 +317,6 @@ export async function uploadNirsData(
 
         // handle if a user uploads data having already registered sample_ids
         const sampleIds = parsedFileData.map((row) => row.sampleId);
-        console.log("sampleIds:", sampleIds);
         if (!force) {
           const existingSamples = await tx
             .selectDistinct({ sampleId: NirsDataTable.sampleId })
@@ -282,8 +327,6 @@ export async function uploadNirsData(
                 inArray(NirsDataTable.sampleId, sampleIds)
               )
             );
-
-          console.log("existingSamples:", existingSamples);
 
           if (existingSamples.length > 0) {
             throw {

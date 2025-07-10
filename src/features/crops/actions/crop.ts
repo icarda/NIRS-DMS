@@ -61,8 +61,6 @@ export async function updateCrop(id: number, unsafeData: CropSchema) {
   const user = await getCurrentUser();
   const canUpdateCrop = hasPermission(user?.role, "crop:update");
 
-  console.log(success, canUpdateCrop, error);
-
   if (!success || !canUpdateCrop) {
     return { error: true, message: "There was an error updating the crop" };
   }

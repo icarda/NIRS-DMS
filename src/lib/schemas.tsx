@@ -25,7 +25,7 @@ export const trialFormSchema = z.object({
       "Invalid coordinates format. Use lat, lon (e.g., 33.2315, -8.1515)"
     )
     .or(z.literal("")),
-  irrigation: z.boolean().optional(),
+  irrigation: z.coerce.boolean().optional(),
   fertilizers: z.array(
     z.object({
       type: z.string().min(0, "Fertilizer type is required"),
@@ -164,6 +164,55 @@ export const multiStepFormSchema = trialFormSchema
       path: ["sampleDate"],
     }
   );
+
+export function getExtendedSchema(metadatas: any[], type: "trial" | "study") {
+  const shape: z.ZodRawShape = {};
+
+  for (const m of metadatas) {
+    let field: z.ZodTypeAny;
+
+    switch (m.type) {
+      case "string":
+        field = z.string();
+        if (m.required)
+          field = (field as z.ZodString).min(1, `${m.label} is required`);
+        else field = field.optional();
+        break;
+      case "number": {
+        let base = z.number({
+          required_error: `${m.label} is required`,
+        });
+        if (m.min) base = base.min(parseFloat(m.min));
+        if (m.max) base = base.max(parseFloat(m.max));
+
+        field = z.preprocess((val) => (val === "" ? undefined : val), base);
+
+        if (!m.required) field = field.optional();
+        break;
+      }
+      case "boolean":
+        field = m.required ? z.coerce.boolean() : z.coerce.boolean().optional();
+        break;
+      case "date":
+        field = m.required
+          ? z.coerce.date({ required_error: `${m.label} is required` })
+          : z.coerce.date().optional();
+        break;
+      case "array":
+        field = z.array(z.any());
+        if (!m.required) field = field.optional();
+        break;
+      default:
+        field = z.any().optional();
+    }
+
+    shape[m.name] = field;
+  }
+
+  return type === "trial"
+    ? trialFormSchema.extend(shape)
+    : studyFormSchema.extend(shape);
+}
 
 export const metadataDialog = z.object({
   id: z

@@ -197,7 +197,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
               name="defaultValue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Default Value</FormLabel>
+                  <FormLabel>Default Value</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="e.g. false" />
                   </FormControl>

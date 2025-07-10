@@ -21,12 +21,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { uploadNirsData } from "@/features/nirs-data/actions/nirs-data";
 import {
+  getExtendedSchema,
   MultiFormData,
-  multiStepFormSchema,
   studyFormSchema,
   trialFormSchema,
+  uploadFormSchema,
 } from "@/lib/schemas";
-import { cn, formatLocalDate } from "@/lib/utils";
+import { formatLocalDate } from "@/lib/utils";
 import StudyStep from "./steps/study-step";
 import TrialStep from "./steps/trial-step";
 import UploadStep from "./steps/upload-step";
@@ -39,6 +40,7 @@ interface MultiStepFormProps {
     nirModels: Record<string, any>[];
     studies: Record<string, any>[];
     trialMetadatas: Record<string, any>[];
+    studyMetadatas: Record<string, any>[];
   };
 }
 
@@ -47,9 +49,32 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
   const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
 
+  const fullTrialSchema = getExtendedSchema(data.trialMetadatas, "trial");
+  const fullStudySchema = getExtendedSchema(data.studyMetadatas, "study");
+
+  const fullDynamicSchema = fullTrialSchema
+    .merge(fullStudySchema)
+    .merge(uploadFormSchema)
+    .refine(
+      (data) => {
+        if (!data.sampleDate || !data.trialPlantingDate) return true;
+        return (
+          (typeof data.sampleDate === "string" ||
+            data.sampleDate instanceof Date) &&
+          (typeof data.trialPlantingDate === "string" ||
+            data.trialPlantingDate instanceof Date) &&
+          new Date(data.sampleDate) >= new Date(data.trialPlantingDate)
+        );
+      },
+      {
+        message: "Sampling date must be on or after planting date",
+        path: ["sampleDate"],
+      }
+    );
+
   const form = useForm<MultiFormData>({
     mode: "onTouched",
-    resolver: zodResolver(multiStepFormSchema),
+    resolver: zodResolver(fullDynamicSchema),
     defaultValues: {
       useExistingStudy: false,
       useExistingTrial: false,
@@ -70,11 +95,20 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       trialPlantingDate: undefined,
       requesterName: "",
       requesterEmail: "",
+      ...Object.fromEntries(
+        data.trialMetadatas
+          .filter((m) => m.type !== "date")
+          .map((m) => [m.name, m.defaultValue])
+      ),
+      ...Object.fromEntries(
+        data.studyMetadatas
+          .filter((m) => m.type !== "date")
+          .map((m) => [m.name, m.defaultValue])
+      ),
     },
   });
 
   const onSubmit = async (multiFormData: MultiFormData) => {
-    console.log("soilType", multiFormData.soilType);
     const selectedCrop = data.crops.find(
       (crop) => crop.name === multiFormData.crop
     )!;
@@ -149,7 +183,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
   };
 
   const nextStep = async () => {
-    const currentSchema = step === 1 ? trialFormSchema : studyFormSchema;
+    const currentSchema = step === 1 ? fullTrialSchema : fullStudySchema;
 
     // validate sampleDate logic for step 2
     if (step === 2) {
@@ -295,6 +329,7 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
             qualityLabs={data.qualityLabs}
             nirModels={data.nirModels}
             studies={data.studies}
+            studyMetadatas={data.studyMetadatas}
           />
         )}
         {step === 3 && <UploadStep form={form} />}
@@ -359,53 +394,6 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          {/* <AlertDialog
-            open={openStudyOverwriteDialog}
-            onOpenChange={setOpenStudyOverwriteDialog}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Overwrite or create a new study?
-                </AlertDialogTitle>
-                <AlertDialogDescription asChild>
-                  <div>
-                    You have modified the metadata of an existing study. Would
-                    you like to:
-                    <ul className="mt-2 list-inside list-disc space-y-1">
-                      <li>
-                        <strong>Overwrite:</strong> Save changes to the
-                        currently selected study.
-                      </li>
-                      <li>
-                        <strong>Create new:</strong> Create a new study using
-                        the updated information.
-                      </li>
-                    </ul>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  onClick={() => {
-                    setOpenStudyOverwriteDialog(false);
-                    setStep((prev) => prev + 1);
-                  }}
-                >
-                  Create New
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    setOpenStudyOverwriteDialog(false);
-                    setStep((prev) => prev + 1);
-                  }}
-                >
-                  Overwrite
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog> */}
         </div>
       </form>
     </div>

@@ -157,11 +157,6 @@ export function RegisterForm({
                           }}
                           value={field.value}
                           onChange={field.onChange}
-                          // countryCode={
-                          //   countries.all.find(
-                          //     (c) => c.name === form.getValues("country")
-                          //   )?.alpha2 ?? undefined
-                          // }
                         />
                       </div>
                     </FormControl>

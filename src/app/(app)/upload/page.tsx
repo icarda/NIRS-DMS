@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCrops } from "@/features/crops/db/crop";
 import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getQualityLabsByCenter } from "@/features/quality-labs/db/quality-lab";
-import { getStudies } from "@/features/studies/db/study";
+import {
+  getStudies,
+  getStudyConfigMetadatas,
+} from "@/features/studies/db/study";
 import { getTrialConfigMetadatas, getTrials } from "@/features/trials/db/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
@@ -19,15 +22,23 @@ export default async function UploadData() {
     redirect("/");
   }
   const center = user?.center as string;
-  const [trials, crops, qualityLabs, nirModels, studies, trialMetadatas] =
-    await Promise.all([
-      getTrials(),
-      getCrops(),
-      getQualityLabsByCenter({ center }),
-      getNirModels(),
-      getStudies(),
-      getTrialConfigMetadatas(),
-    ]);
+  const [
+    trials,
+    crops,
+    qualityLabs,
+    nirModels,
+    studies,
+    trialMetadatas,
+    studyMetadatas,
+  ] = await Promise.all([
+    getTrials(),
+    getCrops(),
+    getQualityLabsByCenter({ center }),
+    getNirModels(),
+    getStudies(),
+    getTrialConfigMetadatas(),
+    getStudyConfigMetadatas(),
+  ]);
   return (
     <PageWrapper title="Upload Data">
       <div>
@@ -58,7 +69,12 @@ export default async function UploadData() {
                     qualityLabs,
                     nirModels,
                     studies,
-                    trialMetadatas,
+                    trialMetadatas: trialMetadatas.filter(
+                      (m) => m.source === "json"
+                    ),
+                    studyMetadatas: studyMetadatas.filter(
+                      (m) => m.source === "json"
+                    ),
                   }}
                 />
               </TabsContent>

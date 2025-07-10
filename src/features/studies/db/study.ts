@@ -40,6 +40,7 @@ export async function getStudies() {
       requesterName: true,
       program: true,
       sampleDate: true,
+      additionalMetadata: true,
     },
   });
   return studies;
@@ -174,7 +175,10 @@ export async function insertStudyMetadataConfig(
           typedValue = data.defaultValue === "true";
           break;
         case "date":
-          typedValue = new Date(data.defaultValue).toISOString();
+          const date = new Date(data.defaultValue);
+          typedValue = isNaN(date.getTime())
+            ? new Date().toISOString() // fallback to today if invalid
+            : date.toISOString();
           break;
         case "array":
           typedValue = JSON.parse(data.defaultValue);
@@ -196,7 +200,6 @@ export async function insertStudyMetadataConfig(
     `
     );
 
-    // Optional: revalidate cache
     revalidateStudyMetadataConfigCache(newStudyMetadata.name);
 
     return newStudyMetadata;
