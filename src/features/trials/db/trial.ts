@@ -145,7 +145,10 @@ export async function insertTrialMetadataConfig(
           typedValue = data.defaultValue === "true";
           break;
         case "date":
-          typedValue = new Date(data.defaultValue).toISOString();
+          const date = new Date(data.defaultValue);
+          typedValue = isNaN(date.getTime())
+            ? new Date().toISOString() // fallback to today if invalid
+            : date.toISOString();
           break;
         case "array":
           typedValue = JSON.parse(data.defaultValue);
