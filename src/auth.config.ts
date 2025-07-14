@@ -28,6 +28,10 @@ export default {
           if (!user) return null;
 
           const passwordMatch = await bcrypt.compare(password, user.password);
+          // check if user is activated
+          if (!user.emailVerified) {
+            throw new Error("User account is not activated.");
+          }
 
           if (passwordMatch) return user;
         }

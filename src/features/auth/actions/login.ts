@@ -28,11 +28,18 @@ export async function login(values: z.infer<typeof loginSchema>) {
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
+        case "CallbackRouteError":
+          // when user is not activated
+          return {
+            error: true,
+            message: "Please wait for an admin to activate your account",
+          };
         case "CredentialsSignin":
           return {
             error: true,
             message: "Invalid credentials!",
           };
+
         default:
           return {
             error: true,
