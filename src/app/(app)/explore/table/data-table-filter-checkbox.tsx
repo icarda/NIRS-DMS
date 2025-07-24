@@ -23,7 +23,8 @@ export function DataTableFilterCheckbox<TData>({
 }: DataTableFilterCheckboxProps<TData>) {
   const value = _value as string;
   const [inputValue, setInputValue] = useState("");
-  const column = table.getColumn(value);
+  const column = table.getAllLeafColumns().find((col) => col.id === value);
+
   const filterValue = column?.getFilterValue();
 
   if (!options?.length) return null;

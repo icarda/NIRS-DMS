@@ -11,7 +11,7 @@ export type DatePreset = {
 
 export type Option = {
   label: string;
-  value: string | boolean | number | undefined;
+  value: string;
 };
 
 export type Input = {

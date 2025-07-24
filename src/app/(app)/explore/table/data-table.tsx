@@ -28,7 +28,6 @@ import { DataTablePagination } from "@/components/ui/table-pagination";
 import { capitalize, cn } from "@/lib/utils";
 import { DataTableFilterControls } from "./data-table-filter-controls";
 import { DataTableToolBar } from "./data-table-toolbar";
-import { ColumnSchema } from "./schema";
 import { DataTableFilterField } from "./types";
 
 interface DataTableProps<TData, TValue> {

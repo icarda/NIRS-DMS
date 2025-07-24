@@ -16,7 +16,8 @@ export function DataTableFilterInput<TData>({
   value: _value,
 }: DataTableFilterInputProps<TData>) {
   const value = _value as string;
-  const column = table.getColumn(value);
+  const column = table.getAllLeafColumns().find((col) => col.id === value);
+
   const filterValue = column?.getFilterValue();
 
   const filters = typeof filterValue === "string" ? filterValue : "";

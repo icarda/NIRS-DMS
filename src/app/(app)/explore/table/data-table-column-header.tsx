@@ -26,7 +26,7 @@ export function DataTableColumnHeader<TData, TValue>({
       onClick={() => {
         column.toggleSorting(undefined);
       }}
-      className={cn("-ml-3", className)}
+      className={cn("-ml-4", className)}
       {...props}
     >
       <span>{title}</span>

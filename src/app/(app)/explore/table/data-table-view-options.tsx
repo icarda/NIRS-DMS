@@ -72,7 +72,6 @@ export function DataTableViewOptions<TData>({
                   onSelect={() =>
                     column.toggleVisibility(!column.getIsVisible())
                   }
-                  className={"capitalize"}
                 >
                   <div
                     className={cn(

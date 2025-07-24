@@ -21,7 +21,8 @@ export function DataTableFilterSlider<TData>({
   unit,
 }: DataTableFilterSliderProps<TData>) {
   const value = _value as string;
-  const column = table.getColumn(value);
+  const column = table.getAllLeafColumns().find((col) => col.id === value);
+
   const filterValue = column?.getFilterValue();
 
   const filters =
