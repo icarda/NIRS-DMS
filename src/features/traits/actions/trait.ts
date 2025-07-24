@@ -1,14 +1,17 @@
 "use server";
 
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
+import { TraitTable } from "@/drizzle/schema";
 import { isUniqueConstraintError } from "@/drizzle/schemaHelpers";
 import { getDistinctSampleIdsForStudy } from "@/features/nirs-data/db/nirs-data";
 import { getCurrentUser } from "@/lib/currentUser";
 import { parseTraitFile, transformTraitDataForDb } from "@/lib/parsing";
 import { traitUploadSchemaFinal } from "@/lib/schemas";
 import { hasPermission } from "@/permissions/general";
+import { revalidateTraitCache } from "../db/cache/trait";
 import {
   deleteTrait as deleteTraitDb,
   insertTrait,
@@ -16,7 +19,7 @@ import {
 } from "../db/trait";
 import { traitSchema } from "../schemas/trait";
 
-export async function uploadTraitDataAction(formData: FormData) {
+export async function uploadTraitDataAction(formData: FormData, force = false) {
   const dataToValidate = {
     studyId: parseInt(formData.get("studyId") as string, 10),
     studyCode: formData.get("studyCode") as string,
@@ -94,9 +97,54 @@ export async function uploadTraitDataAction(formData: FormData) {
       };
     }
 
-    await db.transaction(async (tx) => {
-      await insertTraitBatch(traitDataToInsert, tx);
-    });
+    // Handling the conflict resolution: overwrite if `force` is true
+    if (!force) {
+      // Check for existing sample IDs in the database before inserting
+      const existingSamples = await db
+        .selectDistinct({ sampleId: TraitTable.sampleId })
+        .from(TraitTable)
+        .where(
+          and(
+            eq(TraitTable.studyId, studyId),
+            inArray(TraitTable.sampleId, traitSampleIds)
+          )
+        );
+
+      if (existingSamples.length > 0) {
+        return {
+          error: true,
+          type: "CONFLICT",
+          existingSampleIds: existingSamples.map((e) => e.sampleId),
+          message:
+            "Some sample IDs already exist. Please choose to overwrite or cancel.",
+        };
+      }
+    }
+
+    // If force is true, or if no conflicts, insert the trait data into the database
+    if (force) {
+      await db.transaction(async (tx) => {
+        // Delete the existing data for the conflicting sample IDs
+        await tx
+          .delete(TraitTable)
+          .where(
+            and(
+              eq(TraitTable.studyId, studyId),
+              inArray(TraitTable.sampleId, traitSampleIds)
+            )
+          );
+
+        // Insert new trait data
+        await insertTraitBatch(traitDataToInsert, tx);
+      });
+    } else {
+      await db.transaction(async (tx) => {
+        // Insert trait data if no conflicts
+        await insertTraitBatch(traitDataToInsert, tx);
+      });
+    }
+
+    revalidateTraitCache();
 
     return {
       error: false,

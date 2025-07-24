@@ -6,12 +6,19 @@ import {
   CropTable,
   CropTraitTable,
   NirModelTable,
+  OtherIdsTable,
+  PhysiologicalStageTable,
+  ProductTypeTable,
   QualityLabTable,
   StudyTable,
   TraitTable,
   TrialTable,
 } from "@/drizzle/schema";
-import { getTraitTag, revalidateTraitCache } from "./cache/trait";
+import {
+  getTraitGlobalTag,
+  getTraitTag,
+  revalidateTraitCache,
+} from "./cache/trait";
 
 export interface TraitFilters {
   studyCode?: string;
@@ -122,6 +129,46 @@ export async function getTraitsFiltered(
     console.error("Error fetching filtered Trait data:", error);
     throw new Error(`Database error fetching Trait data: ${error.message}`);
   }
+}
+
+export async function getWetChemistryData() {
+  "use cache";
+  cacheTag(getTraitGlobalTag());
+  const result = await db
+    .selectDistinct({
+      sample_id: TraitTable.sampleId,
+      crop_name: CropTable.name,
+      trait_name: TraitTable.traitName,
+      measured_value: TraitTable.measuredValue,
+      predicted_value: TraitTable.predictedValue,
+      study_code: StudyTable.studyCode,
+      sample_date: StudyTable.sampleDate,
+      germplasm_id: OtherIdsTable.gid,
+      product_type: ProductTypeTable.name,
+      // study_metadata: StudyTable.additionalMetadata,
+      trial_name: TrialTable.name,
+      trial_planting_date: TrialTable.plantingDate,
+      // trial_metadata: TrialTable.additionalMetadata,
+      quality_lab_name: QualityLabTable.name,
+      physiological_stage: PhysiologicalStageTable.name,
+    })
+    .from(TraitTable)
+    .innerJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id)) // Corrected with `eq`
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id)) // Corrected with `eq`
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id)) // Corrected with `eq`
+    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id)) // Corrected with `eq`
+    .innerJoin(
+      ProductTypeTable,
+      eq(StudyTable.productTypeId, ProductTypeTable.id)
+    )
+    .innerJoin(
+      PhysiologicalStageTable,
+      eq(StudyTable.physiologicalStageId, PhysiologicalStageTable.id)
+    )
+    .innerJoin(OtherIdsTable, eq(TraitTable.sampleId, OtherIdsTable.sampleId))
+    .orderBy(TraitTable.sampleId);
+
+  return result;
 }
 
 export async function getTraits({ cropTraitId }: { cropTraitId: number }) {

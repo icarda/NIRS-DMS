@@ -10,7 +10,8 @@ export function getTraitTag(cropTraitId: number) {
   return getCropTraitTag("traits", cropTraitId);
 }
 
-export function revalidateTraitCache(id: number) {
+export function revalidateTraitCache(id?: number) {
   revalidateTag(getTraitGlobalTag());
+  if (id == null) return;
   revalidateTag(getTraitTag(id));
 }

@@ -8,6 +8,16 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -42,6 +52,8 @@ interface TraitUploadProps {
 
 const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
+  const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
 
   const form = useForm<TraitUploadFormData>({
     resolver: zodResolver(traitUploadSchema),
@@ -97,6 +109,49 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
     });
 
     const result = await uploadTraitDataAction(formData);
+
+    if (result.error) {
+      if (result.existingSampleIds) {
+        setExistingSampleIds(result.existingSampleIds);
+        setOverwriteDialogOpen(true);
+
+        return;
+      }
+      toast.error(result.message);
+    } else {
+      toast.success(result.message);
+      setPreview(null);
+      form.reset();
+    }
+  }
+
+  async function handleOverwrite() {
+    const data = form.getValues();
+    const cropId = crops.find((c) => c.name === data.crop)?.id as number;
+    const studyId = studies.find((s) => s.studyCode === data.study)
+      ?.id as number;
+
+    const dataForFormData = {
+      cropId: cropId,
+      studyId: studyId,
+      studyCode: data.study,
+      year: data.year,
+      traits: data.traits,
+      file: data.file,
+    };
+
+    const formData = new FormData();
+    Object.entries(dataForFormData).forEach(([key, value]) => {
+      if (key === "file" && value instanceof File) {
+        formData.append(key, value);
+      } else if (key === "traits" && Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+
+    const result = await uploadTraitDataAction(formData, true);
 
     if (result.error) {
       toast.error(result.message);
@@ -350,6 +405,27 @@ const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
           </div>
         </form>
       </Form>
+      <AlertDialog
+        open={overwriteDialogOpen}
+        onOpenChange={setOverwriteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Overwrite existing Trait data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The following sample IDs already exist:{" "}
+              {existingSampleIds.slice(0, 5).join(", ")}
+              {existingSampleIds.length > 5 ? "..." : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleOverwrite}>
+              Overwrite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
