@@ -56,3 +56,8 @@ export function formatLocalDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+export function stringToNumberIfValid(input: string): number | string {
+  const num = Number(input);
+  return !isNaN(num) && input.trim() !== "" ? num : input;
+}

@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, stringToNumberIfValid } from "@/lib/utils";
 
 const StudyStep = ({
   form,
@@ -160,15 +160,16 @@ const StudyStep = ({
                           "requesterEmail",
                           study.requesterEmail ?? ""
                         );
-                        console.log(
-                          "Selected study:",
-                          study.additionalMetadata
-                        );
                         if (study.additionalMetadata) {
                           Object.entries(study.additionalMetadata).forEach(
                             ([key, value]) => {
                               if (form.getFieldState(key)) {
-                                form.setValue(key, value);
+                                form.setValue(
+                                  key,
+                                  stringToNumberIfValid(
+                                    value as unknown as string
+                                  )
+                                );
                               }
                             }
                           );

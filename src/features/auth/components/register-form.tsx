@@ -153,7 +153,6 @@ export function RegisterForm({
                               shouldValidate: true,
                               shouldTouch: true,
                             });
-                            console.log(val);
                           }}
                           value={field.value}
                           onChange={field.onChange}

@@ -1,14 +1,12 @@
 "use server";
 
-import { error } from "console";
-
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
-import { CenterTable, UserTable } from "@/drizzle/schema";
+import { CenterTable } from "@/drizzle/schema";
 import { getUserByEmail, insertUser } from "@/features/users/db/users";
 import { registerSchema } from "@/lib/schemas";
 
