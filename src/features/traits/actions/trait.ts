@@ -97,9 +97,7 @@ export async function uploadTraitDataAction(formData: FormData, force = false) {
       };
     }
 
-    // Handling the conflict resolution: overwrite if `force` is true
     if (!force) {
-      // Check for existing sample IDs in the database before inserting
       const existingSamples = await db
         .selectDistinct({ sampleId: TraitTable.sampleId })
         .from(TraitTable)
@@ -121,29 +119,25 @@ export async function uploadTraitDataAction(formData: FormData, force = false) {
       }
     }
 
-    // If force is true, or if no conflicts, insert the trait data into the database
     if (force) {
       await db.transaction(async (tx) => {
-        // Delete the existing data for the conflicting sample IDs
         await tx
           .delete(TraitTable)
           .where(
             and(
               eq(TraitTable.studyId, studyId),
-              inArray(TraitTable.sampleId, traitSampleIds)
+              inArray(TraitTable.sampleId, traitSampleIds),
+              inArray(TraitTable.traitName, traits)
             )
           );
 
-        // Insert new trait data
         await insertTraitBatch(traitDataToInsert, tx);
       });
     } else {
       await db.transaction(async (tx) => {
-        // Insert trait data if no conflicts
         await insertTraitBatch(traitDataToInsert, tx);
       });
     }
-
     revalidateTraitCache();
 
     return {
