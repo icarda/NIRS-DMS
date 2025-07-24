@@ -34,7 +34,7 @@ export function DataTableViewOptions<TData>({
   const columns = useMemo(
     () =>
       table
-        .getAllColumns()
+        .getAllLeafColumns()
         .filter(
           (column) =>
             typeof column.accessorFn !== "undefined" && column.getCanHide()
@@ -78,11 +78,11 @@ export function DataTableViewOptions<TData>({
                     className={cn(
                       "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
                       column.getIsVisible()
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary"
                         : "opacity-50 [&_svg]:invisible"
                     )}
                   >
-                    <Check className={cn("h-4 w-4")} />
+                    <Check className={cn("h-4 w-4 text-white")} />
                   </div>
                   <span>{column.columnDef.meta?.label || column.id}</span>
                 </CommandItem>
