@@ -33,15 +33,6 @@ export async function getStudies() {
       nirModel: true,
       physiologicalStage: true,
     },
-    columns: {
-      id: true,
-      studyCode: true,
-      requesterEmail: true,
-      requesterName: true,
-      program: true,
-      sampleDate: true,
-      additionalMetadata: true,
-    },
   });
   return studies;
 }

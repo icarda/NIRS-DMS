@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
   ColumnDef,
@@ -51,26 +51,107 @@ export function DataTable<TData, TValue>({
 
   const [controlsOpen, setControlsOpen] = useState(false);
 
+  const generateColumns = useCallback(
+    (tab: "wet-chemistry" | "trial" | "study") => {
+      console.log(
+        "Additional Metadata:",
+        tab,
+        (data as any).additionalMetadata
+      );
+
+      if (tab === "wet-chemistry")
+        return [
+          ...columns,
+          ...((traitVariables?.map((key) => ({
+            header: capitalize(key),
+            accessorKey: key,
+            id: key,
+            cell: ({ row }) => {
+              const value = row.getValue(key);
+              if (typeof value === "undefined") {
+                return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+              }
+              return <div>{`${value}`}</div>;
+            },
+          })) as ColumnDef<TData>[]) || []),
+        ];
+
+      if (tab === "trial") {
+        const trialColumns = columns;
+        const additionalMetadataKeys = new Set<string>();
+
+        data.forEach((trial: any) => {
+          if (trial.additionalMetadata) {
+            Object.keys(trial.additionalMetadata).forEach((key) => {
+              additionalMetadataKeys.add(key);
+            });
+          }
+        });
+
+        // Map additionalMetadata keys to columns
+        const additionalMetadataColumns = Array.from(
+          additionalMetadataKeys
+        ).map((key) => ({
+          header: capitalize(key),
+          accessorFn: (row: any) => row.additionalMetadata?.[key],
+          id: key,
+          cell: ({ row }) => {
+            const value = row.getValue(key);
+            if (typeof value === "undefined") {
+              return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+            }
+            return <div>{`${value}`}</div>;
+          },
+          meta: { label: capitalize(key) }, // Label the column with the key name
+        })) as ColumnDef<TData>[];
+
+        // Add the dynamic columns to the static columns
+        trialColumns.push(...additionalMetadataColumns);
+
+        return trialColumns;
+      }
+
+      if (tab === "study") {
+        const studyColumns = columns;
+        const additionalMetadataKeys = new Set<string>();
+
+        data.forEach((study: any) => {
+          if (study.additionalMetadata) {
+            Object.keys(study.additionalMetadata).forEach((key) => {
+              additionalMetadataKeys.add(key);
+            });
+          }
+        });
+
+        // Map additionalMetadata keys to columns
+        const additionalMetadataColumns = Array.from(
+          additionalMetadataKeys
+        ).map((key) => ({
+          header: capitalize(key),
+          accessorFn: (row: any) => row.additionalMetadata?.[key],
+          id: key,
+          cell: ({ row }) => {
+            const value = row.getValue(key);
+            if (typeof value === "undefined") {
+              return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+            }
+            return <div>{`${value}`}</div>;
+          },
+          meta: { label: capitalize(key) }, // Label the column with the key name
+        })) as ColumnDef<TData>[];
+
+        // Add the dynamic columns to the static columns
+        studyColumns.push(...additionalMetadataColumns);
+
+        return studyColumns;
+      }
+    },
+    [columns, data, traitVariables] // Add relevant dependencies here
+  );
+
   const table = useReactTable({
     data,
-    columns:
-      tab === "wet-chemistry"
-        ? [
-            ...columns,
-            ...((traitVariables?.map((key) => ({
-              header: capitalize(key),
-              accessorKey: key,
-              id: key,
-              cell: ({ row }) => {
-                const value = row.getValue(key);
-                if (typeof value === "undefined") {
-                  return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-                }
-                return <div>{`${value}`}</div>;
-              },
-            })) as ColumnDef<TData>[]) || []),
-          ]
-        : columns,
+    columns: generateColumns(tab) as ColumnDef<TData, TValue>[],
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,

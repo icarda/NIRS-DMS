@@ -1,17 +1,21 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { format, isSameDay } from "date-fns";
-import { Minus } from "lucide-react";
-
 import PageWrapper from "@/components/page-wrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getStudies } from "@/features/studies/db/study";
 import { getWetChemistryData } from "@/features/traits/db/trait";
-import { capitalize, isArrayOfDates } from "@/lib/utils";
-import { columns } from "./table/columns";
-import { filterFields } from "./table/constants";
+import { getTrials } from "@/features/trials/db/trial";
+import {
+  studyColumns,
+  trialColumns,
+  wetChemistryColumns,
+} from "./table/columns";
+import {
+  studyFilterFields,
+  trialFilterFields,
+  wetChemistryFilterFields,
+} from "./table/constants";
 import { DataTable } from "./table/data-table";
-import { ColumnSchema } from "./table/schema";
 
-async function getRealData() {
+async function getGroupedWetChemistryData() {
   const result = await getWetChemistryData();
 
   const dataColumns = result.map((row) => row.trait_name);
@@ -51,14 +55,17 @@ async function getRealData() {
 }
 
 export default async function ExploreData() {
-  const { realData, dataColumns } = await getRealData();
+  const { realData, dataColumns } = await getGroupedWetChemistryData();
+  const trials = await getTrials();
+  const studies = await getStudies();
+  console.log("Trials:", trials);
 
   const traitVariables = Array.from(new Set(dataColumns));
 
   return (
     <PageWrapper title="Explore Data">
       <div className="px-2 md:px-0">
-        <Tabs defaultValue="wetchemistry">
+        <Tabs defaultValue="study">
           <div className="border-b">
             <div className="flex items-center">
               <TabsList className="h-12 bg-transparent">
@@ -87,12 +94,32 @@ export default async function ExploreData() {
             <TabsContent value="wetchemistry">
               <DataTable
                 //@ts-ignore
-                columns={columns}
+                columns={wetChemistryColumns}
                 //@ts-ignore
                 data={realData}
-                filterFields={filterFields}
+                filterFields={wetChemistryFilterFields}
                 traitVariables={traitVariables}
                 tab="wet-chemistry"
+              />
+            </TabsContent>
+            <TabsContent value="trial">
+              <DataTable
+                //@ts-ignore
+                columns={trialColumns}
+                //@ts-ignore
+                data={trials}
+                filterFields={trialFilterFields}
+                tab="trial"
+              />
+            </TabsContent>
+            <TabsContent value="study">
+              <DataTable
+                //@ts-ignore
+                columns={studyColumns}
+                //@ts-ignore
+                data={studies}
+                filterFields={studyFilterFields}
+                tab="study"
               />
             </TabsContent>
           </div>

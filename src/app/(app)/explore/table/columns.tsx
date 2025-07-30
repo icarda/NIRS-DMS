@@ -6,9 +6,13 @@ import { Check, Minus, X } from "lucide-react";
 
 import { isArrayOfDates } from "@/lib/utils";
 import { DataTableColumnHeader } from "./data-table-column-header";
-import { ColumnSchema } from "./schema";
+import {
+  StudyColumnSchema,
+  TrialColumnSchema,
+  WetChemistryColumnSchema,
+} from "./schema";
 
-export const columns: ColumnDef<ColumnSchema>[] = [
+export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
   {
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Sample ID" />
@@ -59,7 +63,14 @@ export const columns: ColumnDef<ColumnSchema>[] = [
 
         accessorKey: "trial_planting_date",
         id: "trialPlantingDate",
-
+        cell: ({ row }) => {
+          const value = row.getValue("trialPlantingDate");
+          return (
+            <div suppressHydrationWarning>
+              {format(new Date(`${value}`), "LLL dd, y")}
+            </div>
+          );
+        },
         filterFn: (row, id, value) => {
           const rowValue = row.getValue(id);
           if (isArrayOfDates(value) && rowValue instanceof Date) {
@@ -106,6 +117,14 @@ export const columns: ColumnDef<ColumnSchema>[] = [
         ),
         accessorKey: "sample_date",
         id: "sample_date",
+        cell: ({ row }) => {
+          const value = row.getValue("sample_date");
+          return (
+            <div suppressHydrationWarning>
+              {format(new Date(`${value}`), "LLL dd, y")}
+            </div>
+          );
+        },
         filterFn: (row, id, value) => {
           const rowValue = row.getValue(id);
           if (isArrayOfDates(value) && rowValue instanceof Date) {
@@ -122,6 +141,206 @@ export const columns: ColumnDef<ColumnSchema>[] = [
         },
       },
     ],
+  },
+];
+
+export const trialColumns: ColumnDef<TrialColumnSchema>[] = [
+  {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trial Name" />
+    ),
+    accessorKey: "name",
+    id: "trial_name",
+    meta: {
+      label: "Trial Name",
+    },
+  },
+  {
+    header: "Crop",
+    accessorFn: (row) => row.crop.name,
+    id: "crop",
+    meta: {
+      label: "Crop",
+    },
+  },
+  {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Planting Date" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("trial_planting_date");
+      return (
+        <div suppressHydrationWarning>
+          {format(new Date(`${value}`), "LLL dd, y")}
+        </div>
+      );
+    },
+    accessorKey: "plantingDate",
+    id: "trial_planting_date",
+    meta: {
+      label: "Planting Date",
+    },
+  },
+  {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Soil Type" />
+    ),
+    accessorKey: "soilType",
+    id: "trial_soil_type",
+    filterFn: (row, id, value) => {
+      const array = row.getValue(id) as string[];
+      if (typeof value === "string") return array.includes(value);
+      if (Array.isArray(value)) return value.some((i) => array.includes(i));
+      return false;
+    },
+    meta: {
+      label: "Soil Type",
+    },
+  },
+  {
+    header: "Location",
+    accessorKey: "location",
+    id: "trial_location",
+    meta: {
+      label: "Location",
+    },
+  },
+  {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Latitude" />
+    ),
+    accessorKey: "latitude",
+    id: "trial_latitude",
+    meta: {
+      label: "Latitude",
+    },
+  },
+  {
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Longitude" />
+    ),
+    accessorKey: "longitude",
+    id: "trial_longitude",
+    meta: {
+      label: "Longitude",
+    },
+  },
+  {
+    accessorKey: "irrigation",
+    id: "irrigation",
+    header: "Irrigation",
+    cell: ({ row }) => {
+      const value = row.getValue("irrigation");
+      if (typeof value === "undefined") {
+        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+      }
+      if (value) return <Check className="h-4 w-4" />;
+      return <X className="h-4 w-4 text-muted-foreground/50" />;
+    },
+    filterFn: (row, id, value) => {
+      const rowValue = row.getValue(id);
+      return value.includes(rowValue);
+    },
+    meta: {
+      label: "Irrigation",
+    },
+  },
+];
+
+export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
+  {
+    header: "Study Code",
+    accessorKey: "studyCode",
+    id: "study_code",
+    meta: {
+      label: "Study Code",
+    },
+  },
+  {
+    header: "Program",
+    accessorKey: "program",
+    id: "program",
+    meta: {
+      label: "Program",
+    },
+  },
+  {
+    header: "Product Type",
+    accessorFn: (row) => row.productType.name,
+    id: "product_type",
+    meta: {
+      label: "Product Type",
+    },
+  },
+  {
+    header: "NIR Model",
+    accessorFn: (row) => row.nirModel.name,
+    id: "nir_model",
+    meta: {
+      label: "NIR Model",
+    },
+  },
+  {
+    header: "Physiological Stage",
+    accessorFn: (row) => row.physiologicalStage.name,
+    id: "physiological_stage",
+    meta: {
+      label: "Physiological Stage",
+    },
+  },
+  {
+    header: "Quality Lab",
+    accessorFn: (row) => row.qualityLab.name,
+    id: "quality_lab",
+    meta: {
+      label: "Quality Lab",
+    },
+  },
+  {
+    header: "Sample Date",
+    accessorKey: "sampleDate",
+    id: "sample_date",
+    cell: ({ row }) => {
+      const value = row.getValue("sample_date");
+      return (
+        <div suppressHydrationWarning>
+          {format(new Date(`${value}`), "LLL dd, y")}
+        </div>
+      );
+    },
+    meta: {
+      label: "Sample Date",
+    },
+  },
+  {
+    header: "Requester Name",
+    accessorKey: "requesterName",
+    id: "requester_name",
+    cell: ({ row }) => {
+      const value = row.getValue("requester_name");
+      if (!value) {
+        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+      }
+      return <div>{`${value}`}</div>;
+    },
+    meta: {
+      label: "Requester Name",
+    },
+  },
+  {
+    header: "Requester Email",
+    accessorKey: "requesterEmail",
+    id: "requester_email",
+    cell: ({ row }) => {
+      const value = row.getValue("requester_email");
+      if (!value) {
+        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+      }
+      return <div>{`${value}`}</div>;
+    },
+    meta: {
+      label: "Requester Email",
+    },
   },
 ];
 
