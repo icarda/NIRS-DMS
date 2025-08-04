@@ -50,6 +50,11 @@ export function labelToCamel(label: string): string {
     .join("");
 }
 
+export function camelToNormal(text: string): string {
+  const result = text.replace(/([a-z])([A-Z])/g, "$1 $2");
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
 export function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

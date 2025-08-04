@@ -37,7 +37,6 @@ export async function addCropTrait(
       return { error: true, message: "There was an error creating the trait" };
     }
 
-    // check if the trait already exists for the crop
     const cropTraits = await getCropTraits({ cropId });
 
     const traitExists = cropTraits.some(

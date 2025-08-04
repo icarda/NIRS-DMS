@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { CropCommonNameTable, CropTable } from "@/drizzle/schema";
+import { CropTable } from "@/drizzle/schema";
 import {
   getCropGlobalTag,
   getCropIdTag,

@@ -49,14 +49,6 @@ export const wetChemistryFilterFields = [
     value: "product_type",
     type: "input",
   },
-  ...["BetaGlucan", "Fe", "Zn"].map((trait) => ({
-    label: trait,
-    value: trait,
-    type: "slider" as const,
-    min: 0,
-    max: 20,
-    unit: "g",
-  })),
 ] satisfies DataTableFilterField<WetChemistryColumnSchema>[];
 
 export const trialFilterFields = [

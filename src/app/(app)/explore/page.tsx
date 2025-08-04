@@ -58,7 +58,6 @@ export default async function ExploreData() {
   const { realData, dataColumns } = await getGroupedWetChemistryData();
   const trials = await getTrials();
   const studies = await getStudies();
-  console.log("Trials:", trials);
 
   const traitVariables = Array.from(new Set(dataColumns));
 

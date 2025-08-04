@@ -1,3 +1,4 @@
+import { Table } from "@tanstack/react-table";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 

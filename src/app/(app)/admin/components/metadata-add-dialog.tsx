@@ -74,6 +74,7 @@ export function MetadataAddDialog({ type }: MetadataAddDialogProps) {
       setIsLoading(true);
       let result;
       const name = labelToCamel(data.label);
+
       if (type === "study") {
         result = await createStudyMetadataConfig({
           ...data,

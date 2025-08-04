@@ -55,6 +55,9 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
         header: "Name",
         accessorKey: "trial_name",
         id: "trialName",
+        meta: {
+          label: "Trial Name",
+        },
       },
       {
         header: ({ column }) => (
@@ -72,24 +75,46 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
           );
         },
         filterFn: (row, id, value) => {
-          const rowValue = row.getValue(id);
-          if (isArrayOfDates(value) && rowValue instanceof Date) {
-            if (value.length === 1) {
-              return isSameDay(value[0], rowValue);
+          const raw = row.getValue(id);
+
+          const rowDate =
+            raw instanceof Date
+              ? raw
+              : typeof raw === "string"
+                ? new Date(`${raw}T00:00:00`)
+                : null;
+
+          if (!rowDate || isNaN(rowDate.getTime())) return false;
+
+          if (Array.isArray(value)) {
+            const [from, to] = value;
+
+            if (!from && !to) return true;
+            if (from && !to) return isSameDay(from, rowDate);
+            if (from && to) {
+              const toInclusive = new Date(to);
+              toInclusive.setHours(23, 59, 59, 999);
+
+              return (
+                rowDate.getTime() >= from.getTime() &&
+                rowDate.getTime() <= toInclusive.getTime()
+              );
             }
-            const sorted = value.sort((a, b) => a.getTime() - b.getTime());
-            return (
-              sorted[0]?.getTime() <= rowValue.getTime() &&
-              rowValue.getTime() <= sorted[1]?.getTime()
-            );
           }
+
           return false;
+        },
+        meta: {
+          label: "Planting Date",
         },
       },
       {
         header: "Crop",
         accessorKey: "crop_name",
         id: "crop",
+        meta: {
+          label: "Crop",
+        },
       },
     ],
   },
@@ -100,16 +125,25 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
         header: "Study Code",
         accessorKey: "study_code",
         id: "study_code",
+        meta: {
+          label: "Study Code",
+        },
       },
       {
         header: "Product Type",
         accessorKey: "product_type",
         id: "product_type",
+        meta: {
+          label: "Product Type",
+        },
       },
       {
         header: "Physiological Stage",
         accessorKey: "physiological_stage",
         id: "physiological_stage",
+        meta: {
+          label: "Physiological Stage",
+        },
       },
       {
         header: ({ column }) => (
@@ -126,18 +160,37 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
           );
         },
         filterFn: (row, id, value) => {
-          const rowValue = row.getValue(id);
-          if (isArrayOfDates(value) && rowValue instanceof Date) {
-            if (value.length === 1) {
-              return isSameDay(value[0], rowValue);
+          const raw = row.getValue(id);
+
+          const rowDate =
+            raw instanceof Date
+              ? raw
+              : typeof raw === "string"
+                ? new Date(`${raw}T00:00:00`)
+                : null;
+
+          if (!rowDate || isNaN(rowDate.getTime())) return false;
+
+          if (Array.isArray(value)) {
+            const [from, to] = value;
+
+            if (!from && !to) return true;
+            if (from && !to) return isSameDay(from, rowDate);
+            if (from && to) {
+              const toInclusive = new Date(to);
+              toInclusive.setHours(23, 59, 59, 999);
+
+              return (
+                rowDate.getTime() >= from.getTime() &&
+                rowDate.getTime() <= toInclusive.getTime()
+              );
             }
-            const sorted = value.sort((a, b) => a.getTime() - b.getTime());
-            return (
-              sorted[0]?.getTime() <= rowValue.getTime() &&
-              rowValue.getTime() <= sorted[1]?.getTime()
-            );
           }
+
           return false;
+        },
+        meta: {
+          label: "Sample Date",
         },
       },
     ],
@@ -169,12 +222,44 @@ export const trialColumns: ColumnDef<TrialColumnSchema>[] = [
     ),
     cell: ({ row }) => {
       const value = row.getValue("trial_planting_date");
+
       return (
         <div suppressHydrationWarning>
           {format(new Date(`${value}`), "LLL dd, y")}
         </div>
       );
     },
+    filterFn: (row, id, value) => {
+      const raw = row.getValue(id);
+
+      const rowDate =
+        raw instanceof Date
+          ? raw
+          : typeof raw === "string"
+            ? new Date(`${raw}T00:00:00`)
+            : null;
+
+      if (!rowDate || isNaN(rowDate.getTime())) return false;
+
+      if (Array.isArray(value)) {
+        const [from, to] = value;
+
+        if (!from && !to) return true;
+        if (from && !to) return isSameDay(from, rowDate);
+        if (from && to) {
+          const toInclusive = new Date(to);
+          toInclusive.setHours(23, 59, 59, 999);
+
+          return (
+            rowDate.getTime() >= from.getTime() &&
+            rowDate.getTime() <= toInclusive.getTime()
+          );
+        }
+      }
+
+      return false;
+    },
+
     accessorKey: "plantingDate",
     id: "trial_planting_date",
     meta: {
@@ -232,7 +317,9 @@ export const trialColumns: ColumnDef<TrialColumnSchema>[] = [
     cell: ({ row }) => {
       const value = row.getValue("irrigation");
       if (typeof value === "undefined") {
-        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+        return (
+          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+        );
       }
       if (value) return <Check className="h-4 w-4" />;
       return <X className="h-4 w-4 text-muted-foreground/50" />;
@@ -308,6 +395,36 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
         </div>
       );
     },
+    filterFn: (row, id, value) => {
+      const raw = row.getValue(id);
+
+      const rowDate =
+        raw instanceof Date
+          ? raw
+          : typeof raw === "string"
+            ? new Date(`${raw}T00:00:00`)
+            : null;
+
+      if (!rowDate || isNaN(rowDate.getTime())) return false;
+
+      if (Array.isArray(value)) {
+        const [from, to] = value;
+
+        if (!from && !to) return true;
+        if (from && !to) return isSameDay(from, rowDate);
+        if (from && to) {
+          const toInclusive = new Date(to);
+          toInclusive.setHours(23, 59, 59, 999);
+
+          return (
+            rowDate.getTime() >= from.getTime() &&
+            rowDate.getTime() <= toInclusive.getTime()
+          );
+        }
+      }
+
+      return false;
+    },
     meta: {
       label: "Sample Date",
     },
@@ -319,7 +436,9 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
     cell: ({ row }) => {
       const value = row.getValue("requester_name");
       if (!value) {
-        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+        return (
+          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+        );
       }
       return <div>{`${value}`}</div>;
     },
@@ -334,7 +453,9 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
     cell: ({ row }) => {
       const value = row.getValue("requester_email");
       if (!value) {
-        return <Minus className="h-4 w-4 text-muted-foreground/50" />;
+        return (
+          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+        );
       }
       return <div>{`${value}`}</div>;
     },
@@ -343,105 +464,3 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
     },
   },
 ];
-
-// {
-//   header: ({ column }) => (
-//     <DataTableColumnHeader column={column} title="Year" />
-//   ),
-//   accessorKey: "year",
-//   meta: {
-//     label: "Year",
-//   },
-// },
-// {
-//   accessorKey: "starch",
-//   header: ({ column }) => (
-//     <DataTableColumnHeader column={column} title="Starch" />
-//   ),
-//   cell: ({ row }) => {
-//     const value = row.getValue("starch");
-//     if (typeof value === "undefined") {
-//       return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-//     }
-//     return <div>{`${value}`} %</div>;
-//   },
-//   meta: {
-//     label: "Starch",
-//   },
-// },
-// {
-//   header: ({ column }) => (
-//     <DataTableColumnHeader column={column} title="Protein" />
-//   ),
-//   accessorKey: "protein",
-//   cell: ({ row }) => {
-//     const value = row.getValue("protein");
-//     if (typeof value === "undefined") {
-//       return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-//     }
-//     return <div>{`${value}`} g</div>;
-//   },
-//   meta: {
-//     label: "Protein",
-//   },
-// },
-// {
-//   header: ({ column }) => (
-//     <DataTableColumnHeader column={column} title="Hardness" />
-//   ),
-//   cell: ({ row }) => {
-//     const value = row.getValue("hrd");
-//     if (typeof value === "undefined") {
-//       return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-//     }
-//     return <div>{`${value}`} %</div>;
-//   },
-//   accessorKey: "hrd",
-//   meta: {
-//     label: "Hardness",
-//   },
-// },
-// {
-//   accessorKey: "irrigation",
-//   header: "Irrigation",
-//   cell: ({ row }) => {
-//     const value = row.getValue("irrigation");
-//     if (typeof value === "undefined") {
-//       return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-//     }
-//     if (value) return <Check className="h-4 w-4" />;
-//     return <X className="h-4 w-4 text-muted-foreground/50" />;
-//   },
-//   filterFn: (row, id, value) => {
-//     const rowValue = row.getValue(id);
-//     return value.includes(rowValue);
-//   },
-// },
-// {
-//   accessorKey: "date",
-//   header: ({ column }) => (
-//     <DataTableColumnHeader column={column} title="Date" />
-//   ),
-//   cell: ({ row }) => {
-//     const value = row.getValue("date");
-//     return (
-//       <div className="text-xs text-muted-foreground" suppressHydrationWarning>
-//         {format(new Date(`${value}`), "LLL dd, y")}
-//       </div>
-//     );
-//   },
-// filterFn: (row, id, value) => {
-//   const rowValue = row.getValue(id);
-//   if (isArrayOfDates(value) && rowValue instanceof Date) {
-//     if (value.length === 1) {
-//       return isSameDay(value[0], rowValue);
-//     }
-//     const sorted = value.sort((a, b) => a.getTime() - b.getTime());
-//     return (
-//       sorted[0]?.getTime() <= rowValue.getTime() &&
-//       rowValue.getTime() <= sorted[1]?.getTime()
-//     );
-//   }
-//   return false;
-// },
-// },

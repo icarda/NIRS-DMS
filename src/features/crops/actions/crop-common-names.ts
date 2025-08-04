@@ -2,7 +2,6 @@
 
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
-import { revalidateCropCommonNamesCache } from "../db/cache/cropCommonNames";
 import {
   deleteCropCommonName as deleteCropCommonNameDb,
   insertCropCommonNames,

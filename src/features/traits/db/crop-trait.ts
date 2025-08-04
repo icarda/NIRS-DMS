@@ -1,5 +1,4 @@
 import { and, count, eq, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";

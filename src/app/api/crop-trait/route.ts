@@ -42,6 +42,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    // TODO: fix ts error
+    // @ts-ignore
     const newCropTrait = await insertCropTrait(parsed.data);
     return NextResponse.json(
       {

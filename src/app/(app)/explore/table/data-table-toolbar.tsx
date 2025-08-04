@@ -61,10 +61,7 @@ export function DataTableToolBar<TData>({
           </Button>
         ) : null}
         <DataTableViewOptions table={table} />
-        <DataTableDownload
-          table={table}
-          //  tab={tab}
-        />
+        <DataTableDownload table={table} tab={tab} />
       </div>
     </div>
   );
