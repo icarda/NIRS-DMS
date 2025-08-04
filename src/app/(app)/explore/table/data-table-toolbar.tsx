@@ -11,12 +11,14 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   controlsOpen: boolean;
   setControlsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  tab: "study" | "trial" | "wet-chemistry";
 }
 
 export function DataTableToolBar<TData>({
   table,
   controlsOpen,
   setControlsOpen,
+  tab,
 }: DataTableToolbarProps<TData>) {
   const filters = table.getState().columnFilters;
   return (
@@ -59,7 +61,10 @@ export function DataTableToolBar<TData>({
           </Button>
         ) : null}
         <DataTableViewOptions table={table} />
-        <DataTableDownload />
+        <DataTableDownload
+          table={table}
+          //  tab={tab}
+        />
       </div>
     </div>
   );

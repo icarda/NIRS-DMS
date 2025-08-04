@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   ColumnDef,
@@ -25,10 +25,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/ui/table-pagination";
-import { capitalize, cn } from "@/lib/utils";
+import { camelToNormal, cn } from "@/lib/utils";
 import { DataTableFilterControls } from "./data-table-filter-controls";
 import { DataTableToolBar } from "./data-table-toolbar";
 import { DataTableFilterField } from "./types";
+import {
+  findFilterType,
+  renderDynamicCell,
+  renderDynamicFilterFn,
+} from "./utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,6 +41,64 @@ interface DataTableProps<TData, TValue> {
   filterFields?: DataTableFilterField<TData>[];
   traitVariables?: string[];
   tab: "study" | "trial" | "wet-chemistry";
+}
+
+function generateColumns<TData>(
+  tab: "wet-chemistry" | "trial" | "study",
+  columns: ColumnDef<TData, any>[],
+  data: TData[],
+  traitVariables?: string[],
+  filterFields?: DataTableFilterField<TData>[]
+): ColumnDef<TData>[] {
+  const baseColumns = [...columns];
+
+  if (tab === "wet-chemistry") {
+    return [
+      ...baseColumns,
+      ...(traitVariables?.map((key) => ({
+        header: camelToNormal(key),
+        accessorKey: key,
+        id: key,
+        cell: ({ row }) => {
+          const value = row.getValue(key);
+          return typeof value === "undefined" ? (
+            <Minus className="h-4 w-4 text-muted-foreground/50" />
+          ) : (
+            <div>{`${value}`}</div>
+          );
+        },
+        filterFn: renderDynamicFilterFn(findFilterType(key, filterFields)),
+        meta: { label: camelToNormal(key) },
+      })) as ColumnDef<TData>[]),
+    ];
+  }
+
+  if (tab === "trial" || tab === "study") {
+    const additionalMetadataKeys = new Set<string>();
+
+    data.forEach((item: any) => {
+      if (item.additionalMetadata) {
+        Object.keys(item.additionalMetadata).forEach((key) => {
+          additionalMetadataKeys.add(key);
+        });
+      }
+    });
+
+    const additionalMetadataColumns = Array.from(additionalMetadataKeys).map(
+      (key) => ({
+        header: camelToNormal(key),
+
+        accessorFn: (row: any) => row.additionalMetadata?.[key],
+        id: key,
+        cell: renderDynamicCell(key),
+        meta: { label: camelToNormal(key) },
+      })
+    ) as ColumnDef<TData>[];
+
+    return [...baseColumns, ...additionalMetadataColumns];
+  }
+
+  return baseColumns;
 }
 
 export function DataTable<TData, TValue>({
@@ -51,107 +114,16 @@ export function DataTable<TData, TValue>({
 
   const [controlsOpen, setControlsOpen] = useState(false);
 
-  const generateColumns = useCallback(
-    (tab: "wet-chemistry" | "trial" | "study") => {
-      console.log(
-        "Additional Metadata:",
-        tab,
-        (data as any).additionalMetadata
-      );
+  if (tab === "study") console.log(data);
 
-      if (tab === "wet-chemistry")
-        return [
-          ...columns,
-          ...((traitVariables?.map((key) => ({
-            header: capitalize(key),
-            accessorKey: key,
-            id: key,
-            cell: ({ row }) => {
-              const value = row.getValue(key);
-              if (typeof value === "undefined") {
-                return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-              }
-              return <div>{`${value}`}</div>;
-            },
-          })) as ColumnDef<TData>[]) || []),
-        ];
-
-      if (tab === "trial") {
-        const trialColumns = columns;
-        const additionalMetadataKeys = new Set<string>();
-
-        data.forEach((trial: any) => {
-          if (trial.additionalMetadata) {
-            Object.keys(trial.additionalMetadata).forEach((key) => {
-              additionalMetadataKeys.add(key);
-            });
-          }
-        });
-
-        // Map additionalMetadata keys to columns
-        const additionalMetadataColumns = Array.from(
-          additionalMetadataKeys
-        ).map((key) => ({
-          header: capitalize(key),
-          accessorFn: (row: any) => row.additionalMetadata?.[key],
-          id: key,
-          cell: ({ row }) => {
-            const value = row.getValue(key);
-            if (typeof value === "undefined") {
-              return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-            }
-            return <div>{`${value}`}</div>;
-          },
-          meta: { label: capitalize(key) }, // Label the column with the key name
-        })) as ColumnDef<TData>[];
-
-        // Add the dynamic columns to the static columns
-        trialColumns.push(...additionalMetadataColumns);
-
-        return trialColumns;
-      }
-
-      if (tab === "study") {
-        const studyColumns = columns;
-        const additionalMetadataKeys = new Set<string>();
-
-        data.forEach((study: any) => {
-          if (study.additionalMetadata) {
-            Object.keys(study.additionalMetadata).forEach((key) => {
-              additionalMetadataKeys.add(key);
-            });
-          }
-        });
-
-        // Map additionalMetadata keys to columns
-        const additionalMetadataColumns = Array.from(
-          additionalMetadataKeys
-        ).map((key) => ({
-          header: capitalize(key),
-          accessorFn: (row: any) => row.additionalMetadata?.[key],
-          id: key,
-          cell: ({ row }) => {
-            const value = row.getValue(key);
-            if (typeof value === "undefined") {
-              return <Minus className="h-4 w-4 text-muted-foreground/50" />;
-            }
-            return <div>{`${value}`}</div>;
-          },
-          meta: { label: capitalize(key) }, // Label the column with the key name
-        })) as ColumnDef<TData>[];
-
-        // Add the dynamic columns to the static columns
-        studyColumns.push(...additionalMetadataColumns);
-
-        return studyColumns;
-      }
-    },
-    [columns, data, traitVariables] // Add relevant dependencies here
+  const allColumns = useMemo(
+    () => generateColumns(tab, columns, data, traitVariables),
+    [tab, columns, data, traitVariables]
   );
 
   const table = useReactTable({
     data,
-    columns: generateColumns(tab) as ColumnDef<TData, TValue>[],
+    columns: allColumns as ColumnDef<TData, TValue>[],
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -183,6 +155,7 @@ export function DataTable<TData, TValue>({
           table={table}
           controlsOpen={controlsOpen}
           setControlsOpen={setControlsOpen}
+          tab={tab}
         />
         <div className="grid grid-cols-1 rounded-md border">
           <Table>
