@@ -326,7 +326,7 @@ export const trialColumns: ColumnDef<TrialColumnSchema>[] = [
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
-      return value.includes(rowValue);
+      return value.includes(`${rowValue}`);
     },
     meta: {
       label: "Irrigation",
