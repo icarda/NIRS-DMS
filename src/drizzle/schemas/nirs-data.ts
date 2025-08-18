@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { id } from "../schemaHelpers";
-import { StudyTable } from "./study";
+import { SpeciesTable, StudyTable } from "./study";
 import { TraitTable } from "./trait";
 
 export const NirsDataTable = pgTable(
@@ -19,6 +19,11 @@ export const NirsDataTable = pgTable(
       .notNull()
       .references(() => StudyTable.id, { onDelete: "cascade" }),
     sampleId: integer("sample_id").notNull(),
+    speciesId: integer("species_id")
+      .notNull()
+      .references(() => SpeciesTable.id, {
+        onDelete: "cascade",
+      }),
 
     wavelength: integer("wavelength").notNull(),
     value: doublePrecision("value").notNull(),

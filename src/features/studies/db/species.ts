@@ -3,11 +3,9 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import {
-  OtherIdsTable,
+  NirsDataTable,
   SpeciesTable,
-  StudyTable,
   TrialSpeciesTable,
-  TrialTable,
 } from "@/drizzle/schema";
 import { getSpeciesIdTag, revalidateSpeciesCache } from "./cache/species";
 
@@ -106,15 +104,12 @@ export async function getSpeciesForSample(sampleId: number) {
   cacheTag(getSpeciesIdTag(sampleId));
   const species = await db
     .selectDistinct({
-      sampleId: SpeciesTable.id,
-      name: SpeciesTable.name,
+      species: SpeciesTable.name,
     })
-    .from(OtherIdsTable)
-    .innerJoin(StudyTable, eq(OtherIdsTable.studyId, StudyTable.id))
-    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
-    .innerJoin(TrialSpeciesTable, eq(TrialTable.id, TrialSpeciesTable.trialId))
-    .innerJoin(SpeciesTable, eq(TrialSpeciesTable.speciesId, SpeciesTable.id))
-    .where(eq(OtherIdsTable.sampleId, sampleId));
+    .from(NirsDataTable)
+    .innerJoin(SpeciesTable, eq(NirsDataTable.speciesId, SpeciesTable.id))
+    .where(eq(NirsDataTable.sampleId, sampleId))
+    .limit(1);
 
-  return species;
+  return species[0];
 }

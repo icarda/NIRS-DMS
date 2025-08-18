@@ -387,7 +387,13 @@ export async function uploadNirsData(
         }
 
         if (nirsDataToInsert.length > 0) {
-          await insertNirsDataBatch(nirsDataToInsert, tx);
+          await insertNirsDataBatch(
+            nirsDataToInsert.map((nirs) => ({
+              ...nirs,
+              speciesId: validatedData.speciesID,
+            })),
+            tx
+          );
         }
 
         return {
