@@ -39,7 +39,6 @@ export function FilterForm() {
       qualityLab: "",
       year: "",
       country: "",
-      nirModel: "",
     },
   });
 
@@ -125,34 +124,6 @@ export function FilterForm() {
                       {YEARS.map((year) => (
                         <SelectItem key={year} value={year}>
                           {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="nirModel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>NIR Model</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select NIR model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {nirModels.map((model) => (
-                        <SelectItem key={model.id} value={model.name}>
-                          {model.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
