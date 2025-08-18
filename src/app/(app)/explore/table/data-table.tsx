@@ -7,15 +7,20 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
+  Table as TTable,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Minus } from "lucide-react";
+import { Edit, Minus } from "lucide-react";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -25,10 +30,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/ui/table-pagination";
+import { updateStudy } from "@/features/studies/actions/study";
 import { camelToNormal, cn } from "@/lib/utils";
 import { DataTableFilterControls } from "./data-table-filter-controls";
 import { DataTableToolBar } from "./data-table-toolbar";
-import { DataTableFilterField } from "./types";
+import StudyEditDialog from "./study-edit-dialog";
+import {
+  DataTableFilterField,
+  NirModel,
+  PhysiologicalStage,
+  QualityLab,
+  Study,
+} from "./types";
 import {
   findFilterType,
   renderDynamicCell,
@@ -41,6 +54,20 @@ interface DataTableProps<TData, TValue> {
   filterFields?: DataTableFilterField<TData>[];
   traitVariables?: string[];
   tab: "study" | "trial" | "wet-chemistry";
+  studyData: {
+    qualityLabs: QualityLab[];
+    nirModels: NirModel[];
+    physiologicalStages: PhysiologicalStage[];
+    studyMetadatas: {
+      name: string;
+      label: string;
+      type: "string" | "number" | "date" | "boolean";
+      required?: boolean;
+      min: number | null;
+      max: number | null;
+      source: "sql" | "json";
+    }[];
+  };
 }
 
 function generateColumns<TData>(
@@ -48,7 +75,21 @@ function generateColumns<TData>(
   columns: ColumnDef<TData, any>[],
   data: TData[],
   traitVariables?: string[],
-  filterFields?: DataTableFilterField<TData>[]
+  filterFields?: DataTableFilterField<TData>[],
+  studyData?: {
+    qualityLabs: QualityLab[];
+    nirModels: NirModel[];
+    physiologicalStages: PhysiologicalStage[];
+    studyMetadatas: {
+      name: string;
+      label: string;
+      type: "string" | "number" | "date" | "boolean";
+      required?: boolean;
+      min: number | null;
+      max: number | null;
+      source: "sql" | "json";
+    }[];
+  }
 ): ColumnDef<TData>[] {
   const baseColumns = [...columns];
 
@@ -95,7 +136,77 @@ function generateColumns<TData>(
       })
     ) as ColumnDef<TData>[];
 
-    return [...baseColumns, ...additionalMetadataColumns];
+    return [
+      ...baseColumns,
+      ...additionalMetadataColumns,
+      {
+        id: "actions",
+        cell: ({ row }) => {
+          const study = row.original;
+          const [editDialogOpen, setEditDialogOpen] = useState(false);
+          const [isLoading, setIsLoading] = useState(false);
+
+          const handleStudyEdit = async (data: any) => {
+            setIsLoading(true);
+
+            try {
+              const qualityLabId = studyData?.qualityLabs.find(
+                (lab) => lab.name === data.qualityLab
+              )?.id!;
+              const nirModelId = studyData?.nirModels.find(
+                (model) => model.name === data.nirModel
+              )?.id!;
+              const physiologicalStageId = studyData?.physiologicalStages.find(
+                (stage) => stage.name === data.physiologicalStage
+              )?.id!;
+
+              await updateStudy((study as any).id, {
+                qualityLabId,
+                nirModelId,
+                physiologicalStageId,
+                program: data.program,
+                additionalMetadata: data.additionalMetadata,
+                requesterName: data.requesterName || null,
+                requesterEmail: data.requesterEmail || null,
+              });
+              toast.success("Study updated successfully");
+            } catch (error) {
+              console.error("Error updating study:", error);
+              toast.error("Error updating study");
+            } finally {
+              setEditDialogOpen(false);
+              setIsLoading(false);
+            }
+          };
+
+          return (
+            <>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditDialogOpen(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <StudyEditDialog
+                study={study as Study}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+                onSave={handleStudyEdit}
+                isLoading={isLoading}
+                nirModels={studyData?.nirModels || []}
+                physiologicalStages={studyData?.physiologicalStages || []}
+                qualityLabs={studyData?.qualityLabs || []}
+                studyMetadatas={studyData?.studyMetadatas || []}
+              />
+            </>
+          );
+        },
+      },
+    ];
   }
 
   return baseColumns;
@@ -107,6 +218,7 @@ export function DataTable<TData, TValue>({
   filterFields,
   traitVariables,
   tab,
+  studyData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -114,10 +226,16 @@ export function DataTable<TData, TValue>({
 
   const [controlsOpen, setControlsOpen] = useState(false);
 
-  if (tab === "study") console.log(data);
-
   const allColumns = useMemo(
-    () => generateColumns(tab, columns, data, traitVariables),
+    () =>
+      generateColumns(
+        tab,
+        columns,
+        data,
+        traitVariables,
+        filterFields,
+        studyData
+      ),
     [tab, columns, data, traitVariables]
   );
 
@@ -131,6 +249,8 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       columnVisibility,

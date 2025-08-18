@@ -52,6 +52,13 @@ export function DataTableFilterControls<TData, TValue>({
       >
         {filterFields?.map((field) => {
           const value = field.value as string;
+          const column = table
+            .getAllLeafColumns()
+            .find((col) => col.id === value);
+
+          const facettedValues = Array.from(
+            column?.getFacetedUniqueValues().keys() ?? []
+          );
           return (
             <AccordionItem key={value} value={value} className="border-none">
               <AccordionTrigger className="w-full px-2 py-0 hover:no-underline">
@@ -68,7 +75,14 @@ export function DataTableFilterControls<TData, TValue>({
                   switch (field.type) {
                     case "checkbox": {
                       return (
-                        <DataTableFilterCheckbox table={table} {...field} />
+                        <DataTableFilterCheckbox
+                          table={table}
+                          options={facettedValues.map((val) => ({
+                            label: val,
+                            value: val,
+                          }))}
+                          {...field}
+                        />
                       );
                     }
                     case "slider": {

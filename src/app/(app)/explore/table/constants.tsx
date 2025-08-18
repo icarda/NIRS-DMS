@@ -1,3 +1,4 @@
+import { capitalize } from "@/lib/utils";
 import {
   StudyColumnSchema,
   TrialColumnSchema,
@@ -16,17 +17,13 @@ export const wetChemistryFilterFields = [
   {
     label: "Crop",
     value: "crop",
-    type: "input",
+    type: "checkbox",
     defaultOpen: true,
   },
   {
     label: "Quality Lab",
     value: "quality_lab",
     type: "checkbox",
-    options: ["ICARDA-MAR", "ICARDA-LEB", "CIMMYT"].map((lab) => ({
-      label: lab,
-      value: lab,
-    })),
   },
   {
     label: "Sample Date Range",
@@ -42,12 +39,12 @@ export const wetChemistryFilterFields = [
   {
     label: "Physiological Stage",
     value: "physiological_stage",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "Product Type",
     value: "product_type",
-    type: "input",
+    type: "checkbox",
   },
 ] satisfies DataTableFilterField<WetChemistryColumnSchema>[];
 
@@ -60,7 +57,7 @@ export const trialFilterFields = [
   {
     label: "Crop",
     value: "crop",
-    type: "input",
+    type: "checkbox",
     defaultOpen: true,
   },
   {
@@ -72,10 +69,6 @@ export const trialFilterFields = [
     label: "Soil Type",
     value: "trial_soil_type",
     type: "checkbox",
-    options: ["clay", "sandy", "loam"].map((soilType) => ({
-      label: soilType,
-      value: soilType,
-    })),
   },
   {
     label: "Location",
@@ -103,7 +96,7 @@ export const trialFilterFields = [
     value: "irrigation",
     type: "checkbox",
     options: ["true", "false"].map((bool) => ({
-      label: `${bool}`,
+      label: bool === "true" ? "Irrigated" : "Non Irrigated",
       value: bool,
     })),
   },
@@ -124,26 +117,22 @@ export const studyFilterFields = [
   {
     label: "Product Type",
     value: "product_type",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "NIR Model",
     value: "nir_model",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "Physiological Stage",
     value: "physiological_stage",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "Quality Lab",
     value: "quality_lab",
     type: "checkbox",
-    options: ["ICARDA-MAR", "ICARDA-LEB", "CIMMYT"].map((lab) => ({
-      label: lab,
-      value: lab,
-    })),
   },
   {
     label: "Sample Date Range",
