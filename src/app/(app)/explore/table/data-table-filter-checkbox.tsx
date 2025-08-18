@@ -54,7 +54,7 @@ export function DataTableFilterCheckbox<TData>({
           onChange={(e) => setInputValue(e.target.value)}
         />
       ) : null}
-      <div className="rounded-lg border border-border empty:border-none">
+      <div className="max-h-40 overflow-y-auto rounded-lg border border-border empty:border-none">
         {filterOptions
           .sort((a, b) => a.label.localeCompare(b.label))
           .map((option, index) => {
