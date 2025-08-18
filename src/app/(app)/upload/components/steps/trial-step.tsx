@@ -411,7 +411,7 @@ const TrialStep = ({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Location</FormLabel>
+                  <FormLabel>Location</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <LocationCommand

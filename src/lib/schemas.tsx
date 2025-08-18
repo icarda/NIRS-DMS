@@ -17,7 +17,7 @@ export const trialFormSchema = z.object({
   crop: z.string().min(1, "Crop is required"),
   species: z.string().min(1, "Species is required"),
   soilType: z.string(),
-  location: z.string().min(1, "Location is required"),
+  location: z.string(),
   coordinates: z
     .string()
     .regex(
@@ -278,7 +278,7 @@ export const multiStepFormSchemaFinal = z.object({
     invalid_type_error: "Valid Trial planting date is required",
   }),
   soilType: z.string().nullable().optional(),
-  location: z.string().min(1, "Location is required"),
+  location: z.string(),
   coordinates: z
     .string()
     .regex(

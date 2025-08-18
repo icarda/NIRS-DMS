@@ -20,7 +20,7 @@ export const TrialTable = pgTable("trial", {
   plantingDate: date("planting_date").notNull(),
   soilType: text("soil_type"),
   irrigation: boolean("irrigation").notNull(),
-  location: text("location").notNull(),
+  location: text("location"),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
   additionalMetadata: jsonb("additional_metadata").default({}),
