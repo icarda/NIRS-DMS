@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { format } from "date-fns";
 import { CalendarIcon, Check, ChevronsUpDown, Plus, X } from "lucide-react";
@@ -77,9 +77,25 @@ const TrialStep = ({
   });
   const useExistingTrial = form.watch("useExistingTrial") as boolean;
   const previousUseExistingTrial = useRef<boolean | null>(null);
-  const [species, setSpecies] =
-    useState<{ name: string; id: number }[]>(DEFAULT_SPECIES);
   const [open, setOpen] = useState(false);
+
+  const watchedTrialName = form.watch("trial") as string | undefined;
+  const watchedCropName = form.watch("crop") as string | undefined;
+
+  const species: {
+    id: number;
+    name: string;
+  }[] = useMemo(() => {
+    if (useExistingTrial && watchedTrialName) {
+      const tr = trials.find((t) => t.name === watchedTrialName);
+      return tr?.crop?.species ?? DEFAULT_SPECIES;
+    }
+    if (!useExistingTrial && watchedCropName) {
+      const crop = crops.find((c) => c.name === watchedCropName);
+      return crop?.species ?? DEFAULT_SPECIES;
+    }
+    return DEFAULT_SPECIES;
+  }, [useExistingTrial, watchedTrialName, watchedCropName, trials, crops]);
 
   useEffect(() => {
     const isFirstRender = previousUseExistingTrial.current === null;
@@ -105,8 +121,6 @@ const TrialStep = ({
       trialMetadatas.forEach((meta) => {
         form.setValue(meta.name, undefined);
       });
-
-      setSpecies(DEFAULT_SPECIES);
 
       previousUseExistingTrial.current = useExistingTrial;
     }
@@ -191,7 +205,6 @@ const TrialStep = ({
                           form.setValue("coordinates", "");
                         }
                         form.setValue("irrigation", trial.irrigation);
-                        setSpecies(trial.crop.species);
 
                         form.setValue(
                           "fertilizers",
@@ -301,10 +314,7 @@ const TrialStep = ({
                   <Select
                     onValueChange={(val) => {
                       field.onChange(val);
-                      const cropSpecies = crops.find(
-                        (c) => c.name === val
-                      )?.species;
-                      setSpecies(cropSpecies || []);
+
                       form.setValue("species", "");
                     }}
                     value={field.value}
@@ -330,57 +340,62 @@ const TrialStep = ({
             <FormField
               control={form.control}
               name="species"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Species</FormLabel>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full justify-between"
-                      >
-                        {field.value
-                          ? species.find((sp) => sp.name === field.value)?.name
-                          : "Select species..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Search species..." />
-                        <CommandList className="max-h-48 sm:w-52">
-                          <CommandEmpty>No species found.</CommandEmpty>
-                          <CommandGroup>
-                            {species.map((sp) => (
-                              <CommandItem
-                                key={sp.id}
-                                value={sp.name}
-                                onSelect={() => {
-                                  field.onChange(sp.name);
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    field.value === sp.name
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {sp.name}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const displayLabel =
+                  species.find((sp) => sp.name === field.value)?.name ||
+                  field.value ||
+                  "Select species...";
+
+                return (
+                  <FormItem>
+                    <FormLabel required>Species</FormLabel>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          className="w-full justify-between"
+                        >
+                          {displayLabel}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search species..." />
+                          <CommandList className="max-h-48 sm:w-52">
+                            <CommandEmpty>No species found.</CommandEmpty>
+                            <CommandGroup>
+                              {species.map((sp) => (
+                                <CommandItem
+                                  key={sp.id}
+                                  value={sp.name}
+                                  onSelect={() => {
+                                    field.onChange(sp.name);
+                                    setOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      field.value === sp.name
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {sp.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
