@@ -9,7 +9,8 @@ export function exportToCSV(
   const columnIds = table.getVisibleLeafColumns().map((col) => col.id);
   const headers = table
     .getVisibleLeafColumns()
-    .map((col) => col.columnDef.meta?.label ?? col.id);
+    .map((col) => col.columnDef.meta?.label ?? col.id)
+    .filter((label) => label !== "actions");
 
   const rows = table.getFilteredRowModel().rows;
 
@@ -34,7 +35,8 @@ export function exportToXLSX(
   const columnIds = table.getVisibleLeafColumns().map((col) => col.id);
   const headers = table
     .getVisibleLeafColumns()
-    .map((col) => col.columnDef.meta?.label ?? col.id);
+    .map((col) => col.columnDef.meta?.label ?? col.id)
+    .filter((label) => label !== "actions");
 
   const rows = table.getFilteredRowModel().rows;
 
