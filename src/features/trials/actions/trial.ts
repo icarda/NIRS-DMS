@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { trialEditSchema } from "@/app/(app)/explore/table/schema";
 import { db } from "@/drizzle/db";
 import { getCurrentUser } from "@/lib/currentUser";
 import { logMetadataAction } from "@/lib/log-metadata-action";
@@ -35,19 +36,30 @@ export async function createTrial(unsafeData: z.infer<typeof trialSchema>) {
 
 export async function updateTrial(
   id: number,
-  unsafeData: z.infer<typeof trialSchema>
+  unsafeData: Partial<z.infer<typeof trialEditSchema>>
 ) {
-  const { success, data } = trialSchema.safeParse(unsafeData);
+  const { success, data, error } = trialEditSchema.safeParse(unsafeData);
 
   const user = await getCurrentUser();
   const canUpdateTrial = hasPermission(user?.role, "trial:update");
+
+  console.log(success, canUpdateTrial, data, error);
 
   if (!success || !canUpdateTrial) {
     return { error: true, message: "There was an error updating the trial" };
   }
 
-  const { fertilizers, ...trialData } = data;
-  await updateTrialDb({ id }, trialData);
+  const { fertilizers, latitude, longitude, ...restTrialData } = data;
+
+  const trialData = {
+    ...restTrialData,
+    latitude: latitude ? parseFloat(latitude) : undefined,
+    longitude: longitude ? parseFloat(longitude) : undefined,
+  };
+
+  await updateTrialDb({ id }, trialData, fertilizers);
+
+  return { error: false, message: "Trial updated successfully" };
 }
 
 export async function deleteTrial(id: number) {

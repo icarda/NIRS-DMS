@@ -95,15 +95,52 @@ export async function insertTrial(
 
 export async function updateTrial(
   { id }: { id: number },
-  data: Partial<typeof TrialTable.$inferInsert>
+  data: Partial<typeof TrialTable.$inferInsert>,
+  fertilizers?: Omit<typeof TrialFertilizerTable.$inferInsert, "trialId">[]
 ) {
-  const [updatedTrial] = await db
-    .update(TrialTable)
-    .set(data)
+  const existingTrial = await db
+    .select()
+    .from(TrialTable)
     .where(eq(TrialTable.id, id))
-    .returning();
+    .limit(1)
+    .execute();
 
-  if (updatedTrial == null) throw new Error("Failed to update trial");
+  if (!existingTrial.length) throw new Error("Trial not found");
+  const existingMetadata = existingTrial[0]
+    .additionalMetadata as unknown as Record<string, any>;
+
+  if (data.additionalMetadata) {
+    const updatedMetadata = {
+      ...existingMetadata,
+      ...data.additionalMetadata,
+    };
+
+    await db
+      .update(TrialTable)
+      .set({ ...data, additionalMetadata: updatedMetadata })
+      .where(eq(TrialTable.id, id));
+  }
+
+  if (fertilizers && fertilizers.length > 0 && fertilizers[0].type !== "") {
+    await db
+      .delete(TrialFertilizerTable)
+      .where(eq(TrialFertilizerTable.trialId, id));
+    await db.insert(TrialFertilizerTable).values(
+      fertilizers.map((fertilizer) => ({
+        ...fertilizer,
+        trialId: id,
+      }))
+    );
+  }
+
+  const [updatedTrial] = await db
+    .select()
+    .from(TrialTable)
+    .where(eq(TrialTable.id, id))
+    .execute();
+
+  if (!updatedTrial) throw new Error("Failed to update trial");
+
   revalidateTrialCache(updatedTrial.id);
 
   return updatedTrial;

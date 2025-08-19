@@ -23,7 +23,9 @@ export const TrialTable = pgTable("trial", {
   location: text("location"),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
-  additionalMetadata: jsonb("additional_metadata").default({}),
+  additionalMetadata: jsonb("additional_metadata")
+    .$type<Record<string, any>>()
+    .default({}),
 
   cropId: integer("crop_id")
     .notNull()

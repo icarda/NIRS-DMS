@@ -62,22 +62,26 @@ type AdditionalMetadata = {
   [key: string]: string | number | boolean | null;
 };
 
-type Trial = {
+export type Trial = {
   id: number;
   name: string;
   plantingDate: string;
   soilType: string;
   irrigation: boolean;
   location: string;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
   additionalMetadata: AdditionalMetadata;
   cropId: number;
+  species: string;
+  fertilizers: {
+    id: number;
+    type: string;
+    amount: number;
+  }[];
   createdAt: string;
   updatedAt: string;
-  crop: {
-    name: string;
-  };
+  crop: { name: string; id: number };
 };
 
 export type ProductType = {

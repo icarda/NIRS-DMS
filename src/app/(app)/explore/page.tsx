@@ -1,9 +1,11 @@
 import PageWrapper from "@/components/page-wrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getCrops } from "@/features/crops/db/crop";
 import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getQualityLabs } from "@/features/quality-labs/db/quality-lab";
 import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
+import { getSpecies, getTrialSpecies } from "@/features/studies/db/species";
 import {
   getStudies,
   getStudyConfigMetadatas,
@@ -72,6 +74,7 @@ export default async function ExploreData() {
     physiologicalStages,
     studyMetadatas,
     trialMetadatas,
+    crops,
   ] = await Promise.all([
     getTrials(),
     getStudies(),
@@ -80,6 +83,7 @@ export default async function ExploreData() {
     getPhysiologicalStages(),
     getStudyConfigMetadatas(),
     getTrialConfigMetadatas(),
+    getCrops(),
   ]);
 
   const traitVariables = Array.from(new Set(dataColumns));
@@ -132,6 +136,24 @@ export default async function ExploreData() {
                 data={trials}
                 filterFields={trialFilterFields}
                 tab="trial"
+                trialData={{
+                  crops: crops,
+                  trialMetadatas: trialMetadatas
+                    .filter((metadata) => metadata.type !== "array")
+                    .map((metadata) => ({
+                      name: metadata.name,
+                      label: metadata.label,
+                      type: metadata.type as
+                        | "string"
+                        | "number"
+                        | "boolean"
+                        | "date",
+                      required: metadata.required,
+                      min: metadata.min ? Number(metadata.min) : null,
+                      max: metadata.max ? Number(metadata.max) : null,
+                      source: metadata.source,
+                    })),
+                }}
               />
             </TabsContent>
             <TabsContent value="study">

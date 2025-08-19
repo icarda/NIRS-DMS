@@ -7,7 +7,11 @@ import {
   SpeciesTable,
   TrialSpeciesTable,
 } from "@/drizzle/schema";
-import { getSpeciesIdTag, revalidateSpeciesCache } from "./cache/species";
+import {
+  getSpeciesGlobalTag,
+  getSpeciesIdTag,
+  revalidateSpeciesCache,
+} from "./cache/species";
 
 export async function getSpeciesById(id: number) {
   "use cache";
@@ -17,6 +21,19 @@ export async function getSpeciesById(id: number) {
     columns: {
       id: true,
       name: true,
+    },
+  });
+  return species;
+}
+
+export async function getSpecies() {
+  "use cache";
+  cacheTag(getSpeciesGlobalTag());
+  const species = await db.query.SpeciesTable.findMany({
+    columns: {
+      id: true,
+      name: true,
+      cropId: true,
     },
   });
   return species;

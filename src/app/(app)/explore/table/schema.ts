@@ -65,7 +65,11 @@ export const studyColumnSchema = z.object({
 });
 
 const additionalMetadataSchema = z.record(
-  z.union([z.number().optional(), z.string().optional()])
+  z.union([
+    z.number().optional(),
+    z.string().optional(),
+    z.boolean().optional(),
+  ])
 );
 
 export const studyEditFormSchema = z.object({
@@ -82,6 +86,40 @@ export const studyEditFormSchema = z.object({
     .email("Please enter a valid email address")
     .optional()
     .or(z.literal("")),
+});
+
+export const trialEditFormSchema = z.object({
+  id: z.number().int().positive(),
+  crop: z.string(),
+  soilType: z.string(),
+  location: z.string(),
+  coordinates: z.string(),
+  irrigation: z.boolean(),
+  additionalMetadata: additionalMetadataSchema,
+
+  fertilizers: z.array(
+    z.object({
+      type: z.string(),
+      amount: z.number(),
+    })
+  ),
+});
+
+export const trialEditSchema = z.object({
+  cropId: z.number(),
+  soilType: z.string(),
+  location: z.string(),
+  latitude: z.string(),
+  longitude: z.string(),
+  irrigation: z.boolean(),
+  additionalMetadata: additionalMetadataSchema,
+
+  fertilizers: z.array(
+    z.object({
+      type: z.string(),
+      amount: z.number(),
+    })
+  ),
 });
 
 export type StudyColumnSchema = z.infer<typeof studyColumnSchema> &
