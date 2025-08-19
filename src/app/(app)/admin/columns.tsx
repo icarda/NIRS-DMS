@@ -199,7 +199,6 @@ export const userColumns: ColumnDef<User>[] = [
             onOpenChange={setEditDialogOpen}
             onSave={handleEdit}
             isLoading={isLoading}
-            setIsLoading={setIsLoading}
           />
 
           <UserDeleteDialog

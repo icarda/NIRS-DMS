@@ -1,6 +1,5 @@
 "use client";
 
-import { on } from "events";
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,9 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { studyAccesses } from "@/data/studies";
 import { getStudies } from "@/features/studies/actions/study";
-import { getUserStudyAccessCodes } from "@/features/studies/actions/study-access";
 import { User } from "../columns";
 
 const formSchema = z.object({
@@ -54,7 +51,6 @@ interface UserEditDialogProps {
   onOpenChange(open: boolean): void;
   onSave(data: z.infer<typeof formSchema>): void;
   isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
 }
 
 export function UserEditDialog({
@@ -63,7 +59,6 @@ export function UserEditDialog({
   onOpenChange,
   onSave,
   isLoading,
-  setIsLoading,
 }: UserEditDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
