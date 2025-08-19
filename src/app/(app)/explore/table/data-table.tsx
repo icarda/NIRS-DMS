@@ -283,9 +283,6 @@ export function DataTable<TData, TValue>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
-                    const colSpan = (header.column.columnDef as any).columns
-                      ? (header.column.columnDef as any).columns.length
-                      : 1;
                     return (
                       <TableHead
                         key={header.id}
@@ -293,7 +290,7 @@ export function DataTable<TData, TValue>({
                           (header.column.columnDef as any).columns &&
                             "border-x border-x-gray-200"
                         )}
-                        colSpan={colSpan}
+                        colSpan={header.colSpan}
                       >
                         {header.isPlaceholder
                           ? null
