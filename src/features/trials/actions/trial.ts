@@ -43,8 +43,6 @@ export async function updateTrial(
   const user = await getCurrentUser();
   const canUpdateTrial = hasPermission(user?.role, "trial:update");
 
-  console.log(success, canUpdateTrial, data, error);
-
   if (!success || !canUpdateTrial) {
     return { error: true, message: "There was an error updating the trial" };
   }
