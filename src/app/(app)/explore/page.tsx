@@ -1,8 +1,15 @@
 import PageWrapper from "@/components/page-wrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getStudies } from "@/features/studies/db/study";
+import { getNirModels } from "@/features/nir-models/db/nir-model";
+import { getQualityLabs } from "@/features/quality-labs/db/quality-lab";
+import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
+import { getProductTypes } from "@/features/studies/db/product-type";
+import {
+  getStudies,
+  getStudyConfigMetadatas,
+} from "@/features/studies/db/study";
 import { getWetChemistryData } from "@/features/traits/db/trait";
-import { getTrials } from "@/features/trials/db/trial";
+import { getTrialConfigMetadatas, getTrials } from "@/features/trials/db/trial";
 import {
   studyColumns,
   trialColumns,
@@ -56,15 +63,31 @@ async function getGroupedWetChemistryData() {
 
 export default async function ExploreData() {
   const { realData, dataColumns } = await getGroupedWetChemistryData();
-  const trials = await getTrials();
-  const studies = await getStudies();
+
+  const [
+    trials,
+    studies,
+    nirModels,
+    qualityLabs,
+    physiologicalStages,
+    studyMetadatas,
+    trialMetadatas,
+  ] = await Promise.all([
+    getTrials(),
+    getStudies(),
+    getNirModels(),
+    getQualityLabs(),
+    getPhysiologicalStages(),
+    getStudyConfigMetadatas(),
+    getTrialConfigMetadatas(),
+  ]);
 
   const traitVariables = Array.from(new Set(dataColumns));
 
   return (
     <PageWrapper title="Explore Data">
       <div className="px-2 md:px-0">
-        <Tabs defaultValue="study">
+        <Tabs defaultValue="wetchemistry">
           <div className="border-b">
             <div className="flex items-center">
               <TabsList className="h-12 bg-transparent">
@@ -119,6 +142,43 @@ export default async function ExploreData() {
                 data={studies}
                 filterFields={studyFilterFields}
                 tab="study"
+                studyData={{
+                  qualityLabs: qualityLabs.map((lab) => ({
+                    ...lab,
+                    createdAt: lab.createdAt.toISOString(),
+                    updatedAt: lab.updatedAt.toISOString(),
+                  })),
+                  nirModels: nirModels.map((model) => ({
+                    ...model,
+                    createdAt: model.createdAt.toISOString(),
+                    updatedAt: model.updatedAt.toISOString(),
+                  })),
+                  physiologicalStages: physiologicalStages.map((stage) => ({
+                    ...stage,
+                    createdAt: stage.createdAt.toISOString(),
+                    updatedAt: stage.updatedAt.toISOString(),
+                    crop: {
+                      ...stage.crop,
+                      createdAt: stage.crop.createdAt.toISOString(),
+                      updatedAt: stage.crop.updatedAt.toISOString(),
+                    },
+                  })),
+                  studyMetadatas: studyMetadatas
+                    .filter((metadata) => metadata.type !== "array")
+                    .map((metadata) => ({
+                      name: metadata.name,
+                      label: metadata.label,
+                      type: metadata.type as
+                        | "string"
+                        | "number"
+                        | "boolean"
+                        | "date",
+                      required: metadata.required,
+                      min: metadata.min ? Number(metadata.min) : null,
+                      max: metadata.max ? Number(metadata.max) : null,
+                      source: metadata.source,
+                    })),
+                }}
               />
             </TabsContent>
           </div>
