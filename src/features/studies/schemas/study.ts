@@ -14,4 +14,14 @@ export const studySchema = z.object({
   qualityLabId: z.number().min(1, "Quality lab is required"),
 });
 
+export const studySchemaOptional = z.object({
+  nirModelId: z.number(),
+  qualityLabId: z.number(),
+  physiologicalStageId: z.number(),
+  program: z.string(),
+  requesterName: z.string().nullable().optional(),
+  requesterEmail: z.string().email().nullable().optional(),
+  additionalMetadata: z.record(z.any()).optional(),
+});
+
 export type StudySchema = z.infer<typeof studySchema>;

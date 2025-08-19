@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
@@ -343,7 +343,7 @@ const StudyStep = ({
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
+                          date > new Date() || date < new Date("2000-01-01")
                         }
                         initialFocus
                       />

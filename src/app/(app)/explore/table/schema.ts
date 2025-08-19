@@ -64,6 +64,26 @@ export const studyColumnSchema = z.object({
   additional_metadata: z.record(z.unknown()).optional(),
 });
 
+const additionalMetadataSchema = z.record(
+  z.union([z.number().optional(), z.string().optional()])
+);
+
+export const studyEditFormSchema = z.object({
+  qualityLab: z.string(),
+  nirModel: z.string(),
+  physiologicalStage: z.string(),
+  program: z.string(),
+
+  additionalMetadata: additionalMetadataSchema,
+
+  requesterName: z.string().optional(),
+  requesterEmail: z
+    .string()
+    .email("Please enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+});
+
 export type StudyColumnSchema = z.infer<typeof studyColumnSchema> &
   Record<string, any>;
 
@@ -74,3 +94,5 @@ export type WetChemistryColumnSchema = z.infer<
   typeof wetChemistryColumnSchema
 > &
   Record<string, any>;
+
+export type StudyEditFormSchema = z.infer<typeof studyEditFormSchema>;

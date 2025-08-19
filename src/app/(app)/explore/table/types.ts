@@ -57,3 +57,86 @@ export type DataTableFilterField<TData> =
   | DataTableSliderFilterField<TData>
   | DataTableInputFilterField<TData>
   | DataTableTimerangeFilterField<TData>;
+
+type AdditionalMetadata = {
+  [key: string]: string | number | boolean | null;
+};
+
+type Trial = {
+  id: number;
+  name: string;
+  plantingDate: string;
+  soilType: string;
+  irrigation: boolean;
+  location: string;
+  latitude: number;
+  longitude: number;
+  additionalMetadata: AdditionalMetadata;
+  cropId: number;
+  createdAt: string;
+  updatedAt: string;
+  crop: {
+    name: string;
+  };
+};
+
+export type ProductType = {
+  id: number;
+  name: string;
+  cropId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type QualityLab = {
+  id: number;
+  centerId: number;
+  name: string;
+  location: string;
+  country: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NirModel = {
+  id: number;
+  name: string;
+  type: string;
+  wavelengthRange: string;
+  resolution: string;
+  manufacturer: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PhysiologicalStage = {
+  id: number;
+  name: string;
+  cropId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Study = {
+  id: number;
+  trialId: number;
+  studyCode: string;
+  productTypeId: number;
+  program: string;
+  nirModelId: number;
+  requesterName: string | null;
+  requesterEmail: string | null;
+  sampleDate: string;
+  physiologicalStageId: number;
+  additionalMetadata: {
+    [key: string]: string | number | null;
+  };
+  qualityLabId: number;
+  createdAt: string;
+  updatedAt: string;
+  trial: Trial;
+  productType: ProductType;
+  qualityLab: QualityLab;
+  nirModel: NirModel;
+  physiologicalStage: PhysiologicalStage;
+};

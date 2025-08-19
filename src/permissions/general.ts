@@ -16,6 +16,7 @@ type Resource =
   | "trial"
   | "studyMetadata"
   | "studyAccess"
+  | "study"
   | "commonName";
 type Action = "access" | "create" | "update" | "delete" | "upload";
 
@@ -40,6 +41,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "cropSpecies:delete",
     "crop:delete",
     "crop:update",
+    "study:update",
   ],
   SUPERADMIN: [
     "upload:access",
@@ -74,6 +76,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "cropSpecies:delete",
     "crop:delete",
     "crop:update",
+    "study:update",
   ],
 };
 

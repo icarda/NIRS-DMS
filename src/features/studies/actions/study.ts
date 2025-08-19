@@ -16,9 +16,10 @@ import {
   insertStudy,
   insertStudyMetadataConfig,
   removeJsonKeyFromAllStudies,
+  updateStudyById,
   updateStudyMetadataConfig as updateStudyMetadataConfigDb,
 } from "../db/study";
-import { studySchema } from "../schemas/study";
+import { studySchema, studySchemaOptional } from "../schemas/study";
 
 export async function getStudies() {
   const studies = await getStudiesDb();
@@ -36,6 +37,36 @@ export async function createStudy(unsafeData: z.infer<typeof studySchema>) {
     await insertStudy(data);
   } catch (error) {
     return { error: true, message: "There was an error creating the study" };
+  }
+}
+
+export async function updateStudy(
+  id: number,
+  unsafeData: Partial<z.infer<typeof studySchema>>
+) {
+  const { success, data, error } = studySchemaOptional.safeParse(unsafeData);
+
+  if (!success) {
+    return { error: true, message: "There was an error updating the study" };
+  }
+
+  try {
+    const user = await getCurrentUser();
+    const canUpdateStudy = hasPermission(user?.role, "study:update");
+
+    if (!canUpdateStudy || !user?.id) {
+      return {
+        error: true,
+        message: "You do not have permission to update this study",
+      };
+    }
+
+    await updateStudyById(id, data);
+
+    return { error: false, message: "Study updated successfully" };
+  } catch (error) {
+    console.error("Error updating study:", error);
+    return { error: true, message: "Error updating the study" };
   }
 }
 
