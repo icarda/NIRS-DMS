@@ -44,6 +44,11 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
     ),
     accessorKey: "germplasm_id",
     id: "germplasm_id",
+    filterFn: (row, id, value) => {
+      if (value === null) return true;
+      const rowValue = row.getValue(id);
+      return `${rowValue}`.includes(value);
+    },
     meta: {
       label: "Germplasm ID",
     },
