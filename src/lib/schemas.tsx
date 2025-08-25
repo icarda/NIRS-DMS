@@ -6,6 +6,7 @@ export const dashboardFilterSchema = z.object({
   year: z.string(),
   country: z.string(),
 });
+
 export const trialFormSchema = z.object({
   useExistingTrial: z.boolean(),
   trial: z.string().min(1, "Trial is required"),

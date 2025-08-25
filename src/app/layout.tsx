@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";
 
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <BProgressProvider>{children}</BProgressProvider>
+        <NuqsAdapter>
+          <BProgressProvider>{children}</BProgressProvider>
+        </NuqsAdapter>
         <Toaster richColors />
       </body>
     </html>

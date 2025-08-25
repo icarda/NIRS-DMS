@@ -66,3 +66,8 @@ export function stringToNumberIfValid(input: string): number | string {
   const num = Number(input);
   return !isNaN(num) && input.trim() !== "" ? num : input;
 }
+
+export const emptyToNull = (v: string | undefined | null) =>
+  v && v.trim().length > 0 ? v : null;
+
+export const ensureString = (v: string | null | undefined) => v ?? "";

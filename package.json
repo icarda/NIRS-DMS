@@ -29,6 +29,7 @@
     "lucide-react": "^0.469.0",
     "next": "^15.4.5",
     "next-auth": "5.0.0-beta.25",
+    "nuqs": "^2.5.0",
     "papaparse": "^5.5.2",
     "postgres": "^3.4.5",
     "radix-ui": "latest",

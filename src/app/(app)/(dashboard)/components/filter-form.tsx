@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -21,9 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { crops } from "@/data/crops";
-import { nirModels } from "@/data/nir_models";
 import { qualityLabs } from "@/data/quality-labs";
 import { dashboardFilterSchema } from "@/lib/schemas";
+import { emptyToNull, ensureString } from "@/lib/utils";
 
 type FilterValues = z.infer<typeof dashboardFilterSchema>;
 
@@ -32,18 +35,54 @@ const YEARS = ["2024", "2023", "2022", "2021"];
 const COUNTRIES = ["Morocco", "Lebanon", "Mexico"];
 
 export function FilterForm() {
+  const [query, setQuery] = useQueryStates(
+    {
+      crop: parseAsString.withDefault(""),
+      qualityLab: parseAsString.withDefault(""),
+      year: parseAsString.withDefault(""),
+      country: parseAsString.withDefault(""),
+    },
+    {
+      history: "replace",
+      clearOnDefault: true,
+    }
+  );
+
   const form = useForm<FilterValues>({
     resolver: zodResolver(dashboardFilterSchema),
-    defaultValues: {
-      crop: "",
-      qualityLab: "",
-      year: "",
-      country: "",
-    },
+    values: useMemo(
+      () => ({
+        crop: ensureString(query.crop),
+        qualityLab: ensureString(query.qualityLab),
+        year: ensureString(query.year),
+        country: ensureString(query.country),
+      }),
+      [query.crop, query.qualityLab, query.year, query.country]
+    ),
   });
 
   function onSubmit(data: FilterValues) {
-    console.log(data);
+    setQuery(
+      {
+        crop: emptyToNull(data.crop),
+        qualityLab: emptyToNull(data.qualityLab),
+        year: emptyToNull(data.year),
+        country: emptyToNull(data.country),
+      },
+      { history: "push" }
+    );
+  }
+
+  function clearAll() {
+    setQuery(
+      {
+        crop: null,
+        qualityLab: null,
+        year: null,
+        country: null,
+      },
+      { history: "push" }
+    );
   }
 
   return (
@@ -59,7 +98,7 @@ export function FilterForm() {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || undefined}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select crop" />
@@ -87,7 +126,7 @@ export function FilterForm() {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || undefined}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select quality lab" />
@@ -115,7 +154,7 @@ export function FilterForm() {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || undefined}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select year" />
@@ -143,7 +182,7 @@ export function FilterForm() {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value || undefined}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select country" />
@@ -164,6 +203,9 @@ export function FilterForm() {
         </div>
 
         <div className="flex justify-end gap-4">
+          <Button variant="outline" onClick={clearAll}>
+            Clear All
+          </Button>
           <Button type="submit">Apply Filters</Button>
         </div>
       </form>
