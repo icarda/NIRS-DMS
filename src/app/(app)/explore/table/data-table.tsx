@@ -239,7 +239,6 @@ function generateColumns<TData>(
             id: "actions",
             cell: ({ row }) => {
               const trial = row.original;
-              console.log("Trial row data:", trial);
               const [editDialogOpen, setEditDialogOpen] = useState(false);
               const [isLoading, setIsLoading] = useState(false);
 
@@ -250,8 +249,6 @@ function generateColumns<TData>(
                   const cropId = trialData?.crops.find(
                     (crop) => crop.name === data.crop
                   )?.id!;
-
-                  console.log("update trial with", data);
 
                   const { error, message } = await updateTrial(
                     (trial as any).id,

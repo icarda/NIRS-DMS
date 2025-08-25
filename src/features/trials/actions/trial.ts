@@ -38,7 +38,7 @@ export async function updateTrial(
   id: number,
   unsafeData: Partial<z.infer<typeof trialEditSchema>>
 ) {
-  const { success, data, error } = trialEditSchema.safeParse(unsafeData);
+  const { success, data } = trialEditSchema.safeParse(unsafeData);
 
   const user = await getCurrentUser();
   const canUpdateTrial = hasPermission(user?.role, "trial:update");
