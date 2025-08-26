@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/drizzle/db";
-import { TraitTable } from "@/drizzle/schema";
+import { CropTraitTable, TraitTable } from "@/drizzle/schema";
 import { isUniqueConstraintError } from "@/drizzle/schemaHelpers";
 import { getDistinctSampleIdsForStudy } from "@/features/nirs-data/db/nirs-data";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -179,4 +179,23 @@ export async function deleteTrait(id: number) {
   } catch (error) {
     return { error: true, message: "Error deleting the trait" };
   }
+}
+
+export async function getCropTraits(cropName: string) {
+  const rows = await db
+    .select({
+      traitName: TraitTable.traitName,
+    })
+    .from(TraitTable)
+    .innerJoin(
+      CropTraitTable,
+      and(
+        eq(TraitTable.traitName, CropTraitTable.traitName),
+        eq(CropTraitTable.traitName, cropName)
+      )
+    )
+    .groupBy(TraitTable.traitName)
+    .orderBy(TraitTable.traitName);
+
+  return rows.map((r) => r.traitName);
 }
