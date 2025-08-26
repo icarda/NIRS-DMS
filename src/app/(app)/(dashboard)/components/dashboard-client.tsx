@@ -158,6 +158,9 @@ export default function DashboardClient({
           icon={<Bean />}
           description="Distinct species with laboratory trait measurements."
         />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <LineChart filters={form.getValues()} />
         <WetchemHistogramCard filters={form.getValues()} />
       </div>
