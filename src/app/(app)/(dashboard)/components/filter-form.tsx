@@ -25,7 +25,7 @@ import { dashboardFilterSchema } from "@/lib/schemas";
 
 export type FilterValues = z.infer<typeof dashboardFilterSchema>;
 
-const YEARS = ["2024", "2023", "2022", "2021"];
+const YEARS = ["2025", "2024", "2023", "2022", "2021"];
 const COUNTRIES = ["Morocco", "Lebanon", "Mexico"];
 
 export function FilterForm({
@@ -62,7 +62,7 @@ export function FilterForm({
                     </SelectTrigger>
                     <SelectContent>
                       {crops.map((crop) => (
-                        <SelectItem key={crop.id} value={crop.id}>
+                        <SelectItem key={crop.id} value={crop.title}>
                           {crop.title}
                         </SelectItem>
                       ))}

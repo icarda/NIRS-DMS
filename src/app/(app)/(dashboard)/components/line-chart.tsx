@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   CartesianGrid,
@@ -14,12 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getSpectralData } from "@/features/dashboard/actions/graphs";
+import { NirModelSelect } from "./nir-model-select";
 import { SampleSelector } from "./sample-selector";
 
 function randomColor(i: number) {
@@ -66,6 +65,7 @@ export function LineChart({
   const [data, setData] = useState<Record<string, number>[]>([]);
   const [chartConfig, setChartConfig] = useState<ChartConfig>({});
   const [activeSamples, setActiveSamples] = useState<string[]>([]);
+  const [nirModel, setNirModel] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -76,24 +76,39 @@ export function LineChart({
       const config = buildChartConfig(pivoted);
       setChartConfig(config);
 
-      const sampleKeys = Object.keys(config);
-      setActiveSamples(sampleKeys.slice(0, 5)); // Select first 5 samples by default
+      const keys = Object.keys(config);
+      setActiveSamples((prev) => {
+        // keep previously active if still present, else default to first 5
+        const stillValid = prev.filter((k) => keys.includes(k));
+        return stillValid.length ? stillValid : keys.slice(0, 5);
+      });
     }
     fetchData();
   }, [JSON.stringify(filters)]);
 
-  const allSamples = Object.keys(chartConfig);
+  const allSamples = useMemo(
+    () => Object.keys(chartConfig),
+    [JSON.stringify(chartConfig)]
+  );
 
   return (
     <Card className="col-span-1 md:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           Near-Infrared Spectral Chart
-          <SampleSelector
-            options={allSamples}
-            active={activeSamples}
-            onChange={setActiveSamples}
-          />
+          <div className="flex items-center gap-2">
+            <NirModelSelect
+              filters={filters!}
+              value={nirModel}
+              onChange={setNirModel}
+              // disabled={!filters?.crop} // model list is crop-scoped
+            />
+            <SampleSelector
+              options={allSamples}
+              active={activeSamples}
+              onChange={setActiveSamples}
+            />
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -137,7 +152,7 @@ export function LineChart({
             />
             {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
 
-            {Object.keys(chartConfig).map((key) => (
+            {activeSamples.map((key) => (
               <Line
                 key={key}
                 type="monotone"

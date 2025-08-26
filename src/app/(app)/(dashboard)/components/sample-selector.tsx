@@ -23,7 +23,7 @@ export function SampleSelector({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled={options.length === 0}>
           Select Samples
         </Button>
       </PopoverTrigger>

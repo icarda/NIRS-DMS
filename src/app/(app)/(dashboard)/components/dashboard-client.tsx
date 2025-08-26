@@ -1,7 +1,6 @@
-// app/(dashboard)/DashboardClient.tsx
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,7 +13,6 @@ import {
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +23,10 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDashboardKpis } from "@/features/dashboard/actions/kpis";
+import { getCropTraits } from "@/features/traits/actions/trait";
 import { dashboardFilterSchema } from "@/lib/schemas";
 import { FilterForm, FilterValues } from "./filter-form";
+import { WetchemHistogramCard } from "./histogram";
 import { KPICard } from "./kpi-card";
 import { LineChart } from "./line-chart";
 
@@ -43,6 +43,16 @@ export default function DashboardClient({
   const [kpis, setKpis] = useState<Kpis>(initialKpis);
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [traits, setTraits] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchTraitsByCrop() {
+      const traits = await getCropTraits("Fe");
+
+      setTraits(traits);
+    }
+    fetchTraitsByCrop();
+  }, []);
 
   const form = useForm<FilterValues>({
     resolver: zodResolver(dashboardFilterSchema),
@@ -149,12 +159,7 @@ export default function DashboardClient({
           description="Distinct species with laboratory trait measurements."
         />
         <LineChart filters={form.getValues()} />
-        <Card className="col-span-1 md:col-span-2">
-          <CardHeader>
-            <CardTitle>Graph 2</CardTitle>
-          </CardHeader>
-          <CardContent>Graph 2</CardContent>
-        </Card>
+        <WetchemHistogramCard filters={form.getValues()} />
       </div>
     </div>
   );
