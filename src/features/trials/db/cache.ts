@@ -18,9 +18,9 @@ export function getTrialMetadataConfigTag(name: string | number) {
   return getIdTag("trialMetadataConfig", name);
 }
 
-export function revalidateTrialCache(id: number | string) {
+export function revalidateTrialCache(id?: number | string) {
   revalidateTag(getTrialGlobalTag());
-  revalidateTag(getTrialIdTag(id));
+  if (id) revalidateTag(getTrialIdTag(id));
 }
 
 export function revalidateTrialMetadataConfigCache(name: string) {

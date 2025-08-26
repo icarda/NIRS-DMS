@@ -1,12 +1,15 @@
 import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
+import { revalidate } from "@/app/(app)/(dashboard)/page";
 import { db } from "@/drizzle/db";
 import {
   NirsDataTable,
   SpeciesTable,
   TrialSpeciesTable,
 } from "@/drizzle/schema";
+import { revalidateCropCache } from "@/features/crops/db/cache/crop";
+import { revalidateTrialCache } from "@/features/trials/db/cache";
 import {
   getSpeciesGlobalTag,
   getSpeciesIdTag,
@@ -64,6 +67,8 @@ export async function insertSpecies(
 
   if (newSpecies == null) throw new Error("Failed to create species");
   revalidateSpeciesCache(newSpecies.id, { cropId: newSpecies.cropId });
+  revalidateCropCache(newSpecies.cropId);
+  revalidateTrialCache();
 
   return newSpecies;
 }
@@ -81,6 +86,8 @@ export async function updateSpecies(
 
   if (updatedSpecies == null) throw new Error("Failed to update species");
   revalidateSpeciesCache(updatedSpecies.id, { cropId: updatedSpecies.cropId });
+  revalidateCropCache(updatedSpecies.cropId);
+  revalidateTrialCache();
 
   return updatedSpecies;
 }
@@ -96,6 +103,8 @@ export async function deleteSpecies(
 
   if (!deletedSpecies) throw new Error("Failed to delete species");
   revalidateSpeciesCache(deletedSpecies.id, { cropId: deletedSpecies.cropId });
+  revalidateCropCache(deletedSpecies.cropId);
+  revalidateTrialCache();
 
   return deletedSpecies;
 }
