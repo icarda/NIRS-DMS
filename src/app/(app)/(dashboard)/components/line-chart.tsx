@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -19,6 +20,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getSpectralData } from "@/features/dashboard/actions/graphs";
+import { SampleSelector } from "./sample-selector";
 
 function randomColor(i: number) {
   const hue = (i * 137.508) % 360; // golden angle → spread colors evenly
@@ -63,68 +65,91 @@ export function LineChart({
 }) {
   const [data, setData] = useState<Record<string, number>[]>([]);
   const [chartConfig, setChartConfig] = useState<ChartConfig>({});
+  const [activeSamples, setActiveSamples] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchData() {
       const rows = await getSpectralData(filters);
       const pivoted = pivotSpectralData(rows);
       setData(pivoted);
-      setChartConfig(buildChartConfig(pivoted));
+
+      const config = buildChartConfig(pivoted);
+      setChartConfig(config);
+
+      const sampleKeys = Object.keys(config);
+      setActiveSamples(sampleKeys.slice(0, 5)); // Select first 5 samples by default
     }
     fetchData();
   }, [JSON.stringify(filters)]);
 
-  return (
-    <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <ReLineChart
-        data={data}
-        accessibilityLayer
-        margin={{ bottom: 40, left: 20, right: 20, top: 20 }}
-      >
-        <CartesianGrid vertical={false} />
-        <XAxis
-          dataKey="wavelength"
-          tickLine={false}
-          tickMargin={10}
-          axisLine={false}
-          label={{
-            value: "Wavelength (nm)",
-            position: "insideBottom",
-            offset: -15,
-          }}
-          className="pb-2"
-        />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          label={{
-            value: "Absorbance",
-            angle: -90,
-            position: "insideLeft",
-            offset: 15,
-          }}
-        />
-        <ChartTooltip
-          cursor={false}
-          defaultIndex={1}
-          content={
-            <ChartTooltipContent labelFormatter={(value) => `${value} nm`} />
-          }
-        />
-        {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
+  const allSamples = Object.keys(chartConfig);
 
-        {/* Dynamically render one line per sample */}
-        {Object.keys(chartConfig).map((key) => (
-          <Line
-            key={key}
-            type="monotone"
-            dataKey={key}
-            stroke={`var(--color-${key})`}
-            dot={false}
-            strokeWidth={1.5}
+  return (
+    <Card className="col-span-1 md:col-span-2">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          Near-Infrared Spectral Chart
+          <SampleSelector
+            options={allSamples}
+            active={activeSamples}
+            onChange={setActiveSamples}
           />
-        ))}
-      </ReLineChart>
-    </ChartContainer>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+          <ReLineChart
+            data={data}
+            accessibilityLayer
+            margin={{ bottom: 40, left: 20, right: 20, top: 20 }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="wavelength"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              label={{
+                value: "Wavelength (nm)",
+                position: "insideBottom",
+                offset: -15,
+              }}
+              className="pb-2"
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              label={{
+                value: "Absorbance",
+                angle: -90,
+                position: "insideLeft",
+                offset: 15,
+              }}
+            />
+            <ChartTooltip
+              cursor={false}
+              defaultIndex={1}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(value) => `${value} nm`}
+                />
+              }
+            />
+            {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
+
+            {Object.keys(chartConfig).map((key) => (
+              <Line
+                key={key}
+                type="monotone"
+                dataKey={key}
+                stroke={`var(--color-${key})`}
+                dot={false}
+                strokeWidth={1.5}
+              />
+            ))}
+          </ReLineChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 }

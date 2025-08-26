@@ -148,14 +148,7 @@ export default function DashboardClient({
           icon={<Bean />}
           description="Distinct species with laboratory trait measurements."
         />
-        <Card className="col-span-1 md:col-span-2">
-          <CardHeader>
-            <CardTitle>Graph 1</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LineChart filters={form.getValues()} />
-          </CardContent>
-        </Card>
+        <LineChart filters={form.getValues()} />
         <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>Graph 2</CardTitle>
