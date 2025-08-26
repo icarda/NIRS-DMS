@@ -51,7 +51,6 @@ export function WetchemHistogramCard({
 
   useEffect(() => {
     const bins = processToBins(raw);
-    console.log("Processed bins:", bins);
     setBins(bins);
   }, [raw]);
 

@@ -25,6 +25,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDashboardKpis } from "@/features/dashboard/actions/kpis";
 import { getCropTraits } from "@/features/traits/actions/trait";
 import { dashboardFilterSchema } from "@/lib/schemas";
+import { WetchemBoxplotCard } from "./boxplot";
 import { FilterForm, FilterValues } from "./filter-form";
 import { WetchemHistogramCard } from "./histogram";
 import { KPICard } from "./kpi-card";
@@ -163,6 +164,7 @@ export default function DashboardClient({
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <LineChart filters={form.getValues()} />
         <WetchemHistogramCard filters={form.getValues()} />
+        <WetchemBoxplotCard filters={form.getValues()} />
       </div>
     </div>
   );
