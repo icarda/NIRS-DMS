@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -21,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { crops } from "@/data/crops";
 import { qualityLabs } from "@/data/quality-labs";
+import { getNirsFilterOptions } from "@/features/dashboard/actions/nirs-filters";
 import { dashboardFilterSchema } from "@/lib/schemas";
 
 export type FilterValues = z.infer<typeof dashboardFilterSchema>;
@@ -39,6 +42,46 @@ export function FilterForm({
   onClear: () => void;
   submitting?: boolean;
 }) {
+  const [opts, setOpts] = useState<{
+    crops: string[];
+    qualityLabs: string[];
+    countries: string[];
+    years: string[];
+  }>({ crops: [], qualityLabs: [], countries: [], years: [] });
+
+  const values = form.watch();
+  const deps = useMemo(
+    () =>
+      [values.crop, values.qualityLab, values.year, values.country].join("|"),
+    [values.crop, values.qualityLab, values.year, values.country]
+  );
+
+  useEffect(() => {
+    (async () => {
+      const next = await getNirsFilterOptions({
+        crop: values.crop || "",
+        qualityLab: values.qualityLab || "",
+        year: values.year || "",
+        country: values.country || "",
+      });
+
+      setOpts(next);
+
+      if (values.crop && !next.crops.includes(values.crop)) {
+        form.setValue("crop", "");
+      }
+      if (values.qualityLab && !next.qualityLabs.includes(values.qualityLab)) {
+        form.setValue("qualityLab", "");
+      }
+      if (values.country && !next.countries.includes(values.country)) {
+        form.setValue("country", "");
+      }
+      if (values.year && !next.years.includes(values.year)) {
+        form.setValue("year", "");
+      }
+    })();
+  }, [deps]);
+
   return (
     <Form {...form}>
       <form
@@ -61,11 +104,16 @@ export function FilterForm({
                       <SelectValue placeholder="Select crop" />
                     </SelectTrigger>
                     <SelectContent>
-                      {crops.map((crop) => (
-                        <SelectItem key={crop.id} value={crop.title}>
-                          {crop.title}
+                      {opts.crops.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
                         </SelectItem>
                       ))}
+                      {opts.crops.length === 0 && (
+                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                          No crops available
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -89,11 +137,16 @@ export function FilterForm({
                       <SelectValue placeholder="Select quality lab" />
                     </SelectTrigger>
                     <SelectContent>
-                      {qualityLabs.map((lab) => (
+                      {opts.qualityLabs.map((lab) => (
                         <SelectItem key={lab} value={lab}>
                           {lab}
                         </SelectItem>
                       ))}
+                      {opts.qualityLabs.length === 0 && (
+                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                          No labs available
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -117,11 +170,16 @@ export function FilterForm({
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
-                      {YEARS.map((year) => (
-                        <SelectItem key={year} value={year}>
-                          {year}
+                      {opts.years.map((y) => (
+                        <SelectItem key={y} value={y}>
+                          {y}
                         </SelectItem>
                       ))}
+                      {opts.years.length === 0 && (
+                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                          No years available
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -145,11 +203,16 @@ export function FilterForm({
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
                     <SelectContent>
-                      {COUNTRIES.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
+                      {opts.countries.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
                         </SelectItem>
                       ))}
+                      {opts.countries.length === 0 && (
+                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                          No countries available
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>

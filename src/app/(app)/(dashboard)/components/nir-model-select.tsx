@@ -35,7 +35,6 @@ export function NirModelSelect({
   useEffect(() => {
     (async () => {
       const rows = await listNirModelsForFilters(filters);
-      console.log("NIR models for filters", filters, rows);
       setOptions(rows);
 
       if (value && !rows.find((r) => r.name === value)) {
