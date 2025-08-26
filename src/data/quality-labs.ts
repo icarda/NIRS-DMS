@@ -1,1 +1,1 @@
-export const qualityLabs = ["ICARDA-MAR", "ICARDA-LEB", "CIMMY"];
+export const qualityLabs = ["ICARDA-MAR", "ICARDA-LEB", "CIMMYT"];
