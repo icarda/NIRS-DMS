@@ -1,76 +1,124 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { and, eq, gte, lte, sql, SQL } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
+import { db } from "@/drizzle/db";
 import {
-  getNirsDataFiltered,
-  NirsDataFilters,
-} from "@/features/nirs-data/db/nirs-data";
-import { getCurrentUser } from "@/lib/currentUser";
-import { hasPermission } from "@/permissions/general";
+  CropTable,
+  NirModelTable,
+  NirsDataTable,
+  PhysiologicalStageTable,
+  ProductTypeTable,
+  QualityLabTable,
+  SpeciesTable,
+  StudyTable,
+  TrialTable,
+} from "@/drizzle/schema";
+import { NirsFilterSchema, NirsResponseSchema } from "./schema";
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
+function andsafe(conds: SQL[]) {
+  return conds.length ? and(...conds) : undefined;
+}
 
-  const user = await getCurrentUser();
+function normalize(v: string | null) {
+  return v ? v.toLowerCase() : null;
+}
 
-  const canAccessNirsData = hasPermission(user?.role, "nirs:access");
-  if (!canAccessNirsData) {
-    return NextResponse.json(
-      { message: "You do not have permission to access this resource." },
-      { status: 403 }
+/**
+ * Get NIRS data per sample
+ * @description Returns spectral NIR data grouped by sampleId
+ * @params NirsFilterSchema
+ * @response NirsResponse
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+
+  const crop = normalize(searchParams.get("crop"));
+  const qualityLab = normalize(searchParams.get("qualityLab"));
+  const nirModel = normalize(searchParams.get("nirModel"));
+  const species = normalize(searchParams.get("species"));
+  const plantingYear = searchParams.get("plantingYear");
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+  const physiologicalStage = normalize(searchParams.get("physiologicalStage"));
+  const productType = normalize(searchParams.get("productType"));
+
+  const conds: SQL[] = [];
+
+  if (crop) conds.push(eq(sql`lower(${CropTable.name})`, crop));
+  if (qualityLab)
+    conds.push(eq(sql`lower(${QualityLabTable.name})`, qualityLab));
+  if (nirModel) conds.push(eq(sql`lower(${NirModelTable.name})`, nirModel));
+  if (species) conds.push(eq(sql`lower(${SpeciesTable.name})`, species));
+  if (plantingYear)
+    conds.push(
+      eq(sql`extract(year from ${TrialTable.plantingDate})`, plantingYear)
     );
-  }
-
-  const filters: NirsDataFilters = {};
-  try {
-    const parseIntParam = (paramName: string): number | undefined => {
-      const value = searchParams.get(paramName);
-      if (value === null) return undefined;
-      const parsed = parseInt(value, 10);
-      if (isNaN(parsed)) {
-        throw new Error(`Invalid '${paramName}' parameter: Must be a number.`);
-      }
-      return parsed;
-    };
-
-    filters.studyCode =
-      searchParams.get("studyCode")?.replaceAll(" ", "+") ?? undefined;
-    filters.trial = searchParams.get("trial") ?? undefined;
-    filters.crop = searchParams.get("crop") ?? undefined;
-    filters.species = searchParams.get("species") ?? undefined;
-    filters.sampleId = parseIntParam("sampleId");
-    filters.gid = parseIntParam("gid");
-    filters.plotId = parseIntParam("plotId");
-    filters.year = parseIntParam("year");
-    filters.qualityLab = searchParams.get("qualityLab") ?? undefined;
-    filters.nirModel = searchParams.get("nirModel") ?? undefined;
-    filters.minWavelength = parseIntParam("minWavelength");
-    filters.maxWavelength = parseIntParam("maxWavelength");
-    filters.limit = parseIntParam("limit");
-    filters.offset = parseIntParam("offset");
-
-    if (filters.limit !== undefined && filters.limit <= 0)
-      throw new Error("Invalid 'limit': Must be positive.");
-    if (filters.offset !== undefined && filters.offset < 0)
-      throw new Error("Invalid 'offset': Must be non-negative.");
-
-    filters.location = searchParams.get("location") ?? undefined;
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: "Invalid query parameter format", error: error.message },
-      { status: 400 }
+  if (startDate) conds.push(gte(StudyTable.sampleDate, startDate));
+  if (endDate) conds.push(lte(StudyTable.sampleDate, endDate));
+  if (physiologicalStage)
+    conds.push(
+      eq(sql`lower(${PhysiologicalStageTable.name})`, physiologicalStage)
     );
-  }
+  if (productType)
+    conds.push(eq(sql`lower(${ProductTypeTable.name})`, productType));
 
-  try {
-    const nirsData = await getNirsDataFiltered(filters);
+  const rows = await db
+    .select({
+      sampleId: NirsDataTable.sampleId,
+      wavelength: NirsDataTable.wavelength,
+      value: NirsDataTable.value,
+      crop: CropTable.name,
+      qualityLab: QualityLabTable.name,
+      nirModel: NirModelTable.name,
+      species: SpeciesTable.name,
+      plantingDate: TrialTable.plantingDate,
+      physiologicalStage: PhysiologicalStageTable.name,
+      productType: ProductTypeTable.name,
+    })
+    .from(NirsDataTable)
+    .innerJoin(StudyTable, eq(NirsDataTable.studyId, StudyTable.id))
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
+    .innerJoin(SpeciesTable, eq(NirsDataTable.speciesId, SpeciesTable.id))
+    .innerJoin(NirModelTable, eq(StudyTable.nirModelId, NirModelTable.id))
+    .innerJoin(
+      PhysiologicalStageTable,
+      eq(StudyTable.physiologicalStageId, PhysiologicalStageTable.id)
+    )
+    .innerJoin(
+      ProductTypeTable,
+      eq(StudyTable.productTypeId, ProductTypeTable.id)
+    )
+    .where(andsafe(conds));
 
-    return NextResponse.json(nirsData, { status: 200 });
-  } catch (error: any) {
-    console.error("API Error fetching NIRS data:", error);
+  // Group by sampleId
+  const grouped = Object.values(
+    rows.reduce(
+      (acc, row) => {
+        if (!acc[row.sampleId]) {
+          acc[row.sampleId] = {
+            sampleId: row.sampleId,
+            crop: row.crop,
+            qualityLab: row.qualityLab,
+            nirModel: row.nirModel,
+            species: row.species,
+            plantingDate: row.plantingDate,
+            physiologicalStage: row.physiologicalStage,
+            productType: row.productType,
+            nirsData: [],
+          };
+        }
+        acc[row.sampleId].nirsData.push({
+          wavelength: row.wavelength,
+          value: row.value,
+        });
+        return acc;
+      },
+      {} as Record<number, any>
+    )
+  );
 
-    return NextResponse.json(
-      { message: "Failed to fetch NIRS data", error: error.message },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(grouped);
 }
