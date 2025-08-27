@@ -1,140 +1,147 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, eq, gte, inArray, lte, sql, SQL } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
+import { db } from "@/drizzle/db";
 import {
-  deleteTrait,
-  getTraitsFiltered,
-  insertTrait,
-  TraitFilters,
-} from "@/features/traits/db/trait";
-import { traitSchema } from "@/features/traits/schemas/trait";
-import { getCurrentUser } from "@/lib/currentUser";
-import { hasPermission } from "@/permissions/general";
+  CropTable,
+  NirModelTable,
+  PhysiologicalStageTable,
+  ProductTypeTable,
+  QualityLabTable,
+  StudyTable,
+  TraitTable,
+  TrialTable,
+} from "@/drizzle/schema";
+import { TraitFilterSchema, TraitResponseSchema } from "./schema";
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const user = await getCurrentUser();
+function andsafe(conds: SQL[]) {
+  return conds.length ? and(...conds) : undefined;
+}
 
-  const canAccessTraitData = hasPermission(user?.role, "trait:access");
-  if (!canAccessTraitData) {
+function normalize(v: string | null) {
+  return v ? v.toLowerCase() : null;
+}
+
+/**
+ * Get Trait data per sample
+ *
+ * @description Returns wet chemistry and predicted trait values,
+ * grouped by sample ID, with contextual metadata (crop, quality lab,  etc).
+ *
+ * @params TraitFilterSchema
+ * @response TraitResponseSchema
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+
+  const crop = normalize(searchParams.get("crop"));
+  const qualityLab = normalize(searchParams.get("qualityLab"));
+  const nirModel = normalize(searchParams.get("nirModel"));
+  const plantingYear = searchParams.get("plantingYear");
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+  const physiologicalStage = normalize(searchParams.get("physiologicalStage"));
+  const productType = normalize(searchParams.get("productType"));
+  const traitNamesParam = searchParams.get("traitName"); // required
+
+  if (!traitNamesParam) {
     return NextResponse.json(
-      {
-        error: true,
-        message: "You do not have permission to access this resource.",
-      },
-      { status: 403 }
-    );
-  }
-
-  const filters: TraitFilters = {};
-  try {
-    const parseIntParam = (paramName: string): number | undefined => {
-      const value = searchParams.get(paramName);
-      if (value === null) return undefined;
-      const parsed = parseInt(value, 10);
-
-      if (isNaN(parsed)) {
-        throw new Error(
-          `Invalid '${paramName}' parameter: Must be a whole number.`
-        );
-      }
-      return parsed;
-    };
-
-    filters.sampleId = parseIntParam("sampleId");
-    filters.year = parseIntParam("year");
-    filters.limit = parseIntParam("limit");
-    filters.offset = parseIntParam("offset");
-
-    if (filters.limit !== undefined && filters.limit <= 0) {
-      throw new Error("Invalid 'limit' parameter: Must be positive.");
-    }
-    if (filters.offset !== undefined && filters.offset < 0) {
-      throw new Error("Invalid 'offset' parameter: Must be non-negative.");
-    }
-
-    filters.studyCode = searchParams.get("studyCode") ?? undefined;
-    filters.trial = searchParams.get("trial") ?? undefined;
-    filters.crop = searchParams.get("crop") ?? undefined;
-    filters.trait = searchParams.get("trait") ?? undefined;
-    filters.location = searchParams.get("location") ?? undefined;
-    filters.qualityLab = searchParams.get("qualityLab") ?? undefined;
-    filters.nirModel = searchParams.get("nirModel") ?? undefined;
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: "Invalid query parameter format", error: error.message },
+      { error: "traitName is required (can be comma-separated)" },
       { status: 400 }
     );
   }
 
-  try {
-    const traitData = await getTraitsFiltered(filters);
+  const traitNames = traitNamesParam
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
 
-    return NextResponse.json(traitData, { status: 200 });
-  } catch (error: any) {
-    console.error("API Error fetching Trait data:", error);
-
+  if (traitNames.length === 0) {
     return NextResponse.json(
-      { message: "Failed to fetch Trait data", error: "Internal Server Error" },
-      { status: 500 }
+      { error: "No valid trait names provided" },
+      { status: 400 }
     );
   }
-}
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    const parsed = traitSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    const newTrait = await insertTrait(parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Trait created successfully",
-        trait: newTrait,
+  const conds: SQL[] = [];
+
+  if (crop) conds.push(eq(sql`lower(${CropTable.name})`, crop));
+  if (qualityLab)
+    conds.push(eq(sql`lower(${QualityLabTable.name})`, qualityLab));
+  if (nirModel) conds.push(eq(sql`lower(${NirModelTable.name})`, nirModel));
+  if (plantingYear)
+    conds.push(
+      eq(sql`extract(year from ${TrialTable.plantingDate})`, plantingYear)
+    );
+  if (startDate) conds.push(gte(StudyTable.sampleDate, startDate));
+  if (endDate) conds.push(lte(StudyTable.sampleDate, endDate));
+  if (physiologicalStage)
+    conds.push(
+      eq(sql`lower(${PhysiologicalStageTable.name})`, physiologicalStage)
+    );
+  if (productType)
+    conds.push(eq(sql`lower(${ProductTypeTable.name})`, productType));
+  if (traitNames.length)
+    conds.push(inArray(sql`lower(${TraitTable.traitName})`, traitNames));
+
+  const rows = await db
+    .select({
+      sampleId: TraitTable.sampleId,
+      traitName: TraitTable.traitName,
+      measuredValue: TraitTable.measuredValue,
+      predictedValue: TraitTable.predictedValue,
+      year: TraitTable.year,
+      crop: CropTable.name,
+      qualityLab: QualityLabTable.name,
+      nirModel: NirModelTable.name,
+      plantingDate: TrialTable.plantingDate,
+      physiologicalStage: PhysiologicalStageTable.name,
+      productType: ProductTypeTable.name,
+    })
+    .from(TraitTable)
+    .innerJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id))
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
+    .innerJoin(NirModelTable, eq(StudyTable.nirModelId, NirModelTable.id))
+    .innerJoin(
+      PhysiologicalStageTable,
+      eq(StudyTable.physiologicalStageId, PhysiologicalStageTable.id)
+    )
+    .innerJoin(
+      ProductTypeTable,
+      eq(StudyTable.productTypeId, ProductTypeTable.id)
+    )
+    .where(andsafe(conds));
+
+  // Group by sampleId
+  const grouped = Object.values(
+    rows.reduce(
+      (acc, row) => {
+        if (!acc[row.sampleId]) {
+          acc[row.sampleId] = {
+            sampleId: row.sampleId,
+            crop: row.crop,
+            qualityLab: row.qualityLab,
+            nirModel: row.nirModel,
+            plantingDate: row.plantingDate,
+            physiologicalStage: row.physiologicalStage,
+            productType: row.productType,
+            traits: [],
+          };
+        }
+        acc[row.sampleId].traits.push({
+          traitName: row.traitName,
+          measuredValue: row.measuredValue,
+          predictedValue: row.predictedValue,
+          year: row.year,
+        });
+        return acc;
       },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error creating trait" },
-      { status: 500 }
-    );
-  }
-}
+      {} as Record<number, any>
+    )
+  );
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id query parameter" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const deletedTrait = await deleteTrait({ id });
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Trait deleted successfully",
-        trait: deletedTrait,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error deleting trait" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(grouped);
 }
