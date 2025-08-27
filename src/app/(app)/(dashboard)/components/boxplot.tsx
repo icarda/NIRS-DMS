@@ -165,51 +165,61 @@ export function WetchemBoxplotCard({
           }}
           className="h-[340px] w-full"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={data}
-              margin={{ top: 10, right: 20, bottom: 40, left: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              {/* Stack bars to create base + whiskers + boxes */}
-              <Bar stackId="a" dataKey="min" fill="transparent" />
-              <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
-              {/* at min (baseline) */}
-              <Bar stackId="a" dataKey="bottomWhisker" shape={<WhiskerBar />} />
-              <Bar
-                stackId="a"
-                dataKey="bottomBox"
-                fill="var(--color-bottomBox)"
-              />
-              <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
-              {/* at median */}
-              <Bar stackId="a" dataKey="topBox" fill="var(--color-topBox)" />
-              <Bar stackId="a" dataKey="topWhisker" shape={<WhiskerBar />} />
-              <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
-              {/* at max */}
-              {/* mean marker */}
-              <Scatter
-                dataKey="average"
-                fill="var(--color-average)"
-                stroke="#fff"
-              />
-              <XAxis
-                dataKey="group"
-                tickLine={false}
-                axisLine={false}
-                interval={0}
-                angle={-20}
-                textAnchor="end"
-                height={40}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                label={{ value: yLabel, angle: -90, position: "insideLeft" }}
-              />
-              <ChartTooltip cursor={false} content={<BoxplotTooltip />} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {data.length === 0 ? (
+            <div className="flex h-full w-full items-center justify-center">
+              No data to display
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={data}
+                margin={{ top: 10, right: 20, bottom: 40, left: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                {/* Stack bars to create base + whiskers + boxes */}
+                <Bar stackId="a" dataKey="min" fill="transparent" />
+                <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
+                {/* at min (baseline) */}
+                <Bar
+                  stackId="a"
+                  dataKey="bottomWhisker"
+                  shape={<WhiskerBar />}
+                />
+                <Bar
+                  stackId="a"
+                  dataKey="bottomBox"
+                  fill="var(--color-bottomBox)"
+                />
+                <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
+                {/* at median */}
+                <Bar stackId="a" dataKey="topBox" fill="var(--color-topBox)" />
+                <Bar stackId="a" dataKey="topWhisker" shape={<WhiskerBar />} />
+                <Bar stackId="a" dataKey="bar" shape={<HorizonBar />} />{" "}
+                {/* at max */}
+                {/* mean marker */}
+                <Scatter
+                  dataKey="average"
+                  fill="var(--color-average)"
+                  stroke="#fff"
+                />
+                <XAxis
+                  dataKey="group"
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                  height={40}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  label={{ value: yLabel, angle: -90, position: "insideLeft" }}
+                />
+                <ChartTooltip cursor={false} content={<BoxplotTooltip />} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
         </ChartContainer>
       </CardContent>
     </Card>

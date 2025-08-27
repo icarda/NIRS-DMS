@@ -74,45 +74,51 @@ export function WetchemHistogramCard({
           }}
           className="h-[300px] w-full"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={bins}
-              margin={{ top: 10, right: 20, left: 20, bottom: 60 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="range"
-                angle={-45}
-                textAnchor="end"
-                height={60}
-                tickLine={false}
-                axisLine={false}
-                label={{
-                  value: xAxisLabel,
-                  position: "insideBottom",
-                  offset: -20,
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                label={{ value: "Count", angle: -90, position: "insideLeft" }}
-              />
-              <ChartTooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="count"
-                fill="var(--color-count)"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {bins.length === 0 ? (
+            <div className="flex h-full w-full items-center justify-center">
+              No data to display
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={bins}
+                margin={{ top: 10, right: 20, left: 20, bottom: 60 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="range"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  tickLine={false}
+                  axisLine={false}
+                  label={{
+                    value: xAxisLabel,
+                    position: "insideBottom",
+                    offset: -20,
+                  }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  label={{ value: "Count", angle: -90, position: "insideLeft" }}
+                />
+                <ChartTooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </ChartContainer>
 
-        {bins.length === 0 && (
+        {/* {bins.length === 0 && (
           <div className="pt-4 text-sm text-muted-foreground">
             No data for the selected trait and filters.
           </div>
-        )}
+        )} */}
       </CardContent>
     </Card>
   );

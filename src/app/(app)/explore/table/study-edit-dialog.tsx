@@ -204,6 +204,14 @@ export default function StudyEditDialog({
                                 <Input
                                   placeholder={`Enter ${metadata.label.toLowerCase()}`}
                                   {...field}
+                                  value={field.value?.toString() || ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === ""
+                                        ? undefined
+                                        : parseFloat(e.target.value)
+                                    )
+                                  }
                                 />
                               </FormControl>
                               <FormMessage />
@@ -227,6 +235,7 @@ export default function StudyEditDialog({
                                   type="number"
                                   placeholder={`Enter ${metadata.label.toLowerCase()}`}
                                   {...field}
+                                  value={field.value?.toString() || ""}
                                   onChange={(e) =>
                                     field.onChange(
                                       e.target.value === ""
@@ -263,7 +272,10 @@ export default function StudyEditDialog({
                                       )}
                                     >
                                       {field.value ? (
-                                        format(field.value, "PPP")
+                                        format(
+                                          field.value as unknown as Date,
+                                          "PPP"
+                                        )
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
@@ -279,7 +291,9 @@ export default function StudyEditDialog({
                                     mode="single"
                                     selected={
                                       field.value
-                                        ? new Date(field.value)
+                                        ? new Date(
+                                            field.value as unknown as Date
+                                          )
                                         : undefined
                                     }
                                     onSelect={field.onChange}

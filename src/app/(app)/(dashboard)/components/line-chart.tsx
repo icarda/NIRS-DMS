@@ -113,56 +113,62 @@ export function LineChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <ReLineChart
-            data={data}
-            accessibilityLayer
-            margin={{ bottom: 40, left: 20, right: 20, top: 20 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="wavelength"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              label={{
-                value: "Wavelength (nm)",
-                position: "insideBottom",
-                offset: -15,
-              }}
-              className="pb-2"
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              label={{
-                value: "Absorbance",
-                angle: -90,
-                position: "insideLeft",
-                offset: 15,
-              }}
-            />
-            <ChartTooltip
-              cursor={false}
-              defaultIndex={1}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => `${value} nm`}
-                />
-              }
-            />
-            {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
-
-            {activeSamples.map((key) => (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={key}
-                stroke={`var(--color-${key})`}
-                dot={false}
-                strokeWidth={1.5}
+          {data.length === 0 ? (
+            <div className="flex h-full w-full items-center justify-center">
+              No data to display
+            </div>
+          ) : (
+            <ReLineChart
+              data={data}
+              accessibilityLayer
+              margin={{ bottom: 40, left: 20, right: 20, top: 20 }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="wavelength"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                label={{
+                  value: "Wavelength (nm)",
+                  position: "insideBottom",
+                  offset: -15,
+                }}
+                className="pb-2"
               />
-            ))}
-          </ReLineChart>
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                label={{
+                  value: "Absorbance",
+                  angle: -90,
+                  position: "insideLeft",
+                  offset: 15,
+                }}
+              />
+              <ChartTooltip
+                cursor={false}
+                defaultIndex={1}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) => `${value} nm`}
+                  />
+                }
+              />
+              {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
+
+              {activeSamples.map((key) => (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stroke={`var(--color-${key})`}
+                  dot={false}
+                  strokeWidth={1.5}
+                />
+              ))}
+            </ReLineChart>
+          )}
         </ChartContainer>
       </CardContent>
     </Card>

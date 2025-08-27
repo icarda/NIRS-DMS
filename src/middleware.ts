@@ -24,17 +24,7 @@ export default auth((req) => {
   const isAuthRoute = authRoutes.includes(req.nextUrl.pathname);
   const isApiRoute = req.nextUrl.pathname.startsWith(apiPrefix);
 
-  if (isApiAuthRoute) {
-    return;
-  }
-
-  if (isApiRoute) {
-    if (!isLoggedin) {
-      return Response.json(
-        { error: true, message: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+  if (isApiAuthRoute || isApiRoute) {
     return;
   }
 
