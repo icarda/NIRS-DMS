@@ -10,6 +10,7 @@ export default function ApiDocsPage() {
       configuration={{
         _integration: "nextjs",
         url: "/openapi.json",
+        title: "NIRS-DMS API Documentation",
       }}
     />
   );

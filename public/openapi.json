@@ -20,6 +20,115 @@
       }
     },
     "schemas": {
+      "CenterResponseSchema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CenterSchema"
+        }
+      },
+      "CropTraitsFilterSchema": {
+        "type": "object",
+        "properties": {
+          "crop": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "crop"
+        ]
+      },
+      "CropTraitsResponseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "traitName": {
+              "type": "string"
+            },
+            "entity": {
+              "type": "string"
+            },
+            "methodDescription": {
+              "type": "string"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "min": {
+              "type": "number",
+              "nullable": true
+            },
+            "max": {
+              "type": "number",
+              "nullable": true
+            },
+            "variable": {
+              "type": "string"
+            },
+            "crop": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "traitName",
+            "entity",
+            "methodDescription",
+            "unit",
+            "variable",
+            "crop"
+          ]
+        }
+      },
+      "CropsFilterSchema": {
+        "type": "object",
+        "properties": {
+          "commonName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter crops by common name"
+          },
+          "species": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter crops by species name"
+          },
+          "productType": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter crops by product type"
+          },
+          "physiologicalStage": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter crops by physiological stage"
+          }
+        }
+      },
+      "NirModelFilterSchema": {
+        "type": "object",
+        "properties": {
+          "manufacturer": {
+            "type": "string",
+            "nullable": true,
+            "description": "Manufacturer of the NIR model"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "description": "Type of the NIR model"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the NIR model"
+          }
+        }
+      },
       "NirsFilterSchema": {
         "type": "object",
         "properties": {
@@ -67,6 +176,76 @@
         }
       },
       "NirsResponse": {},
+      "PhysiologicalStageFilterSchema": {
+        "type": "object",
+        "properties": {
+          "crop": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter stages by crop name"
+          }
+        }
+      },
+      "ProductTypeFilterSchema": {
+        "type": "object",
+        "properties": {
+          "crop": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter product types by crop name"
+          }
+        }
+      },
+      "QualityLabsFilterSchema": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "nullable": true,
+            "description": "Country where the lab is located"
+          },
+          "center": {
+            "type": "string",
+            "nullable": true,
+            "description": "Center to which the lab belongs"
+          }
+        }
+      },
+      "QualityLabsResponseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the quality lab"
+            },
+            "country": {
+              "type": "string",
+              "description": "Country where the lab is located"
+            },
+            "center": {
+              "type": "string",
+              "description": "Center to which the lab belongs"
+            }
+          },
+          "required": [
+            "name",
+            "country",
+            "center"
+          ]
+        }
+      },
+      "SpeciesFilterSchema": {
+        "type": "object",
+        "properties": {
+          "crop": {
+            "type": "string",
+            "nullable": true,
+            "description": "Filter species by crop name"
+          }
+        }
+      },
       "TraitFilterSchema": {
         "type": "object",
         "properties": {
@@ -130,6 +309,145 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/TraitSampleSchema"
+        }
+      },
+      "CenterSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "acronym": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "acronym"
+        ]
+      },
+      "CropTraitsFilter": {
+        "type": "object",
+        "properties": {
+          "crop": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "crop"
+        ]
+      },
+      "CropTraitsResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "traitName": {
+              "type": "string"
+            },
+            "entity": {
+              "type": "string"
+            },
+            "methodDescription": {
+              "type": "string"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "min": {
+              "type": "number",
+              "nullable": true
+            },
+            "max": {
+              "type": "number",
+              "nullable": true
+            },
+            "variable": {
+              "type": "string"
+            },
+            "crop": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "traitName",
+            "entity",
+            "methodDescription",
+            "unit",
+            "variable",
+            "crop"
+          ]
+        }
+      },
+      "CropsResponseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Unique crop ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Official crop name"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true,
+              "description": "Description of the crop"
+            },
+            "cropImageUrl": {
+              "type": "string",
+              "nullable": true,
+              "description": "Image URL for the crop"
+            },
+            "commonNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Alternative/common names of the crop"
+            },
+            "species": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Species belonging to this crop"
+            },
+            "physiologicalStages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Physiological stages defined for this crop"
+            },
+            "productTypes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Product types for this crop"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "commonNames",
+            "species",
+            "physiologicalStages",
+            "productTypes"
+          ]
         }
       },
       "NirsDataPointSchema": {
@@ -420,78 +738,26 @@
     "/centers": {
       "get": {
         "operationId": "get-centers",
-        "summary": "",
-        "description": "",
+        "summary": "Get Centers\r",
+        "description": "Returns all centers with id, name, acronym, and country.",
         "tags": [
           "Centers"
         ],
         "parameters": [],
         "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-centers",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Centers"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CenterSchema"
+                  }
+                }
+              }
             }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "put": {
-        "operationId": "put-centers",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Centers"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-centers",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Centers"
-        ],
-        "parameters": [],
-        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -504,54 +770,75 @@
     "/crop-trait": {
       "get": {
         "operationId": "get-crop-trait",
-        "summary": "",
-        "description": "",
+        "summary": "Get crop traits\r",
+        "description": "Returns all traits associated with a given crop",
         "tags": [
           "Crop-trait"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "crop",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
           }
-        }
-      },
-      "post": {
-        "operationId": "post-crop-trait",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crop-trait"
         ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "traitName": {
+                        "type": "string"
+                      },
+                      "entity": {
+                        "type": "string"
+                      },
+                      "methodDescription": {
+                        "type": "string"
+                      },
+                      "unit": {
+                        "type": "string"
+                      },
+                      "min": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "max": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "variable": {
+                        "type": "string"
+                      },
+                      "crop": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "traitName",
+                      "entity",
+                      "methodDescription",
+                      "unit",
+                      "variable",
+                      "crop"
+                    ]
+                  }
+                }
+              }
             }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-crop-trait",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crop-trait"
-        ],
-        "parameters": [],
-        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -564,120 +851,53 @@
     "/crops": {
       "get": {
         "operationId": "get-crops",
-        "summary": "",
-        "description": "",
+        "summary": "Get Crops\r",
+        "description": "Returns crops with optional filters, including related common names, species, product types, and physiological stages.",
         "tags": [
           "Crops"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "commonName",
+            "schema": {
+              "type": "string",
+              "description": "Filter crops by common name"
+            },
+            "required": false,
+            "description": "Filter crops by common name"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-crops",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crops"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+          {
+            "in": "query",
+            "name": "species",
+            "schema": {
+              "type": "string",
+              "description": "Filter crops by species name"
+            },
+            "required": false,
+            "description": "Filter crops by species name"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "put": {
-        "operationId": "put-crops",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crops"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+          {
+            "in": "query",
+            "name": "productType",
+            "schema": {
+              "type": "string",
+              "description": "Filter crops by product type"
+            },
+            "required": false,
+            "description": "Filter crops by product type"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
+          {
+            "in": "query",
+            "name": "physiologicalStage",
+            "schema": {
+              "type": "string",
+              "description": "Filter crops by physiological stage"
+            },
+            "required": false,
+            "description": "Filter crops by physiological stage"
           }
-        }
-      },
-      "delete": {
-        "operationId": "delete-crops",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crops"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/crops/{cropId}/common-names": {
-      "get": {
-        "operationId": "get-crops-{cropId}-common-names",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crops"
-        ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-crops-{cropId}-common-names",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Crops"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
@@ -691,53 +911,43 @@
     "/nir-models": {
       "get": {
         "operationId": "get-nir-models",
-        "summary": "",
-        "description": "",
+        "summary": "Get NIR Models\r",
+        "description": "Returns NIR models with optional filters (manufacturer, type, name).",
         "tags": [
           "Nir-models"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "manufacturer",
+            "schema": {
+              "type": "string",
+              "description": "Manufacturer of the NIR model"
+            },
+            "required": false,
+            "description": "Manufacturer of the NIR model"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-nir-models",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Nir-models"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "description": "Type of the NIR model"
+            },
+            "required": false,
+            "description": "Type of the NIR model"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "description": "Name of the NIR model"
+            },
+            "required": false,
+            "description": "Name of the NIR model"
           }
-        }
-      },
-      "delete": {
-        "operationId": "delete-nir-models",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Nir-models"
         ],
-        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
@@ -859,53 +1069,23 @@
     "/physiological-stages": {
       "get": {
         "operationId": "get-physiological-stages",
-        "summary": "",
-        "description": "",
+        "summary": "Get Physiological Stages\r",
+        "description": "Returns physiological stages, optionally filtered by crop name.",
         "tags": [
           "Physiological-stages"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "crop",
+            "schema": {
+              "type": "string",
+              "description": "Filter stages by crop name"
+            },
+            "required": false,
+            "description": "Filter stages by crop name"
           }
-        }
-      },
-      "post": {
-        "operationId": "post-physiological-stages",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Physiological-stages"
         ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-physiological-stages",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Physiological-stages"
-        ],
-        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
@@ -919,53 +1099,23 @@
     "/product-types": {
       "get": {
         "operationId": "get-product-types",
-        "summary": "",
-        "description": "",
+        "summary": "Get Product Types\r",
+        "description": "Returns product types, optionally filtered by crop name.",
         "tags": [
           "Product-types"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "crop",
+            "schema": {
+              "type": "string",
+              "description": "Filter product types by crop name"
+            },
+            "required": false,
+            "description": "Filter product types by crop name"
           }
-        }
-      },
-      "post": {
-        "operationId": "post-product-types",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Product-types"
         ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-product-types",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Product-types"
-        ],
-        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
@@ -979,78 +1129,66 @@
     "/quality-labs": {
       "get": {
         "operationId": "get-quality-labs",
-        "summary": "",
-        "description": "",
+        "summary": "Get Quality Labs\r",
+        "description": "Returns distinct quality labs, filtered by country and/or center.",
         "tags": [
           "Quality-labs"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string",
+              "description": "Country where the lab is located"
+            },
+            "required": false,
+            "description": "Country where the lab is located"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
+          {
+            "in": "query",
+            "name": "center",
+            "schema": {
+              "type": "string",
+              "description": "Center to which the lab belongs"
+            },
+            "required": false,
+            "description": "Center to which the lab belongs"
           }
-        }
-      },
-      "post": {
-        "operationId": "post-quality-labs",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Quality-labs"
         ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the quality lab"
+                      },
+                      "country": {
+                        "type": "string",
+                        "description": "Country where the lab is located"
+                      },
+                      "center": {
+                        "type": "string",
+                        "description": "Center to which the lab belongs"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "country",
+                      "center"
+                    ]
+                  }
+                }
+              }
             }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
           },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "put": {
-        "operationId": "put-quality-labs",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Quality-labs"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-quality-labs",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Quality-labs"
-        ],
-        "parameters": [],
-        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -1060,56 +1198,26 @@
         }
       }
     },
-    "/studies": {
+    "/species": {
       "get": {
-        "operationId": "get-studies",
-        "summary": "",
-        "description": "",
+        "operationId": "get-species",
+        "summary": "Get Species\r",
+        "description": "Returns species, optionally filtered by crop name.",
         "tags": [
-          "Studies"
+          "Species"
         ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
+        "parameters": [
+          {
+            "in": "query",
+            "name": "crop",
+            "schema": {
+              "type": "string",
+              "description": "Filter species by crop name"
+            },
+            "required": false,
+            "description": "Filter species by crop name"
           }
-        }
-      },
-      "post": {
-        "operationId": "post-studies",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Studies"
         ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-studies",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Studies"
-        ],
-        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
@@ -1244,90 +1352,6 @@
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/trials": {
-      "get": {
-        "operationId": "get-trials",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Trials"
-        ],
-        "parameters": [],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-trials",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Trials"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "put": {
-        "operationId": "put-trials",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Trials"
-        ],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "delete": {
-        "operationId": "delete-trials",
-        "summary": "",
-        "description": "",
-        "tags": [
-          "Trials"
-        ],
-        "parameters": [],
-        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },

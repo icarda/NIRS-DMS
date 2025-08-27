@@ -1,90 +1,47 @@
+import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import {
-  deleteCropTrait,
-  getCropTraits,
-  insertCropTrait,
-} from "@/features/traits/db/crop-trait";
-import { cropTraitSchema } from "@/features/traits/schemas/crop-trait";
+import { db } from "@/drizzle/db";
+import { CropTable, CropTraitTable } from "@/drizzle/schema";
+import { CropTraitsFilterSchema, CropTraitsResponseSchema } from "./schema";
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const cropIdParam = searchParams.get("cropId");
-    if (!cropIdParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing cropId query parameter" },
-        { status: 400 }
-      );
-    }
-    const cropId = Number(cropIdParam);
-    const cropTraits = await getCropTraits({ cropId });
-    return NextResponse.json({ error: false, cropTraits }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error fetching crop traits" },
-      { status: 500 }
-    );
-  }
+function normalize(v: string | null) {
+  return v ? v.toLowerCase() : null;
 }
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    const parsed = cropTraitSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    // TODO: fix ts error
-    // @ts-ignore
-    const newCropTrait = await insertCropTrait(parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Crop trait created successfully",
-        cropTrait: newCropTrait,
-      },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error creating crop trait" },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * Get crop traits
+ * @description Returns all traits associated with a given crop
+ * @params CropTraitsFilterSchema
+ * @response CropTraitsResponseSchema
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const crop = normalize(searchParams.get("crop"));
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id query parameter" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const deletedCropTrait = await deleteCropTrait({ id });
+  if (!crop) {
     return NextResponse.json(
-      {
-        error: false,
-        message: "Crop trait deleted successfully",
-        cropTrait: deletedCropTrait,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error deleting crop trait" },
-      { status: 500 }
+      { error: "Missing required parameter: crop" },
+      { status: 400 }
     );
   }
+
+  const rows = await db
+    .select({
+      id: CropTraitTable.id,
+      traitName: CropTraitTable.traitName,
+      entity: CropTraitTable.entity,
+      methodDescription: CropTraitTable.methodDescription,
+      unit: CropTraitTable.unit,
+      min: CropTraitTable.minimumAllowed,
+      max: CropTraitTable.maximumAllowed,
+      variable: CropTraitTable.traitVariable,
+      crop: CropTable.name,
+    })
+    .from(CropTraitTable)
+    .innerJoin(CropTable, eq(CropTraitTable.cropId, CropTable.id))
+    .where(eq(sql`lower(${CropTable.name})`, crop));
+
+  return NextResponse.json(rows);
 }

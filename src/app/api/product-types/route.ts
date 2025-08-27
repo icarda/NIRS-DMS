@@ -1,88 +1,49 @@
+import { and, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import {
-  deleteProductType,
-  getProductTypes,
-  insertProductType,
-} from "@/features/studies/db/product-type";
-import { productTypeSchema } from "@/features/studies/schemas/product-type";
+import { db } from "@/drizzle/db";
+import { CropTable, ProductTypeTable } from "@/drizzle/schema";
+import { ProductTypeFilterSchema } from "./schema";
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const cropIdParam = searchParams.get("cropId");
-    if (!cropIdParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing cropId query parameter" },
-        { status: 400 }
-      );
-    }
-    const cropId = Number(cropIdParam);
-    const productTypes = await getProductTypes(cropId);
-    return NextResponse.json({ error: false, productTypes }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error fetching product types" },
-      { status: 500 }
-    );
-  }
+function normalize(v: string | null | undefined) {
+  return v ? v.toLowerCase() : undefined;
 }
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    const parsed = productTypeSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    const newProductType = await insertProductType(parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Product Type created successfully",
-        productType: newProductType,
-      },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error creating product type" },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * Get Product Types
+ * @description Returns product types, optionally filtered by crop name.
+ * @params ProductTypeFilterSchema
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id for deletion" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const deletedProductType = await deleteProductType({ id });
+  const parsed = ProductTypeFilterSchema.safeParse({
+    crop: normalize(searchParams.get("crop") || undefined),
+  });
+
+  if (!parsed.success) {
     return NextResponse.json(
-      {
-        error: false,
-        message: "Product Type deleted successfully",
-        productType: deletedProductType,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error deleting product type" },
-      { status: 500 }
+      { error: "Invalid query parameters", details: parsed.error.format() },
+      { status: 400 }
     );
   }
+
+  const { crop } = parsed.data;
+
+  const conds: any[] = [];
+  if (crop) conds.push(eq(sql`lower(${CropTable.name})`, crop));
+
+  const rows = await db
+    .select({
+      id: ProductTypeTable.id,
+      name: ProductTypeTable.name,
+      cropId: ProductTypeTable.cropId,
+      cropName: CropTable.name,
+    })
+    .from(ProductTypeTable)
+    .innerJoin(CropTable, eq(ProductTypeTable.cropId, CropTable.id))
+    .where(conds.length ? and(...conds) : undefined);
+
+  return NextResponse.json(rows);
 }

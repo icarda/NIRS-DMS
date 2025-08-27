@@ -1,82 +1,55 @@
+import { and, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import {
-  deleteNirModel,
-  getNirModels,
-  insertNirModel,
-} from "@/features/nir-models/db/nir-model";
-import { nirModelSchema } from "@/features/nir-models/schemas/nir-model";
+import { db } from "@/drizzle/db";
+import { NirModelTable } from "@/drizzle/schema";
+import { NirModelFilterSchema } from "./schema";
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const limitParam = searchParams.get("limit");
-    const limit = limitParam ? Number(limitParam) : undefined;
-    const nirModels = await getNirModels({ limit });
-    return NextResponse.json({ error: false, nirModels }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error fetching NIR models" },
-      { status: 500 }
-    );
-  }
+function normalize(v: string | null | undefined) {
+  return v ? v.toLowerCase() : undefined;
 }
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    const parsed = nirModelSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    const newNirModel = await insertNirModel(parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "NIR model created successfully",
-        nirModel: newNirModel,
-      },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error creating NIR model" },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * Get NIR Models
+ * @description Returns NIR models with optional filters (manufacturer, type, name).
+ * @params NirModelFilterSchema
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id for deletion" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const deletedNirModel = await deleteNirModel({ id });
+  const parsed = NirModelFilterSchema.safeParse({
+    manufacturer: normalize(searchParams.get("manufacturer") || undefined),
+    type: normalize(searchParams.get("type") || undefined),
+    name: normalize(searchParams.get("name") || undefined),
+  });
+
+  if (!parsed.success) {
     return NextResponse.json(
-      {
-        error: false,
-        message: "NIR model deleted successfully",
-        nirModel: deletedNirModel,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: true, message: error.message || "Error deleting NIR model" },
-      { status: 500 }
+      { error: "Invalid query parameters", details: parsed.error.format() },
+      { status: 400 }
     );
   }
+
+  const { manufacturer, type, name } = parsed.data;
+
+  const conds: any[] = [];
+  if (manufacturer)
+    conds.push(eq(sql`lower(${NirModelTable.manufacturer})`, manufacturer));
+  if (type) conds.push(eq(sql`lower(${NirModelTable.type})`, type));
+  if (name) conds.push(eq(sql`lower(${NirModelTable.name})`, name));
+
+  const rows = await db
+    .select({
+      id: NirModelTable.id,
+      name: NirModelTable.name,
+      type: NirModelTable.type,
+      wavelengthRange: NirModelTable.wavelengthRange,
+      resolution: NirModelTable.resolution,
+      manufacturer: NirModelTable.manufacturer,
+    })
+    .from(NirModelTable)
+    .where(conds.length ? and(...conds) : undefined);
+
+  return NextResponse.json(rows);
 }

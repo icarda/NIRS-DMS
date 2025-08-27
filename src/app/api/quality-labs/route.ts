@@ -1,150 +1,55 @@
+import { and, eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import {
-  deleteQualityLab,
-  getQualityLab,
-  getQualityLabs,
-  insertQualityLab,
-  updateQualityLab,
-} from "@/features/quality-labs/db/quality-lab";
-import { qualityLabSchema } from "@/features/quality-labs/schemas/quality-lab";
+import { db } from "@/drizzle/db";
+import { CenterTable, QualityLabTable } from "@/drizzle/schema";
+import { QualityLabsFilterSchema, QualityLabsResponseSchema } from "./schema";
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-
-    if (idParam) {
-      const id = Number(idParam);
-      const qualityLab = await getQualityLab(id);
-      if (!qualityLab) {
-        return NextResponse.json(
-          { error: true, message: "Quality Lab not found" },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json({ error: false, qualityLab }, { status: 200 });
-    } else {
-      const limitParam = searchParams.get("limit");
-      const limit = limitParam ? Number(limitParam) : undefined;
-      const qualityLabs = await getQualityLabs({ limit });
-      return NextResponse.json({ error: false, qualityLabs }, { status: 200 });
-    }
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: true,
-        message: error.message || "Error fetching quality labs",
-      },
-      { status: 500 }
-    );
-  }
+function normalize(v: string | null) {
+  return v ? v.toLowerCase() : null;
 }
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    const parsed = qualityLabSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    const newQualityLab = await insertQualityLab(parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Quality Lab created successfully",
-        qualityLab: newQualityLab,
-      },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: true,
-        message: error.message || "Error creating quality lab",
-      },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * Get Quality Labs
+ * @description Returns distinct quality labs, filtered by country and/or center.
+ * @params QualityLabsFilterSchema
+ * @response QualityLabsResponseSchema
+ * @openapi
+ */
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
 
-export async function PUT(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id for update" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const data = await request.json();
-    const parsed = qualityLabSchema.safeParse(data);
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: true,
-          message: "Validation error",
-          details: parsed.error.issues,
-        },
-        { status: 400 }
-      );
-    }
-    const updatedQualityLab = await updateQualityLab({ id }, parsed.data);
-    return NextResponse.json(
-      {
-        error: false,
-        message: "Quality Lab updated successfully",
-        qualityLab: updatedQualityLab,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: true,
-        message: error.message || "Error updating quality lab",
-      },
-      { status: 500 }
-    );
-  }
-}
+  const parsed = QualityLabsFilterSchema.safeParse({
+    country: normalize(searchParams.get("country")) || undefined,
+    center: normalize(searchParams.get("center")) || undefined,
+  });
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const idParam = searchParams.get("id");
-    if (!idParam) {
-      return NextResponse.json(
-        { error: true, message: "Missing id for deletion" },
-        { status: 400 }
-      );
-    }
-    const id = Number(idParam);
-    const deletedQualityLab = await deleteQualityLab({ id });
+  if (!parsed.success) {
     return NextResponse.json(
-      {
-        error: false,
-        message: "Quality Lab deleted successfully",
-        qualityLab: deletedQualityLab,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: true,
-        message: error.message || "Error deleting quality lab",
-      },
-      { status: 500 }
+      { error: "Invalid query parameters", details: parsed.error.format() },
+      { status: 400 }
     );
   }
+
+  const { country, center } = parsed.data;
+
+  const conds: any[] = [];
+  if (country)
+    conds.push(
+      eq(sql`lower(${QualityLabTable.country})`, country.toLowerCase())
+    );
+  if (center)
+    conds.push(eq(sql`lower(${CenterTable.name})`, center.toLowerCase()));
+
+  const rows = await db
+    .selectDistinct({
+      name: QualityLabTable.name,
+      country: QualityLabTable.country,
+      center: CenterTable.name,
+    })
+    .from(QualityLabTable)
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(conds.length ? and(...conds) : undefined);
+
+  return NextResponse.json(rows);
 }
