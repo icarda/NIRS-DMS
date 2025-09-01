@@ -7,6 +7,8 @@ export const env = createEnv({
     AUTH_TRUST_HOST: z.string().default("false"),
     AUTH_SECRET: z.string(),
     GOOGLE_API_KEY: z.string(),
+    GOOGLE_EMAIL: z.string().email(),
+    GOOGLE_APP_PASSWORD: z.string(),
   },
   experimental__runtimeEnv: process.env,
   emptyStringAsUndefined: true,
