@@ -1,10 +1,15 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+
+import { db } from "@/drizzle/db";
+import { PasswordResetTokens } from "@/drizzle/schema";
 import { updateUserStudyAccessByCode } from "@/features/studies/db/studyAccesses";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
   deleteUser as deleteUserDb,
+  getPasswordResetTokenByEmail,
   updateUser as updateUserDb,
 } from "../db/users";
 
@@ -53,4 +58,24 @@ export async function updateUser({ id }: { id: number }, data: FormData) {
   await updateUserStudyAccessByCode(id, studyAccess);
 
   return updatedUser;
+}
+
+export async function generatePasswordResetToken(email: string) {
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
+
+  const existingToken = await getPasswordResetTokenByEmail(email);
+
+  if (existingToken) {
+    await db
+      .delete(PasswordResetTokens)
+      .where(eq(PasswordResetTokens.id, existingToken.id));
+  }
+
+  const [newToken] = await db
+    .insert(PasswordResetTokens)
+    .values({ email, token, expiresAt })
+    .returning();
+
+  return newToken;
 }

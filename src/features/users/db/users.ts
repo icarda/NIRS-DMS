@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { UserTable } from "@/drizzle/schema";
+import { PasswordResetTokens, UserTable } from "@/drizzle/schema";
 import { getUserGlobalTag, getUserIdTag, revalidateUserCache } from "./cache";
 
 export async function getUserByEmail(email: string) {
@@ -90,4 +90,25 @@ export async function deleteUser({ id }: { id: number }) {
   revalidateUserCache(deletedUser.id);
 
   return deletedUser;
+}
+
+export async function getPasswordResetTokenByEmail(email: string) {
+  try {
+    const passwordToken = await db.query.passwordResetTokens.findFirst({
+      where: eq(PasswordResetTokens.email, email),
+    });
+    return passwordToken;
+  } catch (error) {
+    return null;
+  }
+}
+export async function getPasswordResetTokenByToken(token: string) {
+  try {
+    const passwordToken = await db.query.passwordResetTokens.findFirst({
+      where: eq(PasswordResetTokens.token, token),
+    });
+    return passwordToken;
+  } catch (error) {
+    return null;
+  }
 }

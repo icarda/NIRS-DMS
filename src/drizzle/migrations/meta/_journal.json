@@ -239,6 +239,13 @@
       "when": 1755532466941,
       "tag": "0033_mature_spacker_dave",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1757952807753,
+      "tag": "0034_messy_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

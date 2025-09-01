@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -59,6 +60,19 @@ export const accounts = pgTable(
       }),
     },
   ]
+);
+
+export const PasswordResetTokens = pgTable(
+  "password_reset_token",
+  {
+    id,
+    email: text("email").notNull(),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  },
+  (table) => ({
+    userEmailIdx: index("token_email_idx").on(table.email, table.token),
+  })
 );
 
 export const userRelations = relations(UserTable, ({ one, many }) => ({
