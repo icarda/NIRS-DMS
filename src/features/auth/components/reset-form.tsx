@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { set } from "nprogress";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,30 +27,32 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { login } from "@/features/auth/actions/login";
-import { loginSchema } from "@/lib/schemas";
+import { resetPasswordSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
+import { reset } from "../actions/reset";
 
-export function LoginForm({
+export function ResetForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
     mode: "onTouched",
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: z.infer<typeof resetPasswordSchema>) {
     setError("");
+    setSuccess("");
     startTransition(() => {
-      login(values).then((data) => {
-        setError(data?.message);
+      reset(values).then((data) => {
+        setError(data?.error);
+        setSuccess(data?.success);
       });
     });
   }
@@ -57,9 +61,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Forgot your password?</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -83,30 +87,10 @@ export function LoginForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center">
-                      <FormLabel>Password</FormLabel>
-                      <Link
-                        href="/auth/reset"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      >
-                        Forgot your password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input type="password" {...field} disabled={isPending} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormError message={error} />
+              <FormSuccess message={success} />
               <Button type="submit" className="w-full" disabled={isPending}>
-                Login
+                Reset Password
               </Button>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}

@@ -242,6 +242,10 @@ export const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
+export const resetPasswordSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+});
+
 const passwordSchema = z
   .string()
   .min(8, { message: "Password must be at least 8 characters long" })
@@ -255,6 +259,18 @@ const passwordSchema = z
   .regex(/[0-9]/, { message: "Password must include at least one digit" })
   .regex(/[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>/?]/, {
     message: "Password must include at least one special character",
+  });
+
+export const newPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
 const centers = ["ICARDA", "CIMMYT"] as const;
