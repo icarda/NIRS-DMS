@@ -1,6 +1,11 @@
 export const publicRoutes = ["/", "/crop-ontology"];
 
-export const authRoutes = ["/auth/signin", "/auth/register"];
+export const authRoutes = [
+  "/auth/signin",
+  "/auth/register",
+  "/auth/reset",
+  "/auth/new-password",
+];
 
 export const apiAuthPrefix = "/api/auth";
 
