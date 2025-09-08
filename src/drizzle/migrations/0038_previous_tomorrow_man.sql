@@ -1,0 +1,1 @@
+ALTER TABLE "api_clients" ADD CONSTRAINT "api_clients_name_unique" UNIQUE("name");

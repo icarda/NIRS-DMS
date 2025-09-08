@@ -246,6 +246,34 @@
       "when": 1757952807753,
       "tag": "0034_messy_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758811526827,
+      "tag": "0035_groovy_otto_octavius",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758811659049,
+      "tag": "0036_wakeful_edwin_jarvis",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1758812649732,
+      "tag": "0037_amazing_silhouette",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758814369327,
+      "tag": "0038_previous_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }
