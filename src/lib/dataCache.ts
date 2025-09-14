@@ -22,7 +22,8 @@ type CACHE_TAG =
   | "trialFertilizers"
   | "trialMetadataConfig"
   | "studyMetadataConfig"
-  | "studyAccess";
+  | "studyAccess"
+  | "auth-clients";
 
 export function getGlobalTag(tag: CACHE_TAG) {
   return `global:${tag}` as const;

@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { PasswordResetTokens, UserTable } from "@/drizzle/schema";
+import { apiClients, PasswordResetTokens, UserTable } from "@/drizzle/schema";
+import { getAuthGlobalTag } from "@/features/auth/db/cache";
+import { getCurrentUser } from "@/lib/currentUser";
+import { hasPermission } from "@/permissions/general";
 import { getUserGlobalTag, getUserIdTag, revalidateUserCache } from "./cache";
 
 export async function getUserByEmail(email: string) {
@@ -111,4 +114,23 @@ export async function getPasswordResetTokenByToken(token: string) {
   } catch (error) {
     return null;
   }
+}
+
+export async function getApiClients() {
+  "use cache";
+  cacheTag(getAuthGlobalTag());
+
+  const clients = await db
+    .select({
+      id: apiClients.id,
+      clientId: apiClients.clientId,
+      clientType: apiClients.clientType,
+      status: apiClients.status,
+      scopes: apiClients.scopes,
+      name: apiClients.name,
+      description: apiClients.description,
+      createdAt: apiClients.createdAt,
+    })
+    .from(apiClients);
+  return clients;
 }

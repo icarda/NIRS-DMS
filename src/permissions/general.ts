@@ -17,7 +17,8 @@ type Resource =
   | "studyMetadata"
   | "studyAccess"
   | "study"
-  | "commonName";
+  | "commonName"
+  | "apiClient";
 type Action = "access" | "create" | "update" | "delete" | "upload";
 
 type Permission = `${Resource}:${Action}`;
@@ -79,6 +80,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "crop:update",
     "study:update",
     "trial:update",
+    "apiClient:delete",
+    "apiClient:create",
   ],
 };
 
