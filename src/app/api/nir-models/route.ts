@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle/db";
 import { NirModelTable } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { NirModelFilterSchema } from "./schema";
 
 function normalize(v: string | null | undefined) {
@@ -13,9 +14,12 @@ function normalize(v: string | null | undefined) {
  * Get NIR Models
  * @description Returns NIR models with optional filters (manufacturer, type, name).
  * @params NirModelFilterSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   const parsed = NirModelFilterSchema.safeParse({

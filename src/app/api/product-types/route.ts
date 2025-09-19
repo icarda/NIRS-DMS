@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle/db";
 import { CropTable, ProductTypeTable } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { ProductTypeFilterSchema } from "./schema";
 
 function normalize(v: string | null | undefined) {
@@ -13,9 +14,12 @@ function normalize(v: string | null | undefined) {
  * Get Product Types
  * @description Returns product types, optionally filtered by crop name.
  * @params ProductTypeFilterSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   const parsed = ProductTypeFilterSchema.safeParse({

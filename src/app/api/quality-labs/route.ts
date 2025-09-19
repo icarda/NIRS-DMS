@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle/db";
 import { CenterTable, QualityLabTable } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { QualityLabsFilterSchema, QualityLabsResponseSchema } from "./schema";
 
 function normalize(v: string | null) {
@@ -14,9 +15,12 @@ function normalize(v: string | null) {
  * @description Returns distinct quality labs, filtered by country and/or center.
  * @params QualityLabsFilterSchema
  * @response QualityLabsResponseSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   const parsed = QualityLabsFilterSchema.safeParse({

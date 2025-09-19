@@ -12,6 +12,7 @@ import {
   TraitTable,
   TrialTable,
 } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { TraitFilterSchema, TraitResponseSchema } from "./schema";
 
 function andsafe(conds: SQL[]) {
@@ -30,9 +31,12 @@ function normalize(v: string | null) {
  *
  * @params TraitFilterSchema
  * @response TraitResponseSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   const crop = normalize(searchParams.get("crop"));

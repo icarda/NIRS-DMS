@@ -13,6 +13,7 @@ import {
   StudyTable,
   TrialTable,
 } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { NirsFilterSchema, NirsResponseSchema } from "./schema";
 
 function andsafe(conds: SQL[]) {
@@ -28,9 +29,12 @@ function normalize(v: string | null) {
  * @description Returns spectral NIR data grouped by sampleId
  * @params NirsFilterSchema
  * @response NirsResponse
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   const crop = normalize(searchParams.get("crop"));

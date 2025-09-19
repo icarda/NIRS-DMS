@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle/db";
 import { CropTable, CropTraitTable } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { CropTraitsFilterSchema, CropTraitsResponseSchema } from "./schema";
 
 function normalize(v: string | null) {
@@ -14,9 +15,13 @@ function normalize(v: string | null) {
  * @description Returns all traits associated with a given crop
  * @params CropTraitsFilterSchema
  * @response CropTraitsResponseSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
+
   const { searchParams } = new URL(req.url);
   const crop = normalize(searchParams.get("crop"));
 

@@ -9,6 +9,7 @@ import {
   ProductTypeTable,
   SpeciesTable,
 } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { CropsFilterSchema } from "./schema";
 
 function normalize(v: string | null | undefined) {
@@ -19,9 +20,12 @@ function normalize(v: string | null | undefined) {
  * Get Crops
  * @description Returns crops with optional filters, including related common names, species, product types, and physiological stages.
  * @params CropsFilterSchema
+ * @security BearerAuth
  * @openapi
  */
 export async function GET(req: Request) {
+  const { error } = await requireAuth(req, ["read:data"]);
+  if (error) return error;
   const { searchParams } = new URL(req.url);
 
   // Validate + normalize query params
