@@ -94,7 +94,7 @@ export async function deleteUser({ id }: { id: number }) {
 
 export async function getPasswordResetTokenByEmail(email: string) {
   try {
-    const passwordToken = await db.query.passwordResetTokens.findFirst({
+    const passwordToken = await db.query.PasswordResetTokens.findFirst({
       where: eq(PasswordResetTokens.email, email),
     });
     return passwordToken;
@@ -104,7 +104,7 @@ export async function getPasswordResetTokenByEmail(email: string) {
 }
 export async function getPasswordResetTokenByToken(token: string) {
   try {
-    const passwordToken = await db.query.passwordResetTokens.findFirst({
+    const passwordToken = await db.query.PasswordResetTokens.findFirst({
       where: eq(PasswordResetTokens.token, token),
     });
     return passwordToken;
