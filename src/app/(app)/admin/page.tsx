@@ -10,10 +10,11 @@ import { getPhysiologicalStages } from "@/features/studies/db/physiological-stag
 import { getProductTypes } from "@/features/studies/db/product-type";
 import { getStudyConfigMetadatas } from "@/features/studies/db/study";
 import { getTrialConfigMetadatas } from "@/features/trials/db/trial";
-import { getUsers } from "@/features/users/db/users";
+import { getApiClients, getUsers } from "@/features/users/db/users";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
+  apiClientsColumns,
   NIRModelColumns,
   physiologicalStageColumns,
   productTypeColumns,
@@ -21,6 +22,7 @@ import {
   trialMetadataColumns,
   userColumns,
 } from "./columns";
+import { ApiClientAddDialog } from "./components/api-client-add-dialog";
 import { MetadataAddDialog } from "./components/metadata-add-dialog";
 import { NirModelAddDialog } from "./components/nir-model-add-dialog";
 import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
@@ -41,6 +43,7 @@ export default async function Admin() {
     nirModels,
     trialConfigMetadatas,
     studyConfigMetadatas,
+    apiClients,
   ] = await Promise.all([
     getUsers(),
     getProductTypes(),
@@ -49,6 +52,7 @@ export default async function Admin() {
     getNirModels(),
     getTrialConfigMetadatas(),
     getStudyConfigMetadatas(),
+    getApiClients(),
   ]);
   return (
     <PageWrapper title="Admin Panel">
@@ -92,6 +96,12 @@ export default async function Admin() {
                   className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
                 >
                   Study Metadata
+                </TabsTrigger>
+                <TabsTrigger
+                  value="api_clients"
+                  className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                >
+                  API Clients
                 </TabsTrigger>
               </TabsList>
               <ScrollBar orientation="horizontal" />
@@ -168,6 +178,15 @@ export default async function Admin() {
                 filterColumn="label"
               >
                 <MetadataAddDialog type="study" />
+              </DataTable>
+            </TabsContent>
+            <TabsContent value="api_clients">
+              <DataTable
+                columns={apiClientsColumns}
+                data={apiClients}
+                filterColumn="name"
+              >
+                <ApiClientAddDialog />
               </DataTable>
             </TabsContent>
           </div>

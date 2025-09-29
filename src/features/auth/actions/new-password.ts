@@ -30,11 +30,15 @@ export const newPassword = async (
 
   const existingToken = await getPasswordResetTokenByToken(token);
 
+  console.log("Existing token:", existingToken);
+
   if (!existingToken) {
     return { error: "Invalid token!" };
   }
 
   const hasExpired = new Date(existingToken.expiresAt) < new Date();
+
+  console.log("Has token expired?", hasExpired);
 
   if (hasExpired) {
     return { error: "Token has expired!" };

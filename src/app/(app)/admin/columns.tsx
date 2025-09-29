@@ -20,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrialMetadataType, UserRole } from "@/drizzle/schema";
+import { deleteApiClient } from "@/features/auth/actions/api-client";
 import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
@@ -72,6 +73,17 @@ export type MetadataSchema = {
   min: string | null;
   max: string | null;
   source: "sql" | "json";
+};
+
+export type ApiClient = {
+  id: string;
+  name: string;
+  clientId: string;
+  clientType: string;
+  status: string;
+  scopes: string;
+  description: string | null;
+  createdAt: Date;
 };
 
 export const userColumns: ColumnDef<User>[] = [
@@ -771,6 +783,145 @@ export const studyMetadataColumns: ColumnDef<MetadataSchema>[] = [
                   This will permanently delete the study metadata{" "}
                   <span className="font-medium">{metadata.name}</span>. This
                   action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      );
+    },
+  },
+];
+
+export const apiClientsColumns: ColumnDef<ApiClient>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
+  },
+  {
+    accessorKey: "clientId",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Client ID" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("clientId") as string;
+      return <div className="font-mono">{value}</div>;
+    },
+  },
+  {
+    accessorKey: "clientType",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Client Type" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("clientType") as string;
+      return capitalize(value);
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge
+          variant={status === "active" ? "default" : "warning"}
+          className="capitalize"
+        >
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "scopes",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Scopes" />
+    ),
+    cell: ({ row }) => {
+      const scopes = row.getValue("scopes") as string;
+      return scopes.split(" ").map((scope) => (
+        <Badge key={scope} variant="secondary" className="mb-1 mr-1">
+          {scope}
+        </Badge>
+      ));
+    },
+  },
+  {
+    accessorKey: "description",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Description" />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue("description") as string;
+      return !value ? "NULL" : value;
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const apiCLient = row.original;
+      const [editDialogOpen, setEditDialogOpen] = useState(false);
+      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const handleDelete = async () => {
+        setIsLoading(true);
+
+        const res = await deleteApiClient(apiCLient.name);
+
+        if (res.error) {
+          toast.error(res.message);
+          setIsLoading(false);
+          return;
+        }
+
+        toast.success(res.message);
+        setIsLoading(false);
+        setDeleteDialogOpen(false);
+      };
+      return (
+        <>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setDeleteDialogOpen(true);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the API client{" "}
+                  <span className="font-medium">{}</span>. This action cannot be
+                  undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
