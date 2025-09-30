@@ -4,8 +4,7 @@ import { useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { set } from "nprogress";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -28,23 +27,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { newPasswordSchema, resetPasswordSchema } from "@/lib/schemas";
+import { newPasswordSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { newPassword } from "../actions/new-password";
-import { reset } from "../actions/reset";
 
 export function NewPasswordForm({
   className,
+  token,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & { token?: string }) {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const token = searchParams.get("token");
 
   const form = useForm<z.infer<typeof newPasswordSchema>>({
     resolver: zodResolver(newPasswordSchema),
