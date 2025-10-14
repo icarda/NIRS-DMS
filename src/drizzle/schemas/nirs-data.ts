@@ -4,6 +4,7 @@ import {
   foreignKey,
   integer,
   pgTable,
+  text,
   unique,
 } from "drizzle-orm/pg-core";
 
@@ -18,7 +19,7 @@ export const NirsDataTable = pgTable(
     studyId: integer("study_id")
       .notNull()
       .references(() => StudyTable.id, { onDelete: "cascade" }),
-    sampleId: integer("sample_id").notNull(),
+    sampleId: text("sample_id").notNull(),
     speciesId: integer("species_id")
       .notNull()
       .references(() => SpeciesTable.id, {

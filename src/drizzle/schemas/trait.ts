@@ -25,7 +25,7 @@ export const TraitTable = pgTable(
     cropTraitId: integer("crop_trait_id")
       .notNull()
       .references(() => CropTraitTable.id, { onDelete: "cascade" }),
-    sampleId: integer("sample_id").notNull(),
+    sampleId: text("sample_id").notNull(),
     createdAt,
     updatedAt,
   },

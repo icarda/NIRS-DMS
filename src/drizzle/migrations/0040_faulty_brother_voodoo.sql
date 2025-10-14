@@ -1,0 +1,1 @@
+ALTER TABLE "trial_species" ALTER COLUMN "species_id" SET DATA TYPE integer;
