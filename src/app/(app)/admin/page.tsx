@@ -27,6 +27,7 @@ import { MetadataAddDialog } from "./components/metadata-add-dialog";
 import { NirModelAddDialog } from "./components/nir-model-add-dialog";
 import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
 import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
+import { getCenters } from "@/features/centers/db/center";
 
 export default async function Admin() {
   const user = await getCurrentUser();
@@ -44,6 +45,7 @@ export default async function Admin() {
     trialConfigMetadatas,
     studyConfigMetadatas,
     apiClients,
+    centers
   ] = await Promise.all([
     getUsers(),
     getProductTypes(),
@@ -53,6 +55,7 @@ export default async function Admin() {
     getTrialConfigMetadatas(),
     getStudyConfigMetadatas(),
     getApiClients(),
+    getCenters(),
   ]);
   return (
     <PageWrapper title="Admin Panel">

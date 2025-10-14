@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Loader2, Trash2 } from "lucide-react";
@@ -31,6 +31,8 @@ import { capitalize, labelToCamel } from "@/lib/utils";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
+import { getCentersAction } from "@/features/centers/actions/center";
+import { Centers } from "@/types/types";
 
 export type User = {
   id: number;
@@ -157,6 +159,21 @@ export const userColumns: ColumnDef<User>[] = [
       const [editDialogOpen, setEditDialogOpen] = useState(false);
       const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
       const [isLoading, setIsLoading] = useState(false);
+      const [centers, setCenters] = useState<Centers>([]);
+
+
+      useEffect(() => {
+        async function fetchCenters() {
+
+          const centers = await getCentersAction();
+
+          setCenters(centers);
+          
+        }
+
+        fetchCenters();
+
+      }, []);
 
       const handleEdit = async (data: any) => {
         setIsLoading(true);
@@ -207,6 +224,7 @@ export const userColumns: ColumnDef<User>[] = [
 
           <UserEditDialog
             user={user}
+            centers={centers}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             onSave={handleEdit}

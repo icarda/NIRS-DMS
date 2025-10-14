@@ -34,6 +34,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { getStudies } from "@/features/studies/actions/study";
 import { User } from "../columns";
+import { Centers } from "@/types/types";
 
 const formSchema = z.object({
   firstName: z.string().min(3, "First name must be at least 3 characters"),
@@ -51,6 +52,7 @@ interface UserEditDialogProps {
   onOpenChange(open: boolean): void;
   onSave(data: z.infer<typeof formSchema>): void;
   isLoading: boolean;
+  centers: Centers;
 }
 
 export function UserEditDialog({
@@ -59,6 +61,7 @@ export function UserEditDialog({
   onOpenChange,
   onSave,
   isLoading,
+  centers
 }: UserEditDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -153,8 +156,11 @@ export function UserEditDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ICARDA">ICARDA</SelectItem>
-                      <SelectItem value="CIMMYT">CIMMYT</SelectItem>
+                      {centers.map((center) => (
+                        <SelectItem key={center.id} value={center.acronym}>
+                          {center.acronym}
+                          </SelectItem>))
+                          }
                     </SelectContent>
                   </Select>
                 </FormItem>

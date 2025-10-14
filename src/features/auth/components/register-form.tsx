@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { countries } from "country-data-list";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -18,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Country, CountryDropdown } from "@/components/ui/country-dropdown";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
 import {
   Form,
   FormControl,
@@ -38,14 +37,18 @@ import {
 import { register } from "@/features/auth/actions/register";
 import { registerSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
+import { Centers } from "@/types/types";
 
-const centers = ["ICARDA", "CIMMYT"] as const;
 const positions = ["Engineer", "Researcher", "Associate"] as const;
+
+
+
 
 export function RegisterForm({
   className,
+  centers,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & {centers:Centers}) {
   const [error, setError] = useState<string | undefined>("");
 
   const [isPending, startTransition] = useTransition();
@@ -181,8 +184,8 @@ export function RegisterForm({
                       </FormControl>
                       <SelectContent>
                         {centers.map((center) => (
-                          <SelectItem key={center} value={center}>
-                            {center}
+                          <SelectItem key={center.id} value={center.acronym}>
+                            {center.acronym}
                           </SelectItem>
                         ))}
                       </SelectContent>

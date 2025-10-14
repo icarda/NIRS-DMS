@@ -2,10 +2,18 @@
 
 import {
   deleteCenter as deleteCenterDb,
+  getCenters,
   insertCenter,
   updateCenter as updateCenterDb,
 } from "../db/center";
 import { CenterSchema, centerSchema } from "../schemas/center";
+
+
+export async function getCentersAction() {
+  const centers = await getCenters();
+  return centers;
+}
+
 
 export async function createCenter(unsafeData: CenterSchema) {
   const { success, data } = centerSchema.safeParse(unsafeData);
