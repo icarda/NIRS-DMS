@@ -17,17 +17,15 @@ import {
   revalidateTrialMetadataConfigCache,
 } from "./cache";
 
-export async function getTrialConfigMetadatas() {
+export async function getTrialConfigMetadatas(trx: Omit<typeof db, "$client"> = db) {
   "use cache";
   cacheTag(getTrialMetadataConfigGlobalTag());
-  const trials = await db.query.TrialMetadataConfig.findMany();
+  const trials = await trx.query.TrialMetadataConfig.findMany();
   return trials;
 }
 
-export async function getTrialByName(name: string) {
-  "use cache";
-  cacheTag(getTrialIdTag(name));
-  const trial = await db.query.TrialTable.findFirst({
+export async function getTrialByName(name: string, trx: Omit<typeof db, "$client"> = db) {
+  const trial = await trx.query.TrialTable.findFirst({
     where: eq(TrialTable.name, name),
     columns: {
       id: true,

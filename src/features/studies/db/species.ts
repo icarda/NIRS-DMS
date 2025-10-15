@@ -13,13 +13,12 @@ import { revalidateTrialCache } from "@/features/trials/db/cache";
 import {
   getSpeciesGlobalTag,
   getSpeciesIdTag,
+  getSpeciesSampleIdTag,
   revalidateSpeciesCache,
 } from "./cache/species";
 
-export async function getSpeciesById(id: number) {
-  "use cache";
-  cacheTag(getSpeciesIdTag(id));
-  const species = await db.query.SpeciesTable.findFirst({
+export async function getSpeciesById(id: number, trx: Omit<typeof db, "$client"> = db) {
+  const species = await trx.query.SpeciesTable.findFirst({
     where: (species) => eq(species.id, id),
     columns: {
       id: true,
@@ -42,10 +41,8 @@ export async function getSpecies() {
   return species;
 }
 
-export async function getTrialSpecies(trialId: number, speciesId: number) {
-  "use cache";
-  cacheTag(getSpeciesIdTag(speciesId));
-  const trialSpecies = await db.query.TrialSpeciesTable.findFirst({
+export async function getTrialSpecies(trialId: number, speciesId: number, trx: Omit<typeof db, "$client"> = db) {
+  const trialSpecies = await trx.query.TrialSpeciesTable.findFirst({
     where: (trialSpecies) =>
       and(
         eq(trialSpecies.trialId, trialId),
@@ -125,9 +122,9 @@ export async function insertTrialSpecies(
   return newTrialSpecies;
 }
 
-export async function getSpeciesForSample(sampleId: number) {
+export async function getSpeciesForSample(sampleId: string) {
   "use cache";
-  cacheTag(getSpeciesIdTag(sampleId));
+  cacheTag(getSpeciesSampleIdTag(sampleId));
   const species = await db
     .selectDistinct({
       species: SpeciesTable.name,

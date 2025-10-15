@@ -7,20 +7,21 @@ import { TraitSchema } from "@/features/traits/schemas/trait";
 
 export interface NIRSData {
   studyId: number;
-  sampleId: number;
+  sampleId: string;
   wavelength: number;
   value: number;
+  speciesId: number;
 }
 
 export interface ParsedNirsDataFileRow {
-  plotId: number;
-  sampleId: number;
-  gid: number;
+  plotId: string;
+  sampleId: string;
+  gid: string;
   spectrumData: Record<string, number>;
 }
 
 export interface ParsedTraitFileRow {
-  sampleId: number;
+  sampleId: string;
   traitValues: Record<string, number>;
 }
 
@@ -70,13 +71,13 @@ export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
         }
 
         results.data.forEach((row, index) => {
-          const plotId = parseInt(row[plotIdHeader!] ?? "", 10);
-          const sampleId = parseInt(row[sampleIdHeader!] ?? "", 10);
-          const gid = parseInt(row[gidHeader!] ?? "", 10);
+          const plotId = row[plotIdHeader!] ?? ""
+          const sampleId = row[sampleIdHeader!] ?? ""
+          const gid = row[gidHeader!] ?? ""
           // Use string as key for spectrumData
           const spectrumData: Record<string, number> = {};
 
-          if (isNaN(plotId) || isNaN(sampleId) || isNaN(gid)) {
+          if (!plotId || !sampleId || !gid) {
             console.warn(
               `Skipping CSV row ${index + 2} due to invalid metadata.`
             );
@@ -142,18 +143,9 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
       const rawPlotId = row[plotIdHeader!];
       const rawSampleId = row[sampleIdHeader!];
       const rawGID = row[gidHeader!];
-      const plotId =
-        typeof rawPlotId === "number"
-          ? rawPlotId
-          : parseInt(String(rawPlotId ?? ""), 10);
-      const sampleId =
-        typeof rawSampleId === "number"
-          ? rawSampleId
-          : parseInt(String(rawSampleId ?? ""), 10);
-      const gid =
-        typeof rawGID === "number"
-          ? rawGID
-          : parseInt(String(rawGID ?? ""), 10);
+      const plotId = rawPlotId ?? ""
+      const sampleId = rawSampleId ?? ""
+      const gid = rawGID ?? ""
       // Use string as key for spectrumData
       const spectrumData: Record<string, number> = {};
 
@@ -249,6 +241,7 @@ export function transformParsedNirsDataForDb(
           sampleId: row.sampleId,
           wavelength: wavelength,
           value: value,
+          speciesId: 0, // Placeholder, to be set later
         });
       }
     }
@@ -311,11 +304,11 @@ async function parseTraitCsv(
 
         // Process rows
         results.data.forEach((row, index) => {
-          const sampleId = parseInt(row[sampleIdHeader!] ?? "", 10);
+          const sampleId = row[sampleIdHeader!] ?? ""
 
           const traitValues: Record<string, number> = {};
 
-          if (isNaN(sampleId)) {
+          if (!sampleId) {
             return;
           }
 
@@ -396,14 +389,11 @@ async function parseTraitXlsx(
     // Process rows
     jsonData.forEach((row, index) => {
       const rawSampleId = row[sampleIdHeader!];
-      const sampleId =
-        typeof rawSampleId === "number"
-          ? rawSampleId
-          : parseInt(String(rawSampleId ?? ""), 10);
+      const sampleId = rawSampleId ?? ""
 
       const traitValues: Record<string, number> = {};
 
-      if (isNaN(sampleId)) {
+      if (!sampleId) {
         console.warn(
           `Skipping Trait XLSX row ${index + 2} due to invalid IDs.`
         );

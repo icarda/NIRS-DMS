@@ -5,11 +5,13 @@ type OtherIdInsertData = typeof OtherIdsTable.$inferInsert;
 
 export async function insertOtherIdsBatch(
   data: OtherIdInsertData[],
-  trx: Omit<typeof db, "$client"> = db
+  trx: Omit<typeof db, "$client"> = db,
+  batchSize = 5
 ) {
-  if (!data || data.length === 0) {
-    return;
-  }
+  if (!data?.length) return;
 
-  await trx.insert(OtherIdsTable).values(data);
+  for (let i = 0; i < data.length; i += batchSize) {
+    const batch = data.slice(i, i + batchSize);
+    await trx.insert(OtherIdsTable).values(batch);
+  }
 }

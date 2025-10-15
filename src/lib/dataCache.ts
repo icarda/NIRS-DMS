@@ -23,6 +23,7 @@ type CACHE_TAG =
   | "trialMetadataConfig"
   | "studyMetadataConfig"
   | "studyAccess"
+  | "sample"
   | "auth-clients";
 
 export function getGlobalTag(tag: CACHE_TAG) {
@@ -55,4 +56,8 @@ export function getCropTag(tag: CACHE_TAG, cropId: number) {
 
 export function getCropTraitTag(tag: CACHE_TAG, cropTraitId: number) {
   return `cropTrait:${cropTraitId}-${tag}` as const;
+}
+
+export function getSpeciesTag(tag: CACHE_TAG, id: string | number) {
+  return `species:${id}-${tag}` as const;
 }

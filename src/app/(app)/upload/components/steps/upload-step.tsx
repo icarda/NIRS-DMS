@@ -48,7 +48,7 @@ const UploadStep = ({ form }: { form: UseFormReturn<any> }) => {
           {[
             form.getValues("trial"),
             form.getValues("productType"),
-            format(new Date(form.getValues("sampleDate")), "P"),
+            format(new Date(form.getValues("sampleDate") ?? new Date().toDateString()), "P"),
           ].join("+")}
         </h1>
         <p className="text-base text-muted-foreground">

@@ -108,6 +108,8 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
     },
   });
 
+  
+
   const onSubmit = async (multiFormData: MultiFormData) => {
     const selectedCrop = data.crops.find(
       (crop) => crop.name === multiFormData.crop
@@ -175,10 +177,8 @@ const MultiStepForm = ({ data }: MultiStepFormProps) => {
       toast.error(result.message);
     } else {
       toast.success(result.message);
-      setTimeout(() => {
-        setStep(1);
-        form.reset();
-      }, 300);
+      form.reset();
+      setStep(1);
     }
   };
 

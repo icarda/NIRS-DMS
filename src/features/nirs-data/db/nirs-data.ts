@@ -19,9 +19,9 @@ export interface NirsDataFilters {
   trial?: string;
   crop?: string;
   species?: string;
-  sampleId?: number;
-  gid?: number;
-  plotId?: number;
+  sampleId?: string;
+  gid?: string;
+  plotId?: string;
   location?: string;
   qualityLab?: string;
   nirModel?: string;
@@ -36,9 +36,9 @@ export type NirsDataFilteredResult = {
   nirsId: number;
   wavelength: number;
   value: number;
-  sampleId: number;
-  plotId: number | null;
-  gid: number | null;
+  sampleId: string;
+  plotId: string | null;
+  gid: string | null;
   studyCode: string | null;
   studySampleDate: Date | null;
   program: string | null;
@@ -171,20 +171,21 @@ export async function getNirsDataFiltered(
 
 export async function insertNirsDataBatch(
   data: (typeof NirsDataTable.$inferInsert)[],
-  trx: Omit<typeof db, "$client"> = db
+  trx: Omit<typeof db, "$client"> = db,
+  batchSize = 5000
 ) {
-  if (!data || data.length === 0) {
-    return;
+  if (!data?.length) return;
+
+  for (let i = 0; i < data.length; i += batchSize) {
+    const batch = data.slice(i, i + batchSize);
+    await trx.insert(NirsDataTable).values(batch).onConflictDoNothing();
   }
 
-  await trx.insert(NirsDataTable).values(data).onConflictDoNothing();
-
-  if (data.length > 0) revalidateNIRSDataCache(data[0].studyId);
+  revalidateNIRSDataCache(data[0].studyId);
 }
-
 export async function getDistinctSampleIdsForStudy(
   studyId: number
-): Promise<number[]> {
+): Promise<string[]> {
   if (isNaN(studyId) || studyId <= 0) {
     return [];
   }

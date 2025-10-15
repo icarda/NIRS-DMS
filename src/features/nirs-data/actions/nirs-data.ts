@@ -1,6 +1,6 @@
 "use server";
 
-import { add, format } from "date-fns";
+import { format } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/drizzle/db";
@@ -17,7 +17,6 @@ import {
   getStudyByCode,
   getStudyConfigMetadatas,
   insertStudy,
-  updateStudyById,
 } from "@/features/studies/db/study";
 import {
   getTrialByName,
@@ -51,9 +50,9 @@ function parseWavelengthRange(
 }
 
 export interface OtherIdInsertData {
-  sampleId: number;
-  plotId: number;
-  gid: number;
+  sampleId: string;
+  plotId: string;
+  gid: string;
   studyId: number;
 }
 
@@ -176,7 +175,7 @@ export async function uploadNirsData(
         let trialId: number;
         // get trial ID
         if (validatedData.useExistingTrial) {
-          const existingTrial = await getTrialByName(validatedData.trial);
+          const existingTrial = await getTrialByName(validatedData.trial, tx);
 
           if (!existingTrial) {
             throw new Error(
@@ -186,7 +185,10 @@ export async function uploadNirsData(
           trialId = existingTrial.id;
 
           // Check if the species ID is valid
-          const existingSpecies = await getSpeciesById(validatedData.speciesID);
+          const existingSpecies = await getSpeciesById(
+            validatedData.speciesID,
+            tx
+          );
 
           if (!existingSpecies) {
             throw new Error(
@@ -196,7 +198,8 @@ export async function uploadNirsData(
 
           const trialSpecies = await getTrialSpecies(
             trialId,
-            validatedData.speciesID
+            validatedData.speciesID,
+            tx
           );
 
           if (!trialSpecies) {
@@ -223,7 +226,7 @@ export async function uploadNirsData(
             longitude = coords[1];
           }
 
-          const trialMetadatas = await getTrialConfigMetadatas();
+          const trialMetadatas = await getTrialConfigMetadatas(tx);
 
           const trialDynamicKeys = new Set(
             trialMetadatas.filter((m) => m.source === "json").map((m) => m.name)
@@ -257,7 +260,7 @@ export async function uploadNirsData(
           }
           trialId = newTrial.id;
 
-          const species = await getSpeciesById(validatedData.speciesID);
+          const species = await getSpeciesById(validatedData.speciesID, tx);
 
           if (!species) {
             throw new Error(
@@ -274,12 +277,12 @@ export async function uploadNirsData(
 
         let studyId;
         let newStudy;
-        const existingStudy = await getStudyByCode(validatedData.studyCode);
+        const existingStudy = await getStudyByCode(validatedData.studyCode, tx);
 
         if (existingStudy) {
           studyId = existingStudy.id;
         } else {
-          const studyMetadatas = await getStudyConfigMetadatas();
+          const studyMetadatas = await getStudyConfigMetadatas(tx);
 
           const studyDynamicKeys = new Set(
             studyMetadatas.filter((m) => m.source === "json").map((m) => m.name)
@@ -387,13 +390,11 @@ export async function uploadNirsData(
         }
 
         if (nirsDataToInsert.length > 0) {
-          await insertNirsDataBatch(
-            nirsDataToInsert.map((nirs) => ({
-              ...nirs,
-              speciesId: validatedData.speciesID,
-            })),
-            tx
-          );
+          for (const row of nirsDataToInsert) {
+            row.speciesId = validatedData.speciesID;
+          }
+
+          await insertNirsDataBatch(nirsDataToInsert, tx);
         }
 
         return {

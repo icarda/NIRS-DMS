@@ -37,10 +37,8 @@ export async function getStudies() {
   return studies;
 }
 
-export async function getStudyByCode(studyCode: string) {
-  "use cache";
-  cacheTag(getStudyIdTag(studyCode));
-  const study = await db.query.StudyTable.findFirst({
+export async function getStudyByCode(studyCode: string, trx: Omit<typeof db, "$client"> = db) {
+  const study = await trx.query.StudyTable.findFirst({
     where: eq(StudyTable.studyCode, studyCode),
   });
   return study;
@@ -110,10 +108,8 @@ export async function getStudyMetadataById(id: number) {
   });
 }
 
-export async function getStudyConfigMetadatas() {
-  "use cache";
-  cacheTag(getStudyMetadataConfigGlobalTag());
-  const studies = await db.query.StudyMetadataConfig.findMany();
+export async function getStudyConfigMetadatas(trx: Omit<typeof db, "$client"> = db) {
+  const studies = await trx.query.StudyMetadataConfig.findMany();
   return studies;
 }
 
