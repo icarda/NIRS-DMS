@@ -1,9 +1,9 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { StudyTable } from "@/drizzle/schema";
+import { CenterTable, QualityLabTable, StudyTable } from "@/drizzle/schema";
 import { StudyMetadataConfig } from "@/drizzle/schemas/study-metadata-config";
 import {
   getStudyGlobalTag,
@@ -13,6 +13,47 @@ import {
   revalidateStudyCache,
   revalidateStudyMetadataConfigCache,
 } from "./cache/study";
+
+export async function getStudiesByCenterName(centerName: string) {
+  "use cache";
+  cacheTag(getStudyGlobalTag());
+
+  const labIds = await db
+    .select({ id: QualityLabTable.id })
+    .from(QualityLabTable)
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(eq(CenterTable.acronym, centerName));
+
+  console.log({ labIds });
+
+  if (labIds.length === 0) {
+    return [];
+  }
+
+  const studies = await db.query.StudyTable.findMany({
+    where: inArray(
+      StudyTable.qualityLabId,
+      labIds.map((l) => l.id)
+    ),
+    with: {
+      trial: {
+        with: {
+          crop: {
+            columns: {
+              name: true,
+            },
+          },
+        },
+      },
+      productType: true,
+      qualityLab: true,
+      nirModel: true,
+      physiologicalStage: true,
+    },
+  });
+
+  return studies;
+}
 
 export async function getStudies() {
   "use cache";
@@ -37,7 +78,10 @@ export async function getStudies() {
   return studies;
 }
 
-export async function getStudyByCode(studyCode: string, trx: Omit<typeof db, "$client"> = db) {
+export async function getStudyByCode(
+  studyCode: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
   const study = await trx.query.StudyTable.findFirst({
     where: eq(StudyTable.studyCode, studyCode),
   });
@@ -108,7 +152,9 @@ export async function getStudyMetadataById(id: number) {
   });
 }
 
-export async function getStudyConfigMetadatas(trx: Omit<typeof db, "$client"> = db) {
+export async function getStudyConfigMetadatas(
+  trx: Omit<typeof db, "$client"> = db
+) {
   const studies = await trx.query.StudyMetadataConfig.findMany();
   return studies;
 }

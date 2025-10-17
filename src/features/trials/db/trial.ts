@@ -1,9 +1,12 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import {
+  CenterTable,
+  QualityLabTable,
+  StudyTable,
   TrialFertilizerTable,
   TrialMetadataConfig,
   TrialTable,
@@ -17,14 +20,19 @@ import {
   revalidateTrialMetadataConfigCache,
 } from "./cache";
 
-export async function getTrialConfigMetadatas(trx: Omit<typeof db, "$client"> = db) {
+export async function getTrialConfigMetadatas(
+  trx: Omit<typeof db, "$client"> = db
+) {
   "use cache";
   cacheTag(getTrialMetadataConfigGlobalTag());
   const trials = await trx.query.TrialMetadataConfig.findMany();
   return trials;
 }
 
-export async function getTrialByName(name: string, trx: Omit<typeof db, "$client"> = db) {
+export async function getTrialByName(
+  name: string,
+  trx: Omit<typeof db, "$client"> = db
+) {
   const trial = await trx.query.TrialTable.findFirst({
     where: eq(TrialTable.name, name),
     columns: {
@@ -45,6 +53,32 @@ export async function getTrial(id: number) {
     },
   });
   return trial;
+}
+
+export async function getTrialsByCenter(centerName: string, limit = 50) {
+  // Subquery: find all trialIds linked to that center
+  const trialIdsQuery = db
+    .select({ trialId: StudyTable.trialId })
+    .from(StudyTable)
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(eq(CenterTable.acronym, centerName));
+
+  // Then query trials with all nested relations
+  const trials = await db.query.TrialTable.findMany({
+    where: inArray(TrialTable.id, trialIdsQuery),
+    limit,
+    with: {
+      crop: {
+        with: {
+          species: true,
+        },
+      },
+      fertilizers: true,
+    },
+  });
+
+  return trials;
 }
 
 export async function getTrials({ limit }: { limit?: number } = {}) {

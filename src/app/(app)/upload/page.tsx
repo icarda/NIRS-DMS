@@ -7,9 +7,14 @@ import { getNirModels } from "@/features/nir-models/db/nir-model";
 import { getQualityLabsByCenter } from "@/features/quality-labs/db/quality-lab";
 import {
   getStudies,
+  getStudiesByCenterName,
   getStudyConfigMetadatas,
 } from "@/features/studies/db/study";
-import { getTrialConfigMetadatas, getTrials } from "@/features/trials/db/trial";
+import {
+  getTrialConfigMetadatas,
+  getTrials,
+  getTrialsByCenter,
+} from "@/features/trials/db/trial";
 import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import MultiStepForm from "./components/multi-step-form";
@@ -31,11 +36,11 @@ export default async function UploadData() {
     trialMetadatas,
     studyMetadatas,
   ] = await Promise.all([
-    getTrials(),
+    getTrialsByCenter(center),
     getCrops(),
     getQualityLabsByCenter({ center }),
     getNirModels(),
-    getStudies(),
+    getStudiesByCenterName(center),
     getTrialConfigMetadatas(),
     getStudyConfigMetadatas(),
   ]);

@@ -52,7 +52,7 @@ interface TraitUploadProps {
 
 const TraitUpload = ({ data: { crops, studies } }: TraitUploadProps) => {
   const [preview, setPreview] = useState<string | null>(null);
-  const [existingSampleIds, setExistingSampleIds] = useState<number[]>([]);
+  const [existingSampleIds, setExistingSampleIds] = useState<string[]>([]);
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
 
   const form = useForm<TraitUploadFormData>({

@@ -71,6 +71,9 @@ const StudyStep = ({
       };
     }
   }, [form.watch("study")]);
+
+  console.log(studies.map((s) => s));
+  console.log(studies.filter((s) => s.trial.name === form.getValues("trial")));
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -90,9 +93,9 @@ const StudyStep = ({
                 <FormLabel>Choose an option:</FormLabel>
                 <FormControl>
                   <RadioGroup
-                    onValueChange={(value) =>
-                      field.onChange(value === "existing")
-                    }
+                    onValueChange={(value) => {
+                      field.onChange(value === "existing");
+                    }}
                     defaultValue={field.value ? "existing" : "new"}
                     className="flex flex-col space-y-1"
                   >

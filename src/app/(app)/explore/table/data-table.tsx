@@ -30,9 +30,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/ui/table-pagination";
+import { UserRole } from "@/drizzle/schema";
 import { updateStudy } from "@/features/studies/actions/study";
 import { updateTrial } from "@/features/trials/actions/trial";
 import { camelToNormal, cn } from "@/lib/utils";
+import { hasPermission } from "@/permissions/general";
 import { DataTableFilterControls } from "./data-table-filter-controls";
 import { DataTableToolBar } from "./data-table-toolbar";
 import StudyEditDialog from "./study-edit-dialog";
@@ -57,6 +59,7 @@ interface DataTableProps<TData, TValue> {
   filterFields?: DataTableFilterField<TData>[];
   traitVariables?: string[];
   tab: "study" | "trial" | "wet-chemistry";
+  userRole?: UserRole;
   studyData: {
     qualityLabs: QualityLab[];
     nirModels: NirModel[];
@@ -116,7 +119,8 @@ function generateColumns<TData>(
       max: number | null;
       source: "sql" | "json";
     }[];
-  }
+  },
+  userRole?: UserRole
 ): ColumnDef<TData>[] {
   const baseColumns = [...columns];
 
@@ -163,147 +167,156 @@ function generateColumns<TData>(
       })
     ) as ColumnDef<TData>[];
 
-    return [
-      ...baseColumns,
-      ...additionalMetadataColumns,
-      tab === "study"
-        ? {
-            id: "actions",
-            cell: ({ row }) => {
-              const study = row.original;
-              const [editDialogOpen, setEditDialogOpen] = useState(false);
-              const [isLoading, setIsLoading] = useState(false);
+    const canEditTrial = hasPermission(userRole || "USER", "trial:update");
+    const canEditStudy = hasPermission(userRole || "USER", "study:update");
 
-              const handleStudyEdit = async (data: any) => {
-                setIsLoading(true);
+    if (
+      (tab === "trial" && canEditTrial) ||
+      (tab === "study" && canEditStudy)
+    ) {
+      return [
+        ...baseColumns,
+        ...additionalMetadataColumns,
+        tab === "study"
+          ? {
+              id: "actions",
+              cell: ({ row }) => {
+                const study = row.original;
+                const [editDialogOpen, setEditDialogOpen] = useState(false);
+                const [isLoading, setIsLoading] = useState(false);
 
-                try {
-                  const qualityLabId = studyData?.qualityLabs.find(
-                    (lab) => lab.name === data.qualityLab
-                  )?.id!;
-                  const nirModelId = studyData?.nirModels.find(
-                    (model) => model.name === data.nirModel
-                  )?.id!;
-                  const physiologicalStageId =
-                    studyData?.physiologicalStages.find(
-                      (stage) => stage.name === data.physiologicalStage
+                const handleStudyEdit = async (data: any) => {
+                  setIsLoading(true);
+
+                  try {
+                    const qualityLabId = studyData?.qualityLabs.find(
+                      (lab) => lab.name === data.qualityLab
+                    )?.id!;
+                    const nirModelId = studyData?.nirModels.find(
+                      (model) => model.name === data.nirModel
+                    )?.id!;
+                    const physiologicalStageId =
+                      studyData?.physiologicalStages.find(
+                        (stage) => stage.name === data.physiologicalStage
+                      )?.id!;
+
+                    await updateStudy((study as any).id, {
+                      qualityLabId,
+                      nirModelId,
+                      physiologicalStageId,
+                      program: data.program,
+                      additionalMetadata: data.additionalMetadata,
+                      requesterName: data.requesterName || null,
+                      requesterEmail: data.requesterEmail || null,
+                    });
+                    toast.success("Study updated successfully");
+                  } catch (error) {
+                    console.error("Error updating study:", error);
+                    toast.error("Error updating study");
+                  } finally {
+                    setEditDialogOpen(false);
+                    setIsLoading(false);
+                  }
+                };
+
+                return (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditDialogOpen(true)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <StudyEditDialog
+                      study={study as Study}
+                      open={editDialogOpen}
+                      onOpenChange={setEditDialogOpen}
+                      onSave={handleStudyEdit}
+                      isLoading={isLoading}
+                      nirModels={studyData?.nirModels || []}
+                      physiologicalStages={studyData?.physiologicalStages || []}
+                      qualityLabs={studyData?.qualityLabs || []}
+                      studyMetadatas={studyData?.studyMetadatas || []}
+                    />
+                  </>
+                );
+              },
+            }
+          : {
+              id: "actions",
+              cell: ({ row }) => {
+                const trial = row.original;
+                const [editDialogOpen, setEditDialogOpen] = useState(false);
+                const [isLoading, setIsLoading] = useState(false);
+
+                const handleStudyEdit = async (data: any) => {
+                  setIsLoading(true);
+
+                  try {
+                    const cropId = trialData?.crops.find(
+                      (crop) => crop.name === data.crop
                     )?.id!;
 
-                  await updateStudy((study as any).id, {
-                    qualityLabId,
-                    nirModelId,
-                    physiologicalStageId,
-                    program: data.program,
-                    additionalMetadata: data.additionalMetadata,
-                    requesterName: data.requesterName || null,
-                    requesterEmail: data.requesterEmail || null,
-                  });
-                  toast.success("Study updated successfully");
-                } catch (error) {
-                  console.error("Error updating study:", error);
-                  toast.error("Error updating study");
-                } finally {
-                  setEditDialogOpen(false);
-                  setIsLoading(false);
-                }
-              };
+                    const { error, message } = await updateTrial(
+                      (trial as any).id,
+                      {
+                        cropId,
+                        location: data.location,
+                        latitude: data.coordinates.split(", ")[0],
+                        longitude: data.coordinates.split(", ")[1],
+                        soilType: data.soilType,
+                        irrigation: data.irrigation,
 
-              return (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditDialogOpen(true)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
+                        additionalMetadata: data.additionalMetadata,
+                        fertilizers: data.fertilizers || [],
+                      }
+                    );
 
-                  <StudyEditDialog
-                    study={study as Study}
-                    open={editDialogOpen}
-                    onOpenChange={setEditDialogOpen}
-                    onSave={handleStudyEdit}
-                    isLoading={isLoading}
-                    nirModels={studyData?.nirModels || []}
-                    physiologicalStages={studyData?.physiologicalStages || []}
-                    qualityLabs={studyData?.qualityLabs || []}
-                    studyMetadatas={studyData?.studyMetadatas || []}
-                  />
-                </>
-              );
-            },
-          }
-        : {
-            id: "actions",
-            cell: ({ row }) => {
-              const trial = row.original;
-              const [editDialogOpen, setEditDialogOpen] = useState(false);
-              const [isLoading, setIsLoading] = useState(false);
-
-              const handleStudyEdit = async (data: any) => {
-                setIsLoading(true);
-
-                try {
-                  const cropId = trialData?.crops.find(
-                    (crop) => crop.name === data.crop
-                  )?.id!;
-
-                  const { error, message } = await updateTrial(
-                    (trial as any).id,
-                    {
-                      cropId,
-                      location: data.location,
-                      latitude: data.coordinates.split(", ")[0],
-                      longitude: data.coordinates.split(", ")[1],
-                      soilType: data.soilType,
-                      irrigation: data.irrigation,
-
-                      additionalMetadata: data.additionalMetadata,
-                      fertilizers: data.fertilizers || [],
+                    if (error) {
+                      toast.error(message);
+                    } else {
+                      toast.success(message);
                     }
-                  );
-
-                  if (error) {
-                    toast.error(message);
-                  } else {
-                    toast.success(message);
+                  } catch (error) {
+                    toast.error("Error updating trial");
+                  } finally {
+                    setEditDialogOpen(false);
+                    setIsLoading(false);
                   }
-                } catch (error) {
-                  toast.error("Error updating trial");
-                } finally {
-                  setEditDialogOpen(false);
-                  setIsLoading(false);
-                }
-              };
+                };
 
-              return (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditDialogOpen(true)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
+                return (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditDialogOpen(true)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
 
-                  <TrialEditDialog
-                    trial={trial as Trial}
-                    crops={trialData?.crops || []}
-                    trialMetadatas={trialData?.trialMetadatas || []}
-                    open={editDialogOpen}
-                    onOpenChange={setEditDialogOpen}
-                    onSave={handleStudyEdit}
-                    isLoading={isLoading}
-                  />
-                </>
-              );
+                    <TrialEditDialog
+                      trial={trial as Trial}
+                      crops={trialData?.crops || []}
+                      trialMetadatas={trialData?.trialMetadatas || []}
+                      open={editDialogOpen}
+                      onOpenChange={setEditDialogOpen}
+                      onSave={handleStudyEdit}
+                      isLoading={isLoading}
+                    />
+                  </>
+                );
+              },
             },
-          },
-    ];
+      ];
+    }
+    return [...baseColumns, ...additionalMetadataColumns];
   }
 
   return baseColumns;
@@ -317,6 +330,7 @@ export function DataTable<TData, TValue>({
   tab,
   studyData,
   trialData,
+  userRole,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -333,7 +347,8 @@ export function DataTable<TData, TValue>({
         traitVariables,
         filterFields,
         studyData,
-        trialData
+        trialData,
+        userRole
       ),
     [tab, columns, data, traitVariables]
   );

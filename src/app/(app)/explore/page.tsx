@@ -8,10 +8,16 @@ import { getProductTypes } from "@/features/studies/db/product-type";
 import { getSpecies, getTrialSpecies } from "@/features/studies/db/species";
 import {
   getStudies,
+  getStudiesByCenterName,
   getStudyConfigMetadatas,
 } from "@/features/studies/db/study";
 import { getWetChemistryData } from "@/features/traits/db/trait";
-import { getTrialConfigMetadatas, getTrials } from "@/features/trials/db/trial";
+import {
+  getTrialConfigMetadatas,
+  getTrials,
+  getTrialsByCenter,
+} from "@/features/trials/db/trial";
+import { getCurrentUser } from "@/lib/currentUser";
 import {
   studyColumns,
   trialColumns,
@@ -65,6 +71,9 @@ async function getGroupedWetChemistryData() {
 
 export default async function ExploreData() {
   const { realData, dataColumns } = await getGroupedWetChemistryData();
+  const user = await getCurrentUser();
+  const center = user?.center as string;
+  const userRole = user?.role;
 
   const [
     trials,
@@ -76,10 +85,10 @@ export default async function ExploreData() {
     trialMetadatas,
     crops,
   ] = await Promise.all([
-    getTrials(),
-    getStudies(),
+    center === "USER" ? getTrialsByCenter(center) : getTrials(),
+    center === "USER" ? getStudiesByCenterName(center) : getStudies(),
     getNirModels(),
-    getQualityLabs(),
+    center === "USER" ? getQualityLabs({ center }) : getQualityLabs(),
     getPhysiologicalStages(),
     getStudyConfigMetadatas(),
     getTrialConfigMetadatas(),
@@ -154,6 +163,7 @@ export default async function ExploreData() {
                       source: metadata.source,
                     })),
                 }}
+                userRole={userRole}
               />
             </TabsContent>
             <TabsContent value="study">
@@ -201,6 +211,7 @@ export default async function ExploreData() {
                       source: metadata.source,
                     })),
                 }}
+                userRole={userRole}
               />
             </TabsContent>
           </div>

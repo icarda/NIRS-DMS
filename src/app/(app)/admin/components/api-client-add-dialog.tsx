@@ -89,7 +89,6 @@ export function ApiClientAddDialog() {
       });
 
       toast.success("API Client created successfully.");
-      console.log("API Client created:", res);
       // @ts-ignore
       setResult(res);
       setIsOpenResult(true);

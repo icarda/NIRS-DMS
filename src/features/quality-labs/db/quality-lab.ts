@@ -3,6 +3,7 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import { CenterTable, QualityLabTable } from "@/drizzle/schema";
+import { createdAt } from "@/drizzle/schemaHelpers";
 import {
   getQualityLabGlobalTag,
   getQualityLabIdTag,
@@ -10,9 +11,27 @@ import {
   revalidateQualityLabCache,
 } from "./cache";
 
-export async function getQualityLabs({ limit }: { limit?: number } = {}) {
-  "use cache";
-  cacheTag(getQualityLabGlobalTag());
+export async function getQualityLabs({
+  limit,
+  center,
+}: { limit?: number; center?: string } = {}) {
+  if (center) {
+    const qualityLabsByCenter = await db
+      .select({
+        id: QualityLabTable.id,
+        name: QualityLabTable.name,
+        location: QualityLabTable.location,
+        country: QualityLabTable.country,
+        centerId: QualityLabTable.centerId,
+        createdAt: QualityLabTable.createdAt,
+        updatedAt: QualityLabTable.updatedAt,
+      })
+      .from(QualityLabTable)
+      .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+      .where(eq(CenterTable.acronym, center));
+    return qualityLabsByCenter;
+  }
+
   const qualityLabs = await db.query.QualityLabTable.findMany({
     limit,
   });
