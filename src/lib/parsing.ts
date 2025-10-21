@@ -71,9 +71,9 @@ export async function parseCsv(file: File): Promise<ParsedNirsDataFileRow[]> {
         }
 
         results.data.forEach((row, index) => {
-          const plotId = row[plotIdHeader!] ?? ""
-          const sampleId = row[sampleIdHeader!] ?? ""
-          const gid = row[gidHeader!] ?? ""
+          const plotId = row[plotIdHeader!] ?? "";
+          const sampleId = row[sampleIdHeader!] ?? "";
+          const gid = row[gidHeader!] ?? "";
           // Use string as key for spectrumData
           const spectrumData: Record<string, number> = {};
 
@@ -143,9 +143,9 @@ export async function parseXlsx(file: File): Promise<ParsedNirsDataFileRow[]> {
       const rawPlotId = row[plotIdHeader!];
       const rawSampleId = row[sampleIdHeader!];
       const rawGID = row[gidHeader!];
-      const plotId = rawPlotId ?? ""
-      const sampleId = rawSampleId ?? ""
-      const gid = rawGID ?? ""
+      const plotId = rawPlotId ?? "";
+      const sampleId = rawSampleId ?? "";
+      const gid = rawGID ?? "";
       // Use string as key for spectrumData
       const spectrumData: Record<string, number> = {};
 
@@ -304,7 +304,7 @@ async function parseTraitCsv(
 
         // Process rows
         results.data.forEach((row, index) => {
-          const sampleId = row[sampleIdHeader!] ?? ""
+          const sampleId = String(row[sampleIdHeader!] ?? "").trim();
 
           const traitValues: Record<string, number> = {};
 
@@ -389,7 +389,7 @@ async function parseTraitXlsx(
     // Process rows
     jsonData.forEach((row, index) => {
       const rawSampleId = row[sampleIdHeader!];
-      const sampleId = rawSampleId ?? ""
+      const sampleId = String(rawSampleId ?? "").trim();
 
       const traitValues: Record<string, number> = {};
 

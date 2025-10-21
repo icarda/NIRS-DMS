@@ -104,7 +104,6 @@ export function LineChart({
     };
   }, [JSON.stringify(filters), nirModel]);
 
-  console.log("isLoading:", isLoading);
   return (
     <Card className="col-span-1 md:col-span-2">
       <CardHeader>
