@@ -14,9 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Spinner } from "@/components/ui/spinner";
 import { getSpectralData } from "@/features/dashboard/actions/graphs";
 import { NirModelSelect } from "./nir-model-select";
 import { SampleSelector } from "./sample-selector";
@@ -44,7 +47,7 @@ function buildChartConfig(data: Record<string, number>[]): ChartConfig {
 }
 
 function pivotSpectralData(
-  rows: { sampleId: number; wavelength: number; value: number }[]
+  rows: { sampleId: string; wavelength: number; value: number }[]
 ) {
   const grouped: Record<number, Record<string, number>> = {};
 
@@ -64,33 +67,44 @@ export function LineChart({
 }) {
   const [data, setData] = useState<Record<string, number>[]>([]);
   const [chartConfig, setChartConfig] = useState<ChartConfig>({});
-  const [activeSamples, setActiveSamples] = useState<string[]>([]);
+  const [samples, setSamples] = useState<string[]>([]);
   const [nirModel, setNirModel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
-      const rows = await getSpectralData(filters);
-      const pivoted = pivotSpectralData(rows);
-      setData(pivoted);
+      setIsLoading(true);
+      try {
+        const rows = await getSpectralData(filters, nirModel);
+        if (!isMounted) return;
 
-      const config = buildChartConfig(pivoted);
-      setChartConfig(config);
+        // Offload heavy processing
+        queueMicrotask(() => {
+          const pivoted = pivotSpectralData(rows);
+          const config = buildChartConfig(pivoted);
 
-      const keys = Object.keys(config);
-      setActiveSamples((prev) => {
-        // keep previously active if still present, else default to first 5
-        const stillValid = prev.filter((k) => keys.includes(k));
-        return stillValid.length ? stillValid : keys.slice(0, 5);
-      });
+          if (!isMounted) return;
+          setData(pivoted);
+          setChartConfig(config);
+          setSamples(Object.keys(config));
+          setIsLoading(false);
+        });
+      } catch (error) {
+        console.error("Failed to fetch spectral data:", error);
+        if (isMounted) setIsLoading(false);
+      }
     }
+
     fetchData();
-  }, [JSON.stringify(filters)]);
 
-  const allSamples = useMemo(
-    () => Object.keys(chartConfig),
-    [JSON.stringify(chartConfig)]
-  );
+    return () => {
+      isMounted = false;
+    };
+  }, [JSON.stringify(filters), nirModel]);
 
+  console.log("isLoading:", isLoading);
   return (
     <Card className="col-span-1 md:col-span-2">
       <CardHeader>
@@ -103,17 +117,22 @@ export function LineChart({
               onChange={setNirModel}
               // disabled={!filters?.crop} // model list is crop-scoped
             />
-            <SampleSelector
+            {/* <SampleSelector
               options={allSamples}
               active={activeSamples}
               onChange={setActiveSamples}
-            />
+            /> */}
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          {data.length === 0 ? (
+          {isLoading ? (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-1">
+              <Spinner className="size-8 text-primary" />
+              Loading...
+            </div>
+          ) : data.length === 0 ? (
             <div className="flex h-full w-full items-center justify-center">
               No data to display
             </div>
@@ -149,15 +168,22 @@ export function LineChart({
               <ChartTooltip
                 cursor={false}
                 defaultIndex={1}
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => `${value} nm`}
-                  />
-                }
+                content={({ payload, label }) => {
+                  if (!payload || payload.length === 0) return null;
+                  const avg =
+                    payload.reduce((sum, p) => sum + (p.value as number), 0) /
+                    payload.length;
+                  return (
+                    <div className="rounded-lg bg-white p-3 shadow-sm">
+                      <p>Wavelength: {label}</p>
+                      <p>Average absorbance: {avg.toFixed(4)}</p>
+                      <p>Samples: {payload.length}</p>
+                    </div>
+                  );
+                }}
               />
-              {/* <ChartLegend verticalAlign="top" content={<ChartLegendContent />} /> */}
 
-              {activeSamples.map((key) => (
+              {samples.map((key) => (
                 <Line
                   key={key}
                   type="monotone"

@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Spinner } from "@/components/ui/spinner";
 import {
   getWetchemTraitValues,
   HistogramPoint,
@@ -36,23 +37,40 @@ export function WetchemHistogramCard({
   const [trait, setTrait] = useState<TraitOption | null>(null);
   const [raw, setRaw] = useState<HistogramPoint[]>([]);
   const [bins, setBins] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
       if (!trait?.value) {
         setRaw([]);
         setBins([]);
         return;
       }
-      const rows = await getWetchemTraitValues(filters, trait.value);
-      setRaw(rows);
-    })();
-  }, [trait?.value, JSON.stringify(filters)]);
 
-  useEffect(() => {
-    const bins = processToBins(raw);
-    setBins(bins);
-  }, [raw]);
+      setIsLoading(true);
+      try {
+        const rows = await getWetchemTraitValues(filters, trait.value);
+        if (!isMounted) return;
+
+        setRaw(rows);
+
+        queueMicrotask(() => {
+          const computed = processToBins(rows);
+          if (isMounted) setBins(computed);
+          if (isMounted) setIsLoading(false);
+        });
+      } catch (err) {
+        console.error("Failed to fetch wetchem trait values:", err);
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [trait?.value, JSON.stringify(filters)]);
 
   const xAxisLabel = useMemo(() => {
     if (!trait) return "Value Range";
@@ -74,7 +92,12 @@ export function WetchemHistogramCard({
           }}
           className="h-[300px] w-full"
         >
-          {bins.length === 0 ? (
+          {isLoading ? (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-1">
+              <Spinner className="size-8 text-primary" />
+              Loading...
+            </div>
+          ) : bins.length === 0 ? (
             <div className="flex h-full w-full items-center justify-center">
               No data to display
             </div>

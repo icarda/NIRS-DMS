@@ -72,8 +72,6 @@ const StudyStep = ({
     }
   }, [form.watch("study")]);
 
-  console.log(studies.map((s) => s));
-  console.log(studies.filter((s) => s.trial.name === form.getValues("trial")));
   return (
     <div className="space-y-8">
       <div className="space-y-2">

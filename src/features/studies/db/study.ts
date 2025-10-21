@@ -24,8 +24,6 @@ export async function getStudiesByCenterName(centerName: string) {
     .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
     .where(eq(CenterTable.acronym, centerName));
 
-  console.log({ labIds });
-
   if (labIds.length === 0) {
     return [];
   }

@@ -27,7 +27,10 @@ const yearBounds = (year?: string) => {
   return { start: `${y}-01-01`, end: `${y}-12-31` };
 };
 
-export async function getSpectralData(filters: DashboardFilters) {
+export async function getSpectralData(
+  filters: DashboardFilters,
+  nirModel: string | null
+) {
   const where = [];
 
   if (filters.crop) {
@@ -48,14 +51,20 @@ export async function getSpectralData(filters: DashboardFilters) {
     }
   }
 
+  if (nirModel) {
+    where.push(eq(NirModelTable.name, nirModel));
+  }
+
   const rows = await db
     .select({
       sampleId: NirsDataTable.sampleId,
       wavelength: NirsDataTable.wavelength,
       value: NirsDataTable.value,
+      nirModelName: NirModelTable.name,
     })
     .from(NirsDataTable)
     .innerJoin(StudyTable, eq(NirsDataTable.studyId, StudyTable.id))
+    .innerJoin(NirModelTable, eq(StudyTable.nirModelId, NirModelTable.id))
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
     .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
     .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
