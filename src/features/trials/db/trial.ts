@@ -23,8 +23,6 @@ import {
 export async function getTrialConfigMetadatas(
   trx: Omit<typeof db, "$client"> = db
 ) {
-  "use cache";
-  cacheTag(getTrialMetadataConfigGlobalTag());
   const trials = await trx.query.TrialMetadataConfig.findMany();
   return trials;
 }
