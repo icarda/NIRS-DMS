@@ -6,7 +6,7 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -38,7 +38,7 @@
     "postgres": "^3.4.5",
     "radix-ui": "latest",
     "react": "^19.0.0",
-    "react-day-picker": "8.10.1",
+    "react-day-picker": "9.11.1",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "recharts": "2.15.4",
