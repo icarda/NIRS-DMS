@@ -21,15 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { crops } from "@/data/crops";
-import { qualityLabs } from "@/data/quality-labs";
 import { getNirsFilterOptions } from "@/features/dashboard/actions/nirs-filters";
 import { dashboardFilterSchema } from "@/lib/schemas";
 
 export type FilterValues = z.infer<typeof dashboardFilterSchema>;
-
-const YEARS = ["2025", "2024", "2023", "2022", "2021"];
-const COUNTRIES = ["Morocco", "Lebanon", "Mexico"];
 
 export function FilterForm({
   form,
@@ -66,16 +61,28 @@ export function FilterForm({
       });
 
       setOpts(next);
-
+      // Crop => resets everything below
       if (values.crop && !next.crops.includes(values.crop)) {
         form.setValue("crop", "");
+        form.setValue("qualityLab", "");
+        form.setValue("country", "");
+        form.setValue("year", "");
       }
+
+      // Lab => resets Country + Year
       if (values.qualityLab && !next.qualityLabs.includes(values.qualityLab)) {
         form.setValue("qualityLab", "");
+        form.setValue("country", "");
+        form.setValue("year", "");
       }
+
+      // Country => resets Year
       if (values.country && !next.countries.includes(values.country)) {
         form.setValue("country", "");
+        form.setValue("year", "");
       }
+
+      // Year => only itself
       if (values.year && !next.years.includes(values.year)) {
         form.setValue("year", "");
       }
@@ -96,10 +103,7 @@ export function FilterForm({
               <FormItem>
                 <FormLabel>Crop</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select crop" />
                     </SelectTrigger>
@@ -110,7 +114,7 @@ export function FilterForm({
                         </SelectItem>
                       ))}
                       {opts.crops.length === 0 && (
-                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground px-2 py-1 text-sm">
                           No crops available
                         </div>
                       )}
@@ -129,10 +133,7 @@ export function FilterForm({
               <FormItem>
                 <FormLabel>Quality Lab</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select quality lab" />
                     </SelectTrigger>
@@ -143,7 +144,7 @@ export function FilterForm({
                         </SelectItem>
                       ))}
                       {opts.qualityLabs.length === 0 && (
-                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground px-2 py-1 text-sm">
                           No labs available
                         </div>
                       )}
@@ -162,10 +163,7 @@ export function FilterForm({
               <FormItem>
                 <FormLabel>Year</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
@@ -176,7 +174,7 @@ export function FilterForm({
                         </SelectItem>
                       ))}
                       {opts.years.length === 0 && (
-                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground px-2 py-1 text-sm">
                           No years available
                         </div>
                       )}
@@ -195,10 +193,7 @@ export function FilterForm({
               <FormItem>
                 <FormLabel>Country</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
@@ -209,7 +204,7 @@ export function FilterForm({
                         </SelectItem>
                       ))}
                       {opts.countries.length === 0 && (
-                        <div className="px-2 py-1 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground px-2 py-1 text-sm">
                           No countries available
                         </div>
                       )}

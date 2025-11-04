@@ -29,34 +29,16 @@ const yearBounds = (year?: string) => {
   return { start: `${y}-01-01`, end: `${y}-12-31` };
 };
 
-function andsafe(...conds: SQL[]) {
-  return conds.length ? and(...conds) : undefined;
+function andsafe(...conds: (SQL | undefined)[]) {
+  return conds.length ? and(...conds.filter(Boolean)) : undefined;
 }
 
 export async function getNirsFilterOptions(filters: DashboardFilters) {
   const yb = yearBounds(filters.year);
 
-  const condsFor = (
-    exclude?: "crop" | "qualityLab" | "country" | "year"
-  ): SQL[] => {
-    const conds: SQL[] = [];
-    if (filters.crop && exclude !== "crop") {
-      conds.push(eq(CropTable.name, filters.crop));
-    }
-    if (filters.qualityLab && exclude !== "qualityLab") {
-      conds.push(eq(QualityLabTable.name, filters.qualityLab));
-    }
-    if (filters.country && exclude !== "country") {
-      conds.push(eq(QualityLabTable.country, filters.country));
-    }
-    if (yb && exclude !== "year") {
-      conds.push(gte(StudyTable.sampleDate, yb.start));
-      conds.push(lte(StudyTable.sampleDate, yb.end));
-    }
-    return conds;
-  };
+  const makeConds = (...conds: SQL[]) => andsafe(...conds);
 
-  // CROPS
+  // CROPS: independent
   const cropsRows = await db
     .select({ name: CropTable.name })
     .from(NirsDataTable)
@@ -64,11 +46,10 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
     .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
     .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
-    .where(andsafe(...condsFor("crop")))
     .groupBy(CropTable.name)
     .orderBy(CropTable.name);
 
-  // LABS
+  // LABS: depend only on Crop
   const labsRows = await db
     .select({ name: QualityLabTable.name })
     .from(NirsDataTable)
@@ -76,11 +57,11 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
     .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
     .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
-    .where(andsafe(...condsFor("qualityLab")))
+    .where(filters.crop ? eq(CropTable.name, filters.crop) : undefined)
     .groupBy(QualityLabTable.name)
     .orderBy(QualityLabTable.name);
 
-  // COUNTRIES
+  // COUNTRIES: depend on Crop + Lab
   const countriesRows = await db
     .select({ country: QualityLabTable.country })
     .from(NirsDataTable)
@@ -88,11 +69,18 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
     .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
     .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
-    .where(andsafe(...condsFor("country")))
+    .where(
+      andsafe(
+        filters.crop ? eq(CropTable.name, filters.crop) : undefined,
+        filters.qualityLab
+          ? eq(QualityLabTable.name, filters.qualityLab)
+          : undefined
+      )
+    )
     .groupBy(QualityLabTable.country)
     .orderBy(QualityLabTable.country);
 
-  // YEARS (from Study.sampleDate)
+  // YEARS: depend on Crop + Lab + Country
   const yearExpr = sql<number>`extract(year from ${StudyTable.sampleDate})`;
   const yearsRows = await db
     .select({ year: yearExpr })
@@ -101,7 +89,17 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
     .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
     .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
-    .where(andsafe(...condsFor("year")))
+    .where(
+      andsafe(
+        filters.crop ? eq(CropTable.name, filters.crop) : undefined,
+        filters.qualityLab
+          ? eq(QualityLabTable.name, filters.qualityLab)
+          : undefined,
+        filters.country
+          ? eq(QualityLabTable.country, filters.country)
+          : undefined
+      )
+    )
     .groupBy(yearExpr)
     .orderBy(yearExpr);
 

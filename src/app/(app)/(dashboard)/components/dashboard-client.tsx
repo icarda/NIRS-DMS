@@ -43,7 +43,7 @@ export default function DashboardClient({
 }) {
   const [kpis, setKpis] = useState<Kpis>(initialKpis);
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [traits, setTraits] = useState<string[]>([]);
 
   useEffect(() => {
@@ -60,21 +60,29 @@ export default function DashboardClient({
     defaultValues: { crop: "", qualityLab: "", year: "", country: "" },
   });
 
+  const [chartFilters, setChartFilters] = useState<FilterValues>(
+    form.getValues()
+  );
   async function handleApply(values: FilterValues) {
-    startTransition(async () => {
-      const data = await getDashboardKpis(values);
-      setKpis(data);
-      setOpenFilterDialog(false);
-    });
+    // Update charts immediately (not deferred)
+    setChartFilters(values);
+    setIsPending(true);
+
+    // Then update KPIs
+    const data = await getDashboardKpis(values);
+    setKpis(data);
+    setIsPending(false);
+    setOpenFilterDialog(false);
   }
 
-  function handleClear() {
-    startTransition(async () => {
-      const cleared = { crop: "", qualityLab: "", year: "", country: "" };
-      const data = await getDashboardKpis(cleared);
-      setKpis(data);
-      setOpenFilterDialog(false);
-    });
+  async function handleClear() {
+    setIsPending(false);
+    form.reset();
+    const cleared = { crop: "", qualityLab: "", year: "", country: "" };
+    setChartFilters(cleared);
+    const data = await getDashboardKpis(cleared);
+    setKpis(data);
+    setOpenFilterDialog(false);
   }
 
   return (
@@ -85,7 +93,7 @@ export default function DashboardClient({
             <TabsList className="h-12 bg-transparent">
               <TabsTrigger
                 value="overview"
-                className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                className="data-[state=active]:after:bg-primary relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5"
               >
                 Overview
               </TabsTrigger>
@@ -162,9 +170,9 @@ export default function DashboardClient({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <LineChart filters={form.getValues()} />
-        <WetchemHistogramCard filters={form.getValues()} />
-        <WetchemBoxplotCard filters={form.getValues()} />
+        <LineChart filters={chartFilters} />
+        <WetchemHistogramCard filters={chartFilters} />
+        <WetchemBoxplotCard filters={chartFilters} />
       </div>
     </div>
   );
