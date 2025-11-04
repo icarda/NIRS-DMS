@@ -81,16 +81,14 @@ export function LineChart({
         if (!isMounted) return;
 
         // Offload heavy processing
-        queueMicrotask(() => {
-          const pivoted = pivotSpectralData(rows);
-          const config = buildChartConfig(pivoted);
+        const pivoted = pivotSpectralData(rows);
+        const config = buildChartConfig(pivoted);
 
-          if (!isMounted) return;
-          setData(pivoted);
-          setChartConfig(config);
-          setSamples(Object.keys(config));
-          setIsLoading(false);
-        });
+        if (!isMounted) return;
+        setData(pivoted);
+        setChartConfig(config);
+        setSamples(Object.keys(config));
+        setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch spectral data:", error);
         if (isMounted) setIsLoading(false);
@@ -128,7 +126,7 @@ export function LineChart({
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           {isLoading ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-1">
-              <Spinner className="size-8 text-primary" />
+              <Spinner className="text-primary size-8" />
               Loading...
             </div>
           ) : data.length === 0 ? (

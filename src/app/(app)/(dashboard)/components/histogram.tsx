@@ -40,37 +40,52 @@ export function WetchemHistogramCard({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    let cancelled = false;
 
     (async () => {
       if (!trait?.value) {
         setRaw([]);
         setBins([]);
+        setIsLoading(false);
         return;
       }
 
       setIsLoading(true);
+
       try {
         const rows = await getWetchemTraitValues(filters, trait.value);
-        if (!isMounted) return;
+        if (cancelled) return;
 
         setRaw(rows);
 
-        queueMicrotask(() => {
-          const computed = processToBins(rows);
-          if (isMounted) setBins(computed);
-          if (isMounted) setIsLoading(false);
-        });
+        if (!rows || rows.length === 0) {
+          setBins([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const computed = processToBins(rows);
+
+        if (!cancelled) {
+          setBins(computed);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.error("Failed to fetch wetchem trait values:", err);
-        if (isMounted) setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     })();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [trait?.value, JSON.stringify(filters)]);
+  }, [
+    trait?.value,
+    filters.crop,
+    filters.qualityLab,
+    filters.year,
+    filters.country,
+  ]);
 
   const xAxisLabel = useMemo(() => {
     if (!trait) return "Value Range";
@@ -94,7 +109,7 @@ export function WetchemHistogramCard({
         >
           {isLoading ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-1">
-              <Spinner className="size-8 text-primary" />
+              <Spinner className="text-primary size-8" />
               Loading...
             </div>
           ) : bins.length === 0 ? (
@@ -235,9 +250,9 @@ const CustomTooltip = ({ active, payload }: any) => {
     const data = payload[0].payload;
 
     return (
-      <div className="max-w-xs rounded-lg border bg-background p-4 shadow-md">
+      <div className="bg-background max-w-xs rounded-lg border p-4 shadow-md">
         <h3 className="mb-2 font-medium">Value Range: {data.range}</h3>
-        <p className="mb-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mb-2 text-sm">
           Count: {data.count}
         </p>
 
@@ -248,7 +263,7 @@ const CustomTooltip = ({ active, payload }: any) => {
               {data.items.map((item: string, index: number) => (
                 <li key={index} className="flex">
                   <span className="text-primary">{item}</span>
-                  <span className="ml-auto text-muted-foreground">
+                  <span className="text-muted-foreground ml-auto">
                     {data.itemValues[item]}
                   </span>
                 </li>
