@@ -57,7 +57,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   filterFields?: DataTableFilterField<TData>[];
-  traitVariables?: string[];
+  traitVariables?: { name: string; unit: string }[];
   tab: "study" | "trial" | "wet-chemistry";
   userRole?: UserRole;
   studyData: {
@@ -92,7 +92,7 @@ function generateColumns<TData>(
   tab: "wet-chemistry" | "trial" | "study",
   columns: ColumnDef<TData, any>[],
   data: TData[],
-  traitVariables?: string[],
+  traitVariables?: { name: string; unit: string }[],
   filterFields?: DataTableFilterField<TData>[],
   studyData?: {
     qualityLabs: QualityLab[];
@@ -128,19 +128,19 @@ function generateColumns<TData>(
     return [
       ...baseColumns,
       ...(traitVariables?.map((key) => ({
-        header: camelToNormal(key),
-        accessorKey: key,
-        id: key,
+        header: ` ${camelToNormal(key.name)} (${key.unit})`,
+        accessorKey: key.name,
+        id: key.name,
         cell: ({ row }) => {
-          const value = row.getValue(key);
+          const value = row.getValue(key.name);
           return typeof value === "undefined" ? (
-            <Minus className="h-4 w-4 text-muted-foreground/50" />
+            <Minus className="text-muted-foreground/50 h-4 w-4" />
           ) : (
             <div>{`${value}`}</div>
           );
         },
-        filterFn: renderDynamicFilterFn(findFilterType(key, filterFields)),
-        meta: { label: camelToNormal(key) },
+        filterFn: renderDynamicFilterFn(findFilterType(key.name, filterFields)),
+        meta: { label: camelToNormal(key.name) },
       })) as ColumnDef<TData>[]),
     ];
   }
@@ -376,7 +376,7 @@ export function DataTable<TData, TValue>({
     <div className="flex h-full w-full flex-col gap-3 sm:flex-row">
       <div
         className={cn(
-          "w-full p-1 sm:min-w-52 sm:max-w-52 sm:self-start md:min-w-64 md:max-w-64",
+          "w-full p-1 sm:max-w-52 sm:min-w-52 sm:self-start md:max-w-64 md:min-w-64",
           !controlsOpen && "hidden"
         )}
       >

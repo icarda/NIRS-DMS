@@ -33,7 +33,10 @@ import { DataTable } from "./table/data-table";
 async function getGroupedWetChemistryData() {
   const result = await getWetChemistryData();
 
-  const dataColumns = result.map((row) => row.trait_name);
+  const dataColumns = result.map((row) => ({
+    name: row.trait_name,
+    unit: row.trait_unit,
+  }));
 
   const groupedData: Record<string, Record<string, any>> = {};
 
@@ -47,6 +50,7 @@ async function getGroupedWetChemistryData() {
         study_code: row.study_code,
         sample_date: row.sample_date,
         trial_name: row.trial_name,
+        trait_unit: row.trait_unit,
         trial_planting_date: row.trial_planting_date,
         product_type: row.product_type,
         physiological_stage: row.physiological_stage,
@@ -95,7 +99,9 @@ export default async function ExploreData() {
     getCrops(),
   ]);
 
-  const traitVariables = Array.from(new Set(dataColumns));
+  const traitVariables = Array.from(
+    new Map(dataColumns.map((d) => [d.name, d])).values()
+  );
 
   return (
     <PageWrapper title="Explore Data">
@@ -106,19 +112,19 @@ export default async function ExploreData() {
               <TabsList className="h-12 bg-transparent">
                 <TabsTrigger
                   value="wetchemistry"
-                  className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                  className="data-[state=active]:after:bg-primary relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5"
                 >
                   Wet Chemistry
                 </TabsTrigger>
                 <TabsTrigger
                   value="trial"
-                  className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                  className="data-[state=active]:after:bg-primary relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5"
                 >
                   Trial Data
                 </TabsTrigger>
                 <TabsTrigger
                   value="study"
-                  className="relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                  className="data-[state=active]:after:bg-primary relative h-12 rounded-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5"
                 >
                   Study Data
                 </TabsTrigger>

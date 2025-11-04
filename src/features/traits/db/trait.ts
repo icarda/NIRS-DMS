@@ -24,7 +24,7 @@ export interface TraitFilters {
   studyCode?: string;
   trial?: string;
   crop?: string;
-  sampleId?: number;
+  sampleId?: string;
   trait?: string;
   year?: number;
   location?: string;
@@ -40,7 +40,7 @@ export type TraitFilteredResult = {
   measuredValue: number;
   predictedValue: number | null;
   year: number;
-  sampleId: number;
+  sampleId: string;
   studyCode: string | null;
   trialName: string | null;
   location: string | null;
@@ -141,6 +141,7 @@ export async function getWetChemistryData() {
       trait_name: TraitTable.traitName,
       measured_value: TraitTable.measuredValue,
       predicted_value: TraitTable.predictedValue,
+      trait_unit: CropTraitTable.unit,
       study_code: StudyTable.studyCode,
       sample_date: StudyTable.sampleDate,
       germplasm_id: OtherIdsTable.gid,
@@ -153,10 +154,11 @@ export async function getWetChemistryData() {
       physiological_stage: PhysiologicalStageTable.name,
     })
     .from(TraitTable)
-    .innerJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id)) // Corrected with `eq`
-    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id)) // Corrected with `eq`
-    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id)) // Corrected with `eq`
-    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id)) // Corrected with `eq`
+    .innerJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id))
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
+    .innerJoin(CropTraitTable, eq(TraitTable.cropTraitId, CropTraitTable.id))
     .innerJoin(
       ProductTypeTable,
       eq(StudyTable.productTypeId, ProductTypeTable.id)

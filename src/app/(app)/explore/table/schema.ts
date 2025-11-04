@@ -6,6 +6,7 @@ export const wetChemistryColumnSchema = z.object({
   trait_name: z.string().min(1),
   measured_value: z.number().nullable(),
   predicted_value: z.number().nullable(),
+  trait_unit: z.string().min(1),
   study_code: z.string().min(1),
   species: z.string().min(1),
   sample_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
