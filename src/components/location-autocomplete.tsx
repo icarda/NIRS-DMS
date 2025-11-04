@@ -83,7 +83,7 @@ export function LocationCommand({
     <div className="relative w-full">
       <Command
         ref={wrapperRef}
-        className="w-full rounded-md border bg-white shadow-sm"
+        className="w-full rounded-md border bg-white shadow-xs"
       >
         <CommandInput
           value={value}

@@ -92,7 +92,7 @@ const CountryDropdownComponent = (
   );
 
   const triggerClasses = cn(
-    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs ring-offset-background placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
     slim === true && "w-20"
   );
 
@@ -108,7 +108,7 @@ const CountryDropdownComponent = (
         {...props}
       >
         {selectedCountry ? (
-          <div className="flex w-0 flex-grow items-center gap-2 overflow-hidden">
+          <div className="flex w-0 grow items-center gap-2 overflow-hidden">
             <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md">
               <SelectedCountryFlag className="h-5 w-5" />
             </div>
@@ -132,7 +132,7 @@ const CountryDropdownComponent = (
       <PopoverContent
         collisionPadding={10}
         side="bottom"
-        className="min-w-[--radix-popper-anchor-width] p-0"
+        className="min-w-(--radix-popper-anchor-width) p-0"
       >
         <Command className="max-h-[200px] w-full sm:max-h-[270px]">
           <CommandList>
@@ -154,7 +154,7 @@ const CountryDropdownComponent = (
                       key={key}
                       onSelect={() => handleSelect(option)}
                     >
-                      <div className="flex w-0 flex-grow space-x-2 overflow-hidden">
+                      <div className="flex w-0 grow space-x-2 overflow-hidden">
                         <div className="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-md">
                           <Flag className="h-5 w-5" />
                         </div>

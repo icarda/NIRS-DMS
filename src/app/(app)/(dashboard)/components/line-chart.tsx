@@ -173,7 +173,7 @@ export function LineChart({
                     payload.reduce((sum, p) => sum + (p.value as number), 0) /
                     payload.length;
                   return (
-                    <div className="rounded-lg bg-white p-3 shadow-sm">
+                    <div className="rounded-lg bg-white p-3 shadow-xs">
                       <p>Wavelength: {label}</p>
                       <p>Average absorbance: {avg.toFixed(4)}</p>
                       <p>Samples: {payload.length}</p>

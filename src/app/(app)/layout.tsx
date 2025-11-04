@@ -20,7 +20,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="max-w-full">
-          <div className="py-2 font-[family-name:var(--font-inter)] md:px-4">
+          <div className="py-2 font-(family-name:--font-inter) md:px-4">
             {children}
           </div>
           <Footer />

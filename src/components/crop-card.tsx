@@ -142,7 +142,7 @@ export function CropCard({
   };
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
-      <div className="relative aspect-[16/9]">
+      <div className="relative aspect-video">
         <Link href={`/crop-ontology/${crop.id}`}>
           <Image
             src={crop.cropImageUrl || "/placeholder.svg"}
@@ -152,7 +152,7 @@ export function CropCard({
           />
         </Link>
       </div>
-      <div className="flex flex-grow flex-col">
+      <div className="flex grow flex-col">
         <CardHeader className="flex flex-row items-center justify-between p-3 pb-0">
           <CardTitle className="text-lg font-semibold">
             <Link href={`/crop-ontology/${crop.id}`}>{crop.name}</Link>

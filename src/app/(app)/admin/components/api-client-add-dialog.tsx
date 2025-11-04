@@ -147,7 +147,7 @@ export function ApiClientAddDialog() {
                           defaultValue={field.value}
                           className="gap-2"
                         >
-                          <div className="has-data-[state=checked]:border-primary/50 shadow-xs relative flex w-full items-start gap-2 rounded-md border border-input p-4 outline-none">
+                          <div className="has-data-[state=checked]:border-primary/50 shadow-2xs relative flex w-full items-start gap-2 rounded-md border border-input p-4 outline-hidden">
                             <RadioGroupItem
                               value="public"
                               id={`${id}-1`}
@@ -167,7 +167,7 @@ export function ApiClientAddDialog() {
                             </div>
                           </div>
 
-                          <div className="has-data-[state=checked]:border-primary/50 shadow-xs relative flex w-full items-start gap-2 rounded-md border border-input p-4 outline-none">
+                          <div className="has-data-[state=checked]:border-primary/50 shadow-2xs relative flex w-full items-start gap-2 rounded-md border border-input p-4 outline-hidden">
                             <RadioGroupItem
                               value="confidential"
                               id={`${id}-2`}
