@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/drizzle/db";
 import { apiClients, ClientStatus, ClientType } from "@/drizzle/schemas/auth";
+import { requireAdminToken } from "@/lib/auth/require-auth";
 import { AuthClientRequestSchema, AuthClientResponseSchema } from "./schema";
 
 /**
@@ -15,6 +16,10 @@ import { AuthClientRequestSchema, AuthClientResponseSchema } from "./schema";
  * @openapi
  */
 export async function POST(req: Request) {
+  if (!requireAdminToken(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { type, scopes, name, description } = await req.json();
 
   if (!["public", "confidential"].includes(type)) {

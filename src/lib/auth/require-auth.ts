@@ -35,3 +35,14 @@ export async function requireAuth(req: Request, requiredScopes?: string[]) {
 
   return { clientId: payload.client_id, scopes: payload.scopes };
 }
+
+export function requireAdminToken(req: Request) {
+  const header = req.headers.get("authorization");
+
+  if (!header || !header.startsWith("Bearer ")) {
+    return false;
+  }
+
+  const token = header.replace("Bearer ", "");
+  return token === process.env.ADMIN_API_TOKEN;
+}

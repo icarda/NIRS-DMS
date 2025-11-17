@@ -9,6 +9,7 @@ export const env = createEnv({
     GOOGLE_API_KEY: z.string(),
     GOOGLE_EMAIL: z.string().email(),
     GOOGLE_APP_PASSWORD: z.string(),
+    ADMIN_API_TOKEN: z.string(),
   },
   experimental__runtimeEnv: process.env,
   emptyStringAsUndefined: true,
