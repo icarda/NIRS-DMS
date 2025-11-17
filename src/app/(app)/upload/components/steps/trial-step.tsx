@@ -132,7 +132,7 @@ const TrialStep = ({
         <h1 className="text-xl font-bold tracking-tight md:text-3xl">
           Trial Metadata
         </h1>
-        <p className="text-base text-muted-foreground">
+        <p className="text-muted-foreground text-base">
           Choose the trial associated with the data you are uploading to ensure
           accurate organization.
         </p>
@@ -153,7 +153,7 @@ const TrialStep = ({
                     defaultValue={field.value ? "existing" : "new"}
                     className="flex flex-col space-y-1"
                   >
-                    <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormItem className="flex items-center space-y-0 space-x-3">
                       <FormControl>
                         <RadioGroupItem value="existing" />
                       </FormControl>
@@ -161,7 +161,7 @@ const TrialStep = ({
                         Select Existing trial
                       </FormLabel>
                     </FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormItem className="flex items-center space-y-0 space-x-3">
                       <FormControl>
                         <RadioGroupItem value="new" />
                       </FormControl>
@@ -427,7 +427,7 @@ const TrialStep = ({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel required>Location</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <LocationCommand
@@ -621,7 +621,7 @@ const TrialStep = ({
                               defaultValue={field.value ? "true" : "false"}
                               className="flex h-10 items-center gap-2"
                             >
-                              <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormItem className="flex items-center space-y-0 space-x-3">
                                 <FormControl>
                                   <RadioGroupItem value="true" />
                                 </FormControl>
@@ -629,7 +629,7 @@ const TrialStep = ({
                                   Yes
                                 </FormLabel>
                               </FormItem>
-                              <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormItem className="flex items-center space-y-0 space-x-3">
                                 <FormControl>
                                   <RadioGroupItem value="false" />
                                 </FormControl>

@@ -62,8 +62,10 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
     .orderBy(QualityLabTable.name);
 
   // COUNTRIES: depend on Crop + Lab
+  const countryExpr = sql<string>`split_part(${TrialTable.location}, ', ', 2)`;
+
   const countriesRows = await db
-    .select({ country: QualityLabTable.country })
+    .select({ country: countryExpr })
     .from(NirsDataTable)
     .innerJoin(StudyTable, eq(NirsDataTable.studyId, StudyTable.id))
     .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
@@ -77,8 +79,8 @@ export async function getNirsFilterOptions(filters: DashboardFilters) {
           : undefined
       )
     )
-    .groupBy(QualityLabTable.country)
-    .orderBy(QualityLabTable.country);
+    .groupBy(countryExpr)
+    .orderBy(countryExpr);
 
   // YEARS: depend on Crop + Lab + Country
   const yearExpr = sql<number>`extract(year from ${StudyTable.sampleDate})`;
