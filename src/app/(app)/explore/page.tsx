@@ -121,8 +121,6 @@ export default async function ExploreData() {
     role: userRole,
   });
 
-  console.log("center", center);
-
   const [
     trials,
     studies,
@@ -135,12 +133,12 @@ export default async function ExploreData() {
   ] = await Promise.all([
     userRole === "USER" ? getTrialsByCenter(center) : getTrials(),
     userRole === "USER" ? getStudiesByCenterName(center) : getStudies(),
-    getNirModels(), // TODO: filter by center
+    getNirModels(),
     userRole === "USER" ? getQualityLabs({ center }) : getQualityLabs(),
-    getPhysiologicalStages(), // TODO: filter by center
-    getStudyConfigMetadatas(), // TODO: filter by center
-    getTrialConfigMetadatas(), // TODO: filter by center
-    getCrops(), // TODO: filter by center
+    getPhysiologicalStages(),
+    getStudyConfigMetadatas(),
+    getTrialConfigMetadatas(),
+    getCrops(),
   ]);
 
   return (
