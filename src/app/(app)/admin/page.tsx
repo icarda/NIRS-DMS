@@ -15,23 +15,32 @@ import { getCurrentUser } from "@/lib/currentUser";
 import { hasPermission } from "@/permissions/general";
 import {
   apiClientsColumns,
-  NIRModelColumns,
-  physiologicalStageColumns,
-  productTypeColumns,
   studyMetadataColumns,
   trialMetadataColumns,
   userColumns,
 } from "./columns";
 import { ApiClientAddDialog } from "./components/api-client-add-dialog";
 import { MetadataAddDialog } from "./components/metadata-add-dialog";
-import { NirModelAddDialog } from "./components/nir-model-add-dialog";
-import { PhysiologicalStageAddDialog } from "./components/physiological-stage-add-dialog";
-import { ProductTypeAddDialog } from "./components/product-type-add-dialog";
+import { NirModelTable } from "./components/nir-model-table";
+import { PhysiologicalStageTable } from "./components/physiological-stage-table";
+import { ProductTypeTable } from "./components/product-type-table";
 import { getCenters } from "@/features/centers/db/center";
 
 export default async function Admin() {
   const user = await getCurrentUser();
   const canAccessAdminPage = hasPermission(user?.role, "admin:access");
+  const canUpdateProductType = hasPermission(user?.role, "productType:update");
+  const canDeleteProductType = hasPermission(user?.role, "productType:delete");
+  const canUpdatePhysiologicalStage = hasPermission(
+    user?.role,
+    "physiologicalStage:update"
+  );
+  const canDeletePhysiologicalStage = hasPermission(
+    user?.role,
+    "physiologicalStage:delete"
+  );
+  const canUpdateNirModel = hasPermission(user?.role, "nirModel:update");
+  const canDeleteNirModel = hasPermission(user?.role, "nirModel:delete");
 
   if (!canAccessAdminPage) {
     redirect("/");
@@ -57,6 +66,7 @@ export default async function Admin() {
     getApiClients(),
     getCenters(),
   ]);
+
   return (
     <PageWrapper title="Admin Panel">
       <div>
@@ -129,41 +139,35 @@ export default async function Admin() {
               />
             </TabsContent>
             <TabsContent value="product_types">
-              <DataTable
-                columns={productTypeColumns}
+              <ProductTypeTable
                 data={productTypes.map((productType) => ({
                   id: productType.id,
                   crop: productType.crop.name,
                   type: productType.name,
                 }))}
-                filterColumn="type"
-                selectCrop
-              >
-                <ProductTypeAddDialog crops={crops} />
-              </DataTable>
+                crops={crops}
+                canUpdate={canUpdateProductType}
+                canDelete={canDeleteProductType}
+              />
             </TabsContent>
             <TabsContent value="physiological_stages">
-              <DataTable
-                columns={physiologicalStageColumns}
+              <PhysiologicalStageTable
                 data={physiologicalStages.map((stage) => ({
                   id: stage.id,
                   crop: stage.crop.name,
                   stage: stage.name,
                 }))}
-                filterColumn="stage"
-                selectCrop
-              >
-                <PhysiologicalStageAddDialog crops={crops} />
-              </DataTable>
+                crops={crops}
+                canUpdate={canUpdatePhysiologicalStage}
+                canDelete={canDeletePhysiologicalStage}
+              />
             </TabsContent>
             <TabsContent value="nir_models">
-              <DataTable
-                columns={NIRModelColumns}
+              <NirModelTable
                 data={nirModels}
-                filterColumn="name"
-              >
-                <NirModelAddDialog />
-              </DataTable>
+                canUpdate={canUpdateNirModel}
+                canDelete={canDeleteNirModel}
+              />
             </TabsContent>
             <TabsContent value="trials_metadata">
               <DataTable

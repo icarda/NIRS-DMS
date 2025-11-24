@@ -16,25 +16,25 @@ const InputWithAddons = React.forwardRef<
   return (
     <div
       className={cn(
-        "group flex h-10 w-full overflow-hidden rounded-md border border-input bg-transparent text-sm ring-offset-background focus-within:outline-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "group border-input ring-offset-background focus-within:ring-ring flex h-10 w-full overflow-hidden rounded-md border bg-transparent text-sm focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-hidden",
         containerClassName
       )}
     >
       {leading ? (
-        <div className="border-r border-input bg-muted px-3 py-2">
+        <div className="border-input bg-muted border-r px-2 py-2">
           {leading}
         </div>
       ) : null}
       <input
         className={cn(
-          "w-full rounded-md bg-background px-3 py-2 placeholder:text-muted-foreground focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "bg-background placeholder:text-muted-foreground w-full rounded-md px-3 py-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none",
           className
         )}
         ref={ref}
         {...props}
       />
       {trailing ? (
-        <div className="border-l border-input bg-muted px-3 py-2">
+        <div className="border-input bg-muted border-l px-1 py-2">
           {trailing}
         </div>
       ) : null}

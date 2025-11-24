@@ -21,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrialMetadataType, UserRole } from "@/drizzle/schema";
 import { deleteApiClient } from "@/features/auth/actions/api-client";
+import { getCentersAction } from "@/features/centers/actions/center";
+import { getCrops } from "@/features/crops/db/crop";
 import { deleteNirModel } from "@/features/nir-models/actions/nir-model";
 import { deletePhysiologicalStage } from "@/features/studies/actions/physiological-stage";
 import { deleteProductType } from "@/features/studies/actions/product-type";
@@ -28,11 +30,13 @@ import { deleteStudyMetadata } from "@/features/studies/actions/study";
 import { deleteTrialMetadata } from "@/features/trials/actions/trial";
 import { deleteUser, updateUser } from "@/features/users/actions/user";
 import { capitalize, labelToCamel } from "@/lib/utils";
+import { Centers } from "@/types/types";
 import { MetadataEditDialog } from "./components/metadata-edit-dialog";
+import { NirModelEditDialog } from "./components/nir-model-edit-dialog";
+import { PhysiologicalStageEditDialog } from "./components/physiological-stage-edit-dialog";
+import { ProductTypeEditDialog } from "./components/product-type-edit-dialog";
 import { UserDeleteDialog } from "./components/user-delete-dialog";
 import { UserEditDialog } from "./components/user-edit-dialog";
-import { getCentersAction } from "@/features/centers/actions/center";
-import { Centers } from "@/types/types";
 
 export type User = {
   id: number;
@@ -161,18 +165,14 @@ export const userColumns: ColumnDef<User>[] = [
       const [isLoading, setIsLoading] = useState(false);
       const [centers, setCenters] = useState<Centers>([]);
 
-
       useEffect(() => {
         async function fetchCenters() {
-
           const centers = await getCentersAction();
 
           setCenters(centers);
-          
         }
 
         fetchCenters();
-
       }, []);
 
       const handleEdit = async (data: any) => {
@@ -243,295 +243,411 @@ export const userColumns: ColumnDef<User>[] = [
   },
 ];
 
-export const productTypeColumns: ColumnDef<ProductType>[] = [
-  {
-    accessorKey: "id",
-    header: "#",
-    cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
-  },
-  {
-    accessorKey: "crop",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Crop" />
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
-    ),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const productType = row.original;
-      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-      const [isLoading, setIsLoading] = useState(false);
+type Crops = Awaited<ReturnType<typeof getCrops>>;
 
-      const handleDelete = async () => {
-        try {
-          setIsLoading(true);
-          const result = await deleteProductType(productType.id);
-          if (result.error) {
-            toast.error(result.message);
-          } else {
-            toast.success("Product type deleted successfully");
-            setDeleteDialogOpen(false);
-          }
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error deleting product type:", error);
-          toast.error("Error deleting product type");
-          setIsLoading(false);
-        }
-      };
+type ProductTypeColumnOptions = {
+  crops: Crops;
+  canUpdate: boolean;
+  canDelete: boolean;
+};
 
-      return (
-        <>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <AlertDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete the product type{" "}
-                  <span className="font-medium">{productType.type}</span> for
-                  crop <span className="font-medium">{productType.crop}</span>.
-                  This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      );
+export function getProductTypeColumns({
+  crops,
+  canUpdate,
+  canDelete,
+}: ProductTypeColumnOptions): ColumnDef<ProductType>[] {
+  return [
+    {
+      accessorKey: "id",
+      header: "#",
+      cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
     },
-  },
-];
-
-export const physiologicalStageColumns: ColumnDef<PhysiologicalStage>[] = [
-  {
-    accessorKey: "id",
-    header: "#",
-    cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
-  },
-  {
-    accessorKey: "crop",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Crop" />
-    ),
-  },
-  {
-    accessorKey: "stage",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Stage" />
-    ),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const physiologicalStage = row.original;
-      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-      const [isLoading, setIsLoading] = useState(false);
-
-      const handleDelete = async () => {
-        try {
-          setIsLoading(true);
-          const result = await deletePhysiologicalStage(physiologicalStage.id);
-          if (result.error) {
-            toast.error(result.message);
-          } else {
-            toast.success("Physiological stage deleted successfully");
-            setDeleteDialogOpen(false);
-          }
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error deleting physiological stage:", error);
-          toast.error("Error deleting physiological stage");
-          setIsLoading(false);
-        }
-      };
-
-      return (
-        <>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <AlertDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete the physiological stage{" "}
-                  <span className="font-medium">
-                    {physiologicalStage.stage}
-                  </span>
-                  . This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      );
+    {
+      accessorKey: "crop",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Crop" />
+      ),
     },
-  },
-];
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const productType = row.original;
+        const [editDialogOpen, setEditDialogOpen] = useState(false);
+        const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+        const [isLoading, setIsLoading] = useState(false);
 
-export const NIRModelColumns: ColumnDef<NIRModel>[] = [
-  {
-    accessorKey: "id",
-    header: "#",
-    cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Type" />
-    ),
-  },
-  {
-    accessorKey: "wavelengthRange",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Wavelength Range" />
-    ),
-  },
-  {
-    accessorKey: "resolution",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Resolution" />
-    ),
-  },
-  {
-    accessorKey: "manufacturer",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Manufacturer" />
-    ),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const nirModel = row.original;
-      const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-      const [isLoading, setIsLoading] = useState(false);
-
-      const handleDelete = async () => {
-        try {
-          setIsLoading(true);
-          const result = await deleteNirModel(nirModel.id);
-          if (result.error) {
-            toast.error(result.message);
-          } else {
-            toast.success("NIR model deleted successfully");
+        const handleDelete = async () => {
+          try {
+            setIsLoading(true);
+            const result = await deleteProductType(productType.id);
+            if (result.error) {
+              toast.error(result.message);
+            } else {
+              toast.success("Product type deleted successfully");
+              setDeleteDialogOpen(false);
+            }
             setIsLoading(false);
-            setDeleteDialogOpen(false);
+          } catch (error) {
+            console.error("Error deleting product type:", error);
+            toast.error("Error deleting product type");
+            setIsLoading(false);
           }
-        } catch (error) {
-          console.error("Error deleting NIR model:", error);
-          toast.error("Error deleting NIR model");
-          setIsLoading(false);
-        }
-      };
+        };
 
-      return (
-        <>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+        return (
+          <>
+            <div className="flex items-center justify-end gap-2">
+              {canUpdate && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditDialogOpen(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
 
-          <AlertDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete the NIR model{" "}
-                  <span className="font-medium">{nirModel.name}</span>. This
-                  action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
-      );
+            {canUpdate && (
+              <ProductTypeEditDialog
+                productType={productType}
+                crops={crops}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+              />
+            )}
+
+            {canDelete && (
+              <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the product type{" "}
+                      <span className="font-medium">{productType.type}</span>{" "}
+                      for crop{" "}
+                      <span className="font-medium">{productType.crop}</span>.
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </>
+        );
+      },
     },
-  },
-];
+  ];
+}
+
+type PhysiologicalStageColumnOptions = {
+  crops: Crops;
+  canUpdate: boolean;
+  canDelete: boolean;
+};
+
+export function getPhysiologicalStageColumns({
+  crops,
+  canUpdate,
+  canDelete,
+}: PhysiologicalStageColumnOptions): ColumnDef<PhysiologicalStage>[] {
+  return [
+    {
+      accessorKey: "id",
+      header: "#",
+      cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "crop",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Crop" />
+      ),
+    },
+    {
+      accessorKey: "stage",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Stage" />
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const physiologicalStage = row.original;
+        const [editDialogOpen, setEditDialogOpen] = useState(false);
+        const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+        const [isLoading, setIsLoading] = useState(false);
+
+        const handleDelete = async () => {
+          try {
+            setIsLoading(true);
+            const result = await deletePhysiologicalStage(
+              physiologicalStage.id
+            );
+            if (result.error) {
+              toast.error(result.message);
+            } else {
+              toast.success("Physiological stage deleted successfully");
+              setDeleteDialogOpen(false);
+            }
+            setIsLoading(false);
+          } catch (error) {
+            console.error("Error deleting physiological stage:", error);
+            toast.error("Error deleting physiological stage");
+            setIsLoading(false);
+          }
+        };
+
+        return (
+          <>
+            <div className="flex items-center justify-end gap-2">
+              {canUpdate && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditDialogOpen(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {canUpdate && (
+              <PhysiologicalStageEditDialog
+                physiologicalStage={physiologicalStage}
+                crops={crops}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+              />
+            )}
+
+            {canDelete && (
+              <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the physiological stage{" "}
+                      <span className="font-medium">
+                        {physiologicalStage.stage}
+                      </span>
+                      . This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </>
+        );
+      },
+    },
+  ];
+}
+
+type NirModelColumnOptions = {
+  canUpdate: boolean;
+  canDelete: boolean;
+};
+
+export function getNirModelColumns({
+  canUpdate,
+  canDelete,
+}: NirModelColumnOptions): ColumnDef<NIRModel>[] {
+  return [
+    {
+      accessorKey: "id",
+      header: "#",
+      cell: ({ row }) => <div className="w-[40px]">{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" />
+      ),
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+    },
+    {
+      accessorKey: "wavelengthRange",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Wavelength Range" />
+      ),
+    },
+    {
+      accessorKey: "resolution",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Resolution" />
+      ),
+    },
+    {
+      accessorKey: "manufacturer",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Manufacturer" />
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const nirModel = row.original;
+        const [editDialogOpen, setEditDialogOpen] = useState(false);
+        const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+        const [isLoading, setIsLoading] = useState(false);
+
+        const handleDelete = async () => {
+          try {
+            setIsLoading(true);
+            const result = await deleteNirModel(nirModel.id);
+            if (result.error) {
+              toast.error(result.message);
+            } else {
+              toast.success("NIR model deleted successfully");
+              setIsLoading(false);
+              setDeleteDialogOpen(false);
+            }
+          } catch (error) {
+            console.error("Error deleting NIR model:", error);
+            toast.error("Error deleting NIR model");
+            setIsLoading(false);
+          }
+        };
+
+        return (
+          <>
+            <div className="flex items-center justify-end gap-2">
+              {canUpdate && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditDialogOpen(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {canUpdate && (
+              <NirModelEditDialog
+                nirModel={nirModel}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+              />
+            )}
+
+            {canDelete && (
+              <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the NIR model{" "}
+                      <span className="font-medium">{nirModel.name}</span>. This
+                      action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </>
+        );
+      },
+    },
+  ];
+}
 
 export const trialMetadataColumns: ColumnDef<MetadataSchema>[] = [
   {
@@ -876,7 +992,7 @@ export const apiClientsColumns: ColumnDef<ApiClient>[] = [
     cell: ({ row }) => {
       const scopes = row.getValue("scopes") as string;
       return scopes.split(" ").map((scope) => (
-        <Badge key={scope} variant="secondary" className="mb-1 mr-1">
+        <Badge key={scope} variant="secondary" className="mr-1 mb-1">
           {scope}
         </Badge>
       ));

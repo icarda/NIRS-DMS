@@ -20,6 +20,7 @@ export function DataTableFilterSlider<TData>({
   max,
   unit,
 }: DataTableFilterSliderProps<TData>) {
+  console.log({ value: _value, min, max, unit });
   const value = _value as string;
   const column = table.getAllLeafColumns().find((col) => col.id === value);
 
@@ -40,7 +41,7 @@ export function DataTableFilterSlider<TData>({
         <div className="grid w-full gap-1.5">
           <Label
             htmlFor={`min-${value}`}
-            className="px-2 text-muted-foreground"
+            className="text-muted-foreground px-2"
           >
             Min.
           </Label>
@@ -55,7 +56,7 @@ export function DataTableFilterSlider<TData>({
             min={min}
             max={max}
             onChange={(e) => {
-              const val = Number.parseInt(e.target.value) || 0;
+              const val = Number.parseFloat(e.target.value) || min;
               const newValue =
                 Array.isArray(filters) && val < filters[1]
                   ? [val, filters[1]]
@@ -67,7 +68,7 @@ export function DataTableFilterSlider<TData>({
         <div className="grid w-full gap-1.5">
           <Label
             htmlFor={`max-${value}`}
-            className="px-2 text-muted-foreground"
+            className="text-muted-foreground px-2"
           >
             Max.
           </Label>
@@ -82,7 +83,7 @@ export function DataTableFilterSlider<TData>({
             min={min}
             max={max}
             onChange={(e) => {
-              const val = Number.parseInt(e.target.value) || 0;
+              const val = Number.parseFloat(e.target.value) || max;
               const newValue =
                 Array.isArray(filters) && val > filters[0]
                   ? [filters[0], val]

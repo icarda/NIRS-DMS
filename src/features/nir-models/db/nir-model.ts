@@ -54,3 +54,21 @@ export async function deleteNirModel({ id }: { id: number }) {
 
   return deletedNirModel;
 }
+
+export async function updateNirModel(
+  id: number,
+  data: Partial<typeof NirModelTable.$inferInsert>
+) {
+  const [updatedNirModel] = await db
+    .update(NirModelTable)
+    .set(data)
+    .where(eq(NirModelTable.id, id))
+    .returning();
+
+  if (updatedNirModel == null) {
+    throw new Error("Failed to update NIR model");
+  }
+
+  revalidateNirModelCache(updatedNirModel.id);
+  return updatedNirModel;
+}

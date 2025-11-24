@@ -61,3 +61,23 @@ export async function deleteProductType({ id }: { id: number }) {
 
   return deletedProductType;
 }
+
+export async function updateProductType(
+  id: number,
+  data: Partial<typeof ProductTypeTable.$inferInsert>
+) {
+  const [updatedProductType] = await db
+    .update(ProductTypeTable)
+    .set(data)
+    .where(eq(ProductTypeTable.id, id))
+    .returning();
+
+  if (updatedProductType == null) {
+    throw new Error("Failed to update Product Type");
+  }
+
+  revalidateProductTypeCache(updatedProductType.id);
+  revalidateCropCache(updatedProductType.cropId);
+
+  return updatedProductType;
+}

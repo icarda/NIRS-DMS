@@ -45,9 +45,22 @@ export const wetChemistryColumns: ColumnDef<WetChemistryColumnSchema>[] = [
     accessorKey: "germplasm_id",
     id: "germplasm_id",
     filterFn: (row, id, value) => {
-      if (value === null) return true;
-      const rowValue = row.getValue(id);
-      return `${rowValue}`.includes(value);
+      if (value == null) return true;
+      const rowValue = String(row.getValue(id) ?? "")
+        .trim()
+        .toLowerCase();
+
+      const tokens = Array.isArray(value)
+        ? value
+        : typeof value === "string"
+          ? [value]
+          : [];
+
+      if (tokens.length === 0) return true;
+
+      return tokens.some(
+        (token) => rowValue === String(token).trim().toLowerCase()
+      );
     },
     meta: {
       label: "Germplasm ID",
@@ -323,11 +336,11 @@ export const trialColumns: ColumnDef<TrialColumnSchema>[] = [
       const value = row.getValue("irrigation");
       if (typeof value === "undefined") {
         return (
-          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+          <Minus className="text-muted-foreground/50 h-4 w-4 text-center" />
         );
       }
       if (value) return <Check className="h-4 w-4" />;
-      return <X className="h-4 w-4 text-muted-foreground/50" />;
+      return <X className="text-muted-foreground/50 h-4 w-4" />;
     },
     filterFn: (row, id, value) => {
       const rowValue = row.getValue(id);
@@ -442,7 +455,7 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
       const value = row.getValue("requester_name");
       if (!value) {
         return (
-          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+          <Minus className="text-muted-foreground/50 h-4 w-4 text-center" />
         );
       }
       return <div>{`${value}`}</div>;
@@ -459,7 +472,7 @@ export const studyColumns: ColumnDef<StudyColumnSchema>[] = [
       const value = row.getValue("requester_email");
       if (!value) {
         return (
-          <Minus className="h-4 w-4 text-center text-muted-foreground/50" />
+          <Minus className="text-muted-foreground/50 h-4 w-4 text-center" />
         );
       }
       return <div>{`${value}`}</div>;

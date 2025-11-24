@@ -11,7 +11,10 @@ import {
   getStudiesByCenterName,
   getStudyConfigMetadatas,
 } from "@/features/studies/db/study";
-import { getWetChemistryData } from "@/features/traits/db/trait";
+import {
+  getWetChemistryData,
+  getWetChemistryDataByCenter,
+} from "@/features/traits/db/trait";
 import {
   getTrialConfigMetadatas,
   getTrials,
@@ -30,14 +33,26 @@ import {
 } from "./table/constants";
 import { DataTable } from "./table/data-table";
 
-async function getGroupedWetChemistryData() {
-  const result = await getWetChemistryData();
+type TraitStats = {
+  name: string;
+  unit: string;
+  min: number;
+  max: number;
+};
 
-  const dataColumns = result.map((row) => ({
-    name: row.trait_name,
-    unit: row.trait_unit,
-  }));
+async function getGroupedWetChemistryData({
+  center,
+  role,
+}: {
+  center: string;
+  role: string;
+}) {
+  const result =
+    role === "USER"
+      ? await getWetChemistryDataByCenter({ center })
+      : await getWetChemistryData();
 
+  const traitStats = new Map<string, TraitStats>();
   const groupedData: Record<string, Record<string, any>> = {};
 
   result.forEach((row) => {
@@ -59,25 +74,54 @@ async function getGroupedWetChemistryData() {
       };
     }
 
-    if (
+    const hasTraitValue =
       row.trait_name &&
       row.measured_value !== null &&
-      row.measured_value !== undefined
-    ) {
+      row.measured_value !== undefined;
+
+    if (hasTraitValue) {
       groupedData[groupKey][row.trait_name] = row.measured_value;
+
+      const prevStats = traitStats.get(row.trait_name);
+      const numericValue =
+        typeof row.measured_value === "number"
+          ? row.measured_value
+          : Number(row.measured_value);
+
+      if (!Number.isNaN(numericValue)) {
+        if (!prevStats) {
+          traitStats.set(row.trait_name, {
+            name: row.trait_name,
+            unit: row.trait_unit,
+            min: numericValue,
+            max: numericValue,
+          });
+        } else {
+          traitStats.set(row.trait_name, {
+            ...prevStats,
+            min: Math.min(prevStats.min, numericValue),
+            max: Math.max(prevStats.max, numericValue),
+          });
+        }
+      }
     }
   });
 
   const realData = Object.values(groupedData);
 
-  return { realData, dataColumns };
+  return { realData, traitVariables: Array.from(traitStats.values()) };
 }
 
 export default async function ExploreData() {
-  const { realData, dataColumns } = await getGroupedWetChemistryData();
   const user = await getCurrentUser();
   const center = user?.center as string;
   const userRole = user?.role;
+  const { realData, traitVariables } = await getGroupedWetChemistryData({
+    center,
+    role: userRole,
+  });
+
+  console.log("center", center);
 
   const [
     trials,
@@ -89,19 +133,15 @@ export default async function ExploreData() {
     trialMetadatas,
     crops,
   ] = await Promise.all([
-    center === "USER" ? getTrialsByCenter(center) : getTrials(),
-    center === "USER" ? getStudiesByCenterName(center) : getStudies(),
-    getNirModels(),
-    center === "USER" ? getQualityLabs({ center }) : getQualityLabs(),
-    getPhysiologicalStages(),
-    getStudyConfigMetadatas(),
-    getTrialConfigMetadatas(),
-    getCrops(),
+    userRole === "USER" ? getTrialsByCenter(center) : getTrials(),
+    userRole === "USER" ? getStudiesByCenterName(center) : getStudies(),
+    getNirModels(), // TODO: filter by center
+    userRole === "USER" ? getQualityLabs({ center }) : getQualityLabs(),
+    getPhysiologicalStages(), // TODO: filter by center
+    getStudyConfigMetadatas(), // TODO: filter by center
+    getTrialConfigMetadatas(), // TODO: filter by center
+    getCrops(), // TODO: filter by center
   ]);
-
-  const traitVariables = Array.from(
-    new Map(dataColumns.map((d) => [d.name, d])).values()
-  );
 
   return (
     <PageWrapper title="Explore Data">

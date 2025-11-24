@@ -30,20 +30,20 @@ export function renderDynamicCell(key: string) {
     const type = guessType(value);
 
     if (type === "undefined") {
-      return <Minus className="h-4 w-4 text-center text-muted-foreground/50" />;
+      return <Minus className="text-muted-foreground/50 h-4 w-4 text-center" />;
     }
 
     switch (type) {
       case "boolean":
         return value === "true" ? (
-          <Check className="h-4 w-4 text-center text-muted-foreground" />
+          <Check className="text-muted-foreground h-4 w-4 text-center" />
         ) : (
-          <X className="h-4 w-4 text-center text-muted-foreground" />
+          <X className="text-muted-foreground h-4 w-4 text-center" />
         );
       case "date":
         return (
           <div
-            className="text-center text-muted-foreground"
+            className="text-muted-foreground text-center"
             suppressHydrationWarning
           >
             {format(new Date(value), "LLL dd, y")}
@@ -59,7 +59,13 @@ export function renderDynamicCell(key: string) {
 }
 
 export function renderDynamicFilterFn(
-  type: "input" | "checkbox" | "timerange" | "slider"
+  type:
+    | "input"
+    | "checkbox"
+    | "timerange"
+    | "slider"
+    | "multi-select"
+    | "token-input"
 ): FilterFn<any> | undefined {
   switch (type) {
     case "input":
@@ -107,6 +113,43 @@ export function renderDynamicFilterFn(
         }
 
         return false;
+      };
+
+    case "slider":
+      return (row, id, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+        const [min, max] = value as (number | undefined)[];
+        const rawValue = row.getValue(id);
+        const numericValue =
+          typeof rawValue === "number" ? rawValue : Number(rawValue);
+        if (Number.isNaN(numericValue)) return false;
+
+        if (min == null && max == null) return true;
+        if (min != null && max == null) {
+          return numericValue >= min;
+        }
+        if (min == null && max != null) {
+          return numericValue <= max;
+        }
+        return (
+          numericValue >= (min ?? numericValue) &&
+          numericValue <= (max ?? numericValue)
+        );
+      };
+
+    case "multi-select":
+      return (row, id, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+        const rowValue = row.getValue(id);
+        return value.some((selected) => selected === String(rowValue ?? ""));
+      };
+
+    case "token-input":
+      return (row, id, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+        const normalizedTokens = value.map((token) => token.toLowerCase());
+        const rowValue = String(row.getValue(id) ?? "").toLowerCase();
+        return normalizedTokens.includes(rowValue);
       };
 
     default:

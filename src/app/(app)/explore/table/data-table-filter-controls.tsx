@@ -12,8 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { DataTableFilterCheckbox } from "./data-table-filter-checkbox";
 import { DataTableFilterInput } from "./data-table-filter-input";
+import { DataTableFilterMultiSelect } from "./data-table-filter-multi-select";
 import { DataTableFilterSlider } from "./data-table-filter-slider";
 import { DataTableFilterTimerange } from "./data-table-filter-timerange";
+import { DataTableFilterTokenInput } from "./data-table-filter-token-input";
 import type { DataTableFilterField } from "./types";
 
 interface DataTableFilterControlsProps<TData, TValue> {
@@ -59,6 +61,10 @@ export function DataTableFilterControls<TData, TValue>({
           const facettedValues = Array.from(
             column?.getFacetedUniqueValues().keys() ?? []
           );
+          const facettedOptions = facettedValues.map((val) => ({
+            label: val,
+            value: val,
+          }));
           return (
             <AccordionItem key={value} value={value} className="border-none">
               <AccordionTrigger className="w-full px-2 py-0 hover:no-underline">
@@ -77,10 +83,7 @@ export function DataTableFilterControls<TData, TValue>({
                       return (
                         <DataTableFilterCheckbox
                           table={table}
-                          options={facettedValues.map((val) => ({
-                            label: val,
-                            value: val,
-                          }))}
+                          options={facettedOptions}
                           {...field}
                         />
                       );
@@ -100,6 +103,21 @@ export function DataTableFilterControls<TData, TValue>({
                     case "timerange": {
                       return (
                         <DataTableFilterTimerange table={table} {...field} />
+                      );
+                    }
+                    case "multi-select": {
+                      const options = field.options ?? facettedOptions;
+                      return (
+                        <DataTableFilterMultiSelect
+                          table={table}
+                          options={options}
+                          {...field}
+                        />
+                      );
+                    }
+                    case "token-input": {
+                      return (
+                        <DataTableFilterTokenInput table={table} {...field} />
                       );
                     }
                   }

@@ -12,7 +12,7 @@ export const wetChemistryFilterFields = [
   {
     label: "Study Code",
     value: "study_code",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "Crop",
@@ -34,7 +34,7 @@ export const wetChemistryFilterFields = [
   {
     label: "Germplasm ID",
     value: "germplasm_id",
-    type: "input",
+    type: "token-input",
   },
   {
     label: "Physiological Stage",
@@ -106,7 +106,7 @@ export const studyFilterFields = [
   {
     label: "Study Code",
     value: "study_code",
-    type: "input",
+    type: "checkbox",
   },
   {
     label: "Program",

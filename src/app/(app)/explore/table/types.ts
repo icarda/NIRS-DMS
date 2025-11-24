@@ -38,6 +38,18 @@ export type Timerange = {
   options?: Option[]; // required for TS
 };
 
+export type MultiSelect = {
+  type: "multi-select";
+  options?: Option[];
+  placeholder?: string;
+};
+
+export type TokenInput = {
+  type: "token-input";
+  placeholder?: string;
+  description?: string;
+};
+
 export type Base<TData> = {
   label: string;
   value: keyof TData;
@@ -51,12 +63,16 @@ export type DataTableCheckboxFilterField<TData> = Base<TData> & Checkbox;
 export type DataTableSliderFilterField<TData> = Base<TData> & Slider;
 export type DataTableInputFilterField<TData> = Base<TData> & Input;
 export type DataTableTimerangeFilterField<TData> = Base<TData> & Timerange;
+export type DataTableMultiSelectFilterField<TData> = Base<TData> & MultiSelect;
+export type DataTableTokenInputFilterField<TData> = Base<TData> & TokenInput;
 
 export type DataTableFilterField<TData> =
   | DataTableCheckboxFilterField<TData>
   | DataTableSliderFilterField<TData>
   | DataTableInputFilterField<TData>
-  | DataTableTimerangeFilterField<TData>;
+  | DataTableTimerangeFilterField<TData>
+  | DataTableMultiSelectFilterField<TData>
+  | DataTableTokenInputFilterField<TData>;
 
 type AdditionalMetadata = {
   [key: string]: string | number | boolean | null;

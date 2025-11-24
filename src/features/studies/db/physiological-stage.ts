@@ -62,3 +62,23 @@ export async function deletePhysiologicalStage({ id }: { id: number }) {
 
   return deletedPhysiologicalStage;
 }
+
+export async function updatePhysiologicalStage(
+  id: number,
+  data: Partial<typeof PhysiologicalStageTable.$inferInsert>
+) {
+  const [updatedPhysiologicalStage] = await db
+    .update(PhysiologicalStageTable)
+    .set(data)
+    .where(eq(PhysiologicalStageTable.id, id))
+    .returning();
+
+  if (updatedPhysiologicalStage == null) {
+    throw new Error("Failed to update Physiological Stage");
+  }
+
+  revalidatePhysiologicalStageCache(updatedPhysiologicalStage.id);
+  revalidateCropCache(updatedPhysiologicalStage.cropId);
+
+  return updatedPhysiologicalStage;
+}

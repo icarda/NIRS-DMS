@@ -72,14 +72,14 @@ export function MultiSelect({
       onKeyDown={handleKeyDown}
       className="overflow-visible bg-transparent"
     >
-      <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+      <div className="group border-input ring-offset-background focus-within:ring-ring rounded-md border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-offset-2">
         <div className="flex flex-wrap gap-x-1 gap-y-2 overflow-hidden">
           {selected.map((selectable) => {
             return (
               <Badge key={selectable.value} variant="default">
                 {selectable.label}
                 <button
-                  className="ml-1 rounded-full outline-hidden ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ring-offset-background focus:ring-ring ml-1 rounded-full outline-hidden focus:ring-2 focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handleUnselect(selectable);
@@ -91,7 +91,7 @@ export function MultiSelect({
                   }}
                   onClick={() => handleUnselect(selectable)}
                 >
-                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  <X className="text-muted-foreground hover:text-foreground h-3 w-3" />
                 </button>
               </Badge>
             );
@@ -103,14 +103,14 @@ export function MultiSelect({
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
             placeholder={placeholder || "Select traits..."}
-            className="flex-1 bg-transparent outline-hidden placeholder:text-muted-foreground"
+            className="placeholder:text-muted-foreground flex-1 bg-transparent outline-hidden"
           />
         </div>
       </div>
       <div className={cn("relative", open && "mt-2")}>
         <CommandList>
           {open && selectables.length > 0 ? (
-            <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden animate-in">
+            <div className="bg-popover text-popover-foreground animate-in absolute top-0 z-10 w-full rounded-md border shadow-md outline-hidden">
               <ScrollArea>
                 <CommandGroup className="h-full overflow-auto">
                   {selectables.map((selectable) => {

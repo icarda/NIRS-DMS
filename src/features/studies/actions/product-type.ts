@@ -9,7 +9,14 @@ import { hasPermission } from "@/permissions/general";
 import {
   deleteProductType as deleteProductTypeDb,
   insertProductType,
+  updateProductType as updateProductTypeDb,
 } from "../db/product-type";
+
+const productTypeEditSchema = productTypeAddSchema.extend({
+  id: z.number().int().positive(),
+});
+
+type DbError = Error & { code?: string };
 
 export async function createProductType(
   unsafeData: z.infer<typeof productTypeAddSchema>
@@ -68,5 +75,53 @@ export async function deleteProductType(id: number) {
     return { error: false, message: "Successfully deleted the study" };
   } catch (error) {
     return { error: true, message: "Error deleting the study" };
+  }
+}
+
+export async function updateProductType(
+  unsafeData: z.infer<typeof productTypeEditSchema>
+) {
+  const { success, data } = productTypeEditSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canUpdateProductType = hasPermission(
+    user?.role,
+    "productType:update"
+  );
+
+  if (!success || !canUpdateProductType) {
+    return {
+      error: true,
+      message: "There was an error updating the product type",
+    };
+  }
+
+  const crop = await getCropByName(data.crop);
+
+  if (!crop) {
+    return {
+      error: true,
+      message: "Crop not found",
+    };
+  }
+
+  try {
+    await updateProductTypeDb(data.id, {
+      name: data.type,
+      cropId: crop.id,
+    });
+    return { error: false, message: "Successfully updated the product type" };
+  } catch (error) {
+    const dbError = error as DbError;
+    if (dbError?.code === "23505") {
+      return {
+        error: true,
+        message: "This product type already exists for the selected crop",
+      };
+    }
+    console.error("Error updating product type", error);
+    return {
+      error: true,
+      message: "There was an error updating the product type",
+    };
   }
 }

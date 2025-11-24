@@ -3,6 +3,7 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
 import {
+  CenterTable,
   CropTable,
   CropTraitTable,
   NirModelTable,
@@ -168,6 +169,54 @@ export async function getWetChemistryData() {
       eq(StudyTable.physiologicalStageId, PhysiologicalStageTable.id)
     )
     .innerJoin(OtherIdsTable, eq(TraitTable.sampleId, OtherIdsTable.sampleId))
+    .orderBy(TraitTable.sampleId);
+
+  return result;
+}
+
+export async function getWetChemistryDataByCenter({
+  center,
+}: {
+  center: string;
+}) {
+  "use cache";
+  cacheTag(getTraitGlobalTag());
+  const result = await db
+    .selectDistinct({
+      sample_id: TraitTable.sampleId,
+      crop_name: CropTable.name,
+      trait_name: TraitTable.traitName,
+      measured_value: TraitTable.measuredValue,
+      predicted_value: TraitTable.predictedValue,
+      trait_unit: CropTraitTable.unit,
+      study_code: StudyTable.studyCode,
+      sample_date: StudyTable.sampleDate,
+      germplasm_id: OtherIdsTable.gid,
+      product_type: ProductTypeTable.name,
+      // study_metadata: StudyTable.additionalMetadata,
+      trial_name: TrialTable.name,
+      trial_planting_date: TrialTable.plantingDate,
+      // trial_metadata: TrialTable.additionalMetadata,
+      quality_lab_name: QualityLabTable.name,
+      physiological_stage: PhysiologicalStageTable.name,
+    })
+    .from(TraitTable)
+    .innerJoin(StudyTable, eq(TraitTable.studyId, StudyTable.id))
+    .innerJoin(TrialTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CropTable, eq(TrialTable.cropId, CropTable.id))
+    .innerJoin(CropTraitTable, eq(TraitTable.cropTraitId, CropTraitTable.id))
+    .innerJoin(
+      ProductTypeTable,
+      eq(StudyTable.productTypeId, ProductTypeTable.id)
+    )
+    .innerJoin(
+      PhysiologicalStageTable,
+      eq(StudyTable.physiologicalStageId, PhysiologicalStageTable.id)
+    )
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .innerJoin(OtherIdsTable, eq(TraitTable.sampleId, OtherIdsTable.sampleId))
+    .where(eq(CenterTable.acronym, center))
     .orderBy(TraitTable.sampleId);
 
   return result;

@@ -57,7 +57,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   filterFields?: DataTableFilterField<TData>[];
-  traitVariables?: { name: string; unit: string }[];
+  traitVariables?: { name: string; unit: string; min?: number; max?: number }[];
   tab: "study" | "trial" | "wet-chemistry";
   userRole?: UserRole;
   studyData: {
@@ -338,6 +338,73 @@ export function DataTable<TData, TValue>({
 
   const [controlsOpen, setControlsOpen] = useState(false);
 
+  const traitValueRanges = useMemo(() => {
+    if (tab !== "wet-chemistry" || !traitVariables?.length) return null;
+    const ranges = new Map<
+      string,
+      {
+        min: number;
+        max: number;
+      }
+    >();
+
+    (data as Record<string, any>[]).forEach((row) => {
+      traitVariables.forEach((trait) => {
+        const rawValue = row?.[trait.name];
+        const numericValue =
+          typeof rawValue === "number"
+            ? rawValue
+            : Number.parseFloat(String(rawValue));
+
+        if (!Number.isFinite(numericValue)) return;
+
+        const existingRange = ranges.get(trait.name);
+        if (existingRange) {
+          existingRange.min = Math.min(existingRange.min, numericValue);
+          existingRange.max = Math.max(existingRange.max, numericValue);
+        } else {
+          ranges.set(trait.name, {
+            min: numericValue,
+            max: numericValue,
+          });
+        }
+      });
+    });
+
+    return ranges;
+  }, [data, tab, traitVariables]);
+
+  const enhancedFilterFields = useMemo(() => {
+    if (tab !== "wet-chemistry" || !traitVariables?.length) {
+      return filterFields;
+    }
+
+    const traitSliderFields = traitVariables
+      .filter(
+        (trait) =>
+          typeof trait.min === "number" && typeof trait.max === "number"
+      )
+      .map((trait) => {
+        const min = trait.min ?? 0;
+        const max = trait.max ?? min;
+        const normalizedMax = min === max ? min + 1 : max;
+        return {
+          label: `${camelToNormal(trait.name)} (${trait.unit})`,
+          value: trait.name as keyof TData,
+          type: "slider" as const,
+          min,
+          max: normalizedMax,
+          unit: trait.unit,
+          defaultOpen: false,
+        };
+      });
+
+    return [
+      ...(filterFields ?? []),
+      ...(traitSliderFields as DataTableFilterField<TData>[]),
+    ];
+  }, [filterFields, tab, traitVariables]);
+
   const allColumns = useMemo(
     () =>
       generateColumns(
@@ -345,12 +412,21 @@ export function DataTable<TData, TValue>({
         columns,
         data,
         traitVariables,
-        filterFields,
+        enhancedFilterFields,
         studyData,
         trialData,
         userRole
       ),
-    [tab, columns, data, traitVariables]
+    [
+      tab,
+      columns,
+      data,
+      traitVariables,
+      enhancedFilterFields,
+      studyData,
+      trialData,
+      userRole,
+    ]
   );
 
   const table = useReactTable({
@@ -381,7 +457,10 @@ export function DataTable<TData, TValue>({
         )}
       >
         <div className="-m-1 h-full p-1">
-          <DataTableFilterControls table={table} filterFields={filterFields} />
+          <DataTableFilterControls
+            table={table}
+            filterFields={enhancedFilterFields}
+          />
         </div>
       </div>
       <div className="flex max-w-full flex-1 flex-col overflow-hidden">

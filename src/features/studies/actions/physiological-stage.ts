@@ -9,7 +9,12 @@ import { hasPermission } from "@/permissions/general";
 import {
   deletePhysiologicalStage as deletePhysiologicalStageDb,
   insertPhysiologicalStage,
+  updatePhysiologicalStage as updatePhysiologicalStageDb,
 } from "../db/physiological-stage";
+
+const physiologicalStageEditSchema = physiologicalStageAddSchema.extend({
+  id: z.number().int().positive(),
+});
 
 export async function createPhysiologicalStage(
   unsafeData: z.infer<typeof physiologicalStageAddSchema>
@@ -74,5 +79,49 @@ export async function deletePhysiologicalStage(id: number) {
     return { error: false, message: "Successfully deleted the study" };
   } catch (error) {
     return { error: true, message: "Error deleting the study" };
+  }
+}
+
+export async function updatePhysiologicalStage(
+  unsafeData: z.infer<typeof physiologicalStageEditSchema>
+) {
+  const { success, data } = physiologicalStageEditSchema.safeParse(unsafeData);
+  const user = await getCurrentUser();
+  const canUpdatePhysiologicalStage = hasPermission(
+    user?.role,
+    "physiologicalStage:update"
+  );
+
+  if (!success || !canUpdatePhysiologicalStage) {
+    return {
+      error: true,
+      message: "There was an error updating the physiological stage",
+    };
+  }
+
+  const crop = await getCropByName(data.crop);
+
+  if (!crop) {
+    return {
+      error: true,
+      message: "Crop not found",
+    };
+  }
+
+  try {
+    await updatePhysiologicalStageDb(data.id, {
+      name: data.stage,
+      cropId: crop.id,
+    });
+    return {
+      error: false,
+      message: "Successfully updated the physiological stage",
+    };
+  } catch (error) {
+    console.error("Error updating physiological stage", error);
+    return {
+      error: true,
+      message: "There was an error updating the physiological stage",
+    };
   }
 }
