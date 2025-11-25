@@ -20,7 +20,6 @@ export function DataTableFilterSlider<TData>({
   max,
   unit,
 }: DataTableFilterSliderProps<TData>) {
-  console.log({ value: _value, min, max, unit });
   const value = _value as string;
   const column = table.getAllLeafColumns().find((col) => col.id === value);
 
