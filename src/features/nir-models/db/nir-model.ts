@@ -1,8 +1,13 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { NirModelTable } from "@/drizzle/schema";
+import {
+  CenterTable,
+  NirModelTable,
+  QualityLabTable,
+  StudyTable,
+} from "@/drizzle/schema";
 import {
   getNirModelGlobalTag,
   getNirModelIdTag,
@@ -24,6 +29,35 @@ export async function getNirModels({ limit }: { limit?: number } = {}) {
   const nirModels = await db.query.NirModelTable.findMany({
     limit,
   });
+  return nirModels;
+}
+
+export async function getNirModelsByCenter(centerName: string) {
+  "use cache";
+  cacheTag(getNirModelGlobalTag());
+  
+  // Subquery: find all nirModelIds from studies in the center's quality labs
+  const nirModelIdsQuery = db
+    .selectDistinct({ nirModelId: StudyTable.nirModelId })
+    .from(StudyTable)
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(eq(CenterTable.acronym, centerName));
+
+  const nirModelIds = await nirModelIdsQuery;
+  
+  if (nirModelIds.length === 0) {
+    return [];
+  }
+
+  // Then query NIR models
+  const nirModels = await db.query.NirModelTable.findMany({
+    where: inArray(
+      NirModelTable.id,
+      nirModelIds.map((m) => m.nirModelId)
+    ),
+  });
+  
   return nirModels;
 }
 

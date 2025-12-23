@@ -1,8 +1,13 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { PhysiologicalStageTable } from "@/drizzle/schema";
+import {
+  CenterTable,
+  PhysiologicalStageTable,
+  QualityLabTable,
+  StudyTable,
+} from "@/drizzle/schema";
 import { revalidateCropCache } from "@/features/crops/db/cache/crop";
 import {
   getCropPhysiologicalStageTag,
@@ -28,6 +33,39 @@ export async function getPhysiologicalStages(cropId?: number) {
     },
     orderBy: (stages, { asc }) => [asc(stages.name)],
   });
+}
+
+export async function getPhysiologicalStagesByCenter(centerName: string) {
+  "use cache";
+  cacheTag(getCropPhysiologicalStageTag());
+  
+  // Subquery: find all physiologicalStageIds from studies in the center's quality labs
+  const physiologicalStageIdsQuery = db
+    .selectDistinct({ physiologicalStageId: StudyTable.physiologicalStageId })
+    .from(StudyTable)
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(eq(CenterTable.acronym, centerName));
+
+  const physiologicalStageIds = await physiologicalStageIdsQuery;
+  
+  if (physiologicalStageIds.length === 0) {
+    return [];
+  }
+
+  // Then query physiological stages with crop relations
+  const physiologicalStages = await db.query.PhysiologicalStageTable.findMany({
+    where: inArray(
+      PhysiologicalStageTable.id,
+      physiologicalStageIds.map((s) => s.physiologicalStageId)
+    ),
+    with: {
+      crop: true,
+    },
+    orderBy: (stages, { asc }) => [asc(stages.name)],
+  });
+  
+  return physiologicalStages;
 }
 
 export async function insertPhysiologicalStage(

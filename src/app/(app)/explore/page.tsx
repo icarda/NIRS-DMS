@@ -1,9 +1,18 @@
 import PageWrapper from "@/components/page-wrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getCrops } from "@/features/crops/db/crop";
-import { getNirModels } from "@/features/nir-models/db/nir-model";
+import {
+  getCrops,
+  getCropsByCenter,
+} from "@/features/crops/db/crop";
+import {
+  getNirModels,
+  getNirModelsByCenter,
+} from "@/features/nir-models/db/nir-model";
 import { getQualityLabs } from "@/features/quality-labs/db/quality-lab";
-import { getPhysiologicalStages } from "@/features/studies/db/physiological-stage";
+import {
+  getPhysiologicalStages,
+  getPhysiologicalStagesByCenter,
+} from "@/features/studies/db/physiological-stage";
 import { getProductTypes } from "@/features/studies/db/product-type";
 import { getSpecies, getTrialSpecies } from "@/features/studies/db/species";
 import {
@@ -48,7 +57,7 @@ async function getGroupedWetChemistryData({
   role: string;
 }) {
   const result =
-    role === "USER"
+    role !== "SUPERADMIN"
       ? await getWetChemistryDataByCenter({ center })
       : await getWetChemistryData();
 
@@ -131,14 +140,18 @@ export default async function ExploreData() {
     trialMetadatas,
     crops,
   ] = await Promise.all([
-    userRole === "USER" ? getTrialsByCenter(center) : getTrials(),
-    userRole === "USER" ? getStudiesByCenterName(center) : getStudies(),
-    getNirModels(),
-    userRole === "USER" ? getQualityLabs({ center }) : getQualityLabs(),
-    getPhysiologicalStages(),
+    userRole !== "SUPERADMIN" ? getTrialsByCenter(center) : getTrials(),
+    userRole !== "SUPERADMIN" ? getStudiesByCenterName(center) : getStudies(),
+    userRole !== "SUPERADMIN"
+      ? getNirModelsByCenter(center)
+      : getNirModels(),
+    userRole !== "SUPERADMIN" ? getQualityLabs({ center }) : getQualityLabs(),
+    userRole !== "SUPERADMIN"
+      ? getPhysiologicalStagesByCenter(center)
+      : getPhysiologicalStages(),
     getStudyConfigMetadatas(),
     getTrialConfigMetadatas(),
-    getCrops(),
+    userRole !== "SUPERADMIN" ? getCropsByCenter(center) : getCrops(),
   ]);
 
   return (

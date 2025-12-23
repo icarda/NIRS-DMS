@@ -1,8 +1,14 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 
 import { db } from "@/drizzle/db";
-import { CropTable } from "@/drizzle/schema";
+import {
+  CenterTable,
+  CropTable,
+  QualityLabTable,
+  StudyTable,
+  TrialTable,
+} from "@/drizzle/schema";
 import {
   getCropGlobalTag,
   getCropIdTag,
@@ -51,6 +57,43 @@ export async function getCrops({ limit }: { limit?: number } = {}) {
       cropTraits: true,
     },
   });
+  return crops;
+}
+
+export async function getCropsByCenter(centerName: string) {
+  "use cache";
+  cacheTag(getCropGlobalTag());
+  
+  // Subquery: find all cropIds from trials linked to studies in the center's quality labs
+  const cropIdsQuery = db
+    .selectDistinct({ cropId: TrialTable.cropId })
+    .from(TrialTable)
+    .innerJoin(StudyTable, eq(StudyTable.trialId, TrialTable.id))
+    .innerJoin(QualityLabTable, eq(StudyTable.qualityLabId, QualityLabTable.id))
+    .innerJoin(CenterTable, eq(QualityLabTable.centerId, CenterTable.id))
+    .where(eq(CenterTable.acronym, centerName));
+
+  const cropIds = await cropIdsQuery;
+  
+  if (cropIds.length === 0) {
+    return [];
+  }
+
+  // Then query crops with all nested relations
+  const crops = await db.query.CropTable.findMany({
+    where: inArray(
+      CropTable.id,
+      cropIds.map((c) => c.cropId)
+    ),
+    with: {
+      commonNames: true,
+      species: true,
+      productTypes: true,
+      physiologicalStages: true,
+      cropTraits: true,
+    },
+  });
+  
   return crops;
 }
 
